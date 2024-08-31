@@ -9586,7 +9586,7 @@ a.text-dark:hover, a.text-dark:focus {
 .id_input_box{
 	border: 1px solid black;
 	height:31px;
-	padding: 10px 14px;	
+	padding: 0px;	
 	display: block;
 	width : 80%;
 	margin : auto;	
@@ -9605,7 +9605,7 @@ a.text-dark:hover, a.text-dark:focus {
 .pw_input_box{
 	border: 1px solid black;
 	height:31px;
-	padding: 10px 14px;	
+	padding: 0px;
 	display: block;
 	width : 80%;
 	margin : auto;	
