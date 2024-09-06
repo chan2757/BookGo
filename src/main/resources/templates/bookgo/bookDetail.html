@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>책 상세 페이지</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top-section {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .left-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ddd;
+      max-width: 95%;
+      max-height: 95%;
+    }
+
+    .right-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    .main-section {
+      width: 65%;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    img {
+      max-width: 95%;
+      max-height: 95%;
+      height: auto;
+      width: auto;
+      margin-bottom: 10px;
+      object-fit: contain;
+    }
+
+    .info-box {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .link-button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .link-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-section">
+    <!-- Left Section: Book Cover Image -->
+    <div class="left-section">
+      <img th:if="${bookDetail.cover != null}" th:src="${bookDetail.cover}" alt="책 커버 이미지">
+    </div>
+
+    <!-- Right Section: Title, Author, Publisher Info -->
+    <div class="right-section">
+      <div class="info-box">
+        <h2 th:text="${bookDetail.title ?: '제목 없음'}">제목 없음</h2>
+      </div>
+      <div class="info-box">
+        <!-- 저자 정보 및 버튼 추가 -->
+        <p>저자: <a th:href="@{'https://www.google.com/search?q=' +작가 + ${bookDetail.author}}" target="_blank" th:text="${bookDetail.author ?: '저자 정보 없음'}">저자 정보 없음</a></p>
+        <a th:href="@{'/bookgo/book/search/author?author=' + ${bookDetail.author}}" class="link-button">다른 저서 보기</a>
+      </div>
+      <div class="info-box">
+        <!-- 출판사 정보 및 버튼 추가 -->
+        <p>출판사: <a th:href="@{'https://www.google.com/search?q=' + 출판사 + ${bookDetail.publisher}}" target="_blank" th:text="${bookDetail.publisher ?: '출판사 정보 없음'}">출판사 정보 없음</a></p>
+        <a th:href="@{'/bookgo/book/search/publisher?publisher=' + ${bookDetail.publisher}}" class="link-button">다른 출판물 보기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Section: Main Image and Detailed Info -->
+  <div class="main-section">
+    <img th:if="${bookDetail.mainImg != null}" th:src="${bookDetail.mainImg}" alt="메인 이미지">
+    <p th:if="${bookDetail.introduction != null}" th:text="${bookDetail.introduction ?: '소개 정보 없음'}">책 소개 내용</p>
+  </div>
+
+  <!-- Additional Content: Contents, Recommendations, etc. -->
+  <div class="main-section">
+    <h3 th:if="${bookDetail.contents != null}">목차</h3>
+    <p th:if="${bookDetail.contents != null}" th:text="${bookDetail.contents ?: '목차 정보 없음'}">목차 내용</p>
+
+    <h3 th:if="${bookDetail.recommendations != null}">추천사</h3>
+    <p th:if="${bookDetail.recommendations != null}" th:text="${bookDetail.recommendations ?: '추천사 정보 없음'}">추천사 내용</p>
+
+    <h3 th:if="${bookDetail.bookInside != null}">책 속으로</h3>
+    <p th:if="${bookDetail.bookInside != null}" th:text="${bookDetail.bookInside ?: '책 속으로 정보 없음'}">책 속으로 내용</p>
+
+    <h3 th:if="${bookDetail.publisherReview != null}">출판사 서평</h3>
+    <p th:if="${bookDetail.publisherReview != null}" th:text="${bookDetail.publisherReview ?: '출판사 서평 정보 없음'}">출판사 서평</p>
+  </div>
+</div>
+
+</body>
+</html>

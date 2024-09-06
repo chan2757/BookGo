@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>도서 리스트</title>
+    <style>
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .book-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .book-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            width: 200px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-item img {
+            width: 150px;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .book-item img:hover {
+            transform: scale(1.05);
+        }
+
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: color 0.3s;
+        }
+
+        .book-title:hover {
+            color: #007bff;
+        }
+
+        .book-author, .book-publisher {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .book-price {
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .book-rating {
+            display: flex;
+            gap: 2px;
+            margin-top: 5px;
+        }
+
+        .star {
+            color: gold;
+            font-size: 16px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .search-bar {
+            margin-left: auto;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<h1>도서 리스트</h1>
+<div class="button-container">
+    <button onclick="location.href='/bookgo/books/list?queryType=Bestseller'">베스트셀러</button>
+    <button onclick="location.href='/bookgo/books/list?queryType=ItemNewSpecial'">주목할 만한 신간</button>
+    <button onclick="location.href='/bookgo/books/list?queryType=ItemNewAll'">신간 전체 리스트</button>
+    <form class="search-bar" th:action="@{/bookgo/books/search}" method="get">
+        <input type="text" name="query" placeholder="도서 검색">
+        <button type="submit">검색</button>
+    </form>
+</div>
+<div class="book-list">
+    <th:block th:each="row : ${#numbers.sequence(0, books.size() / 4)}">
+        <div class="book-row">
+            <th:block th:each="book : ${books.subList(row * 4, T(java.lang.Math).min((row + 1) * 4, books.size()))}">
+                <div class="book-item">
+                    <form action="/bookgo/book/detail" method="post">
+                        <input type="hidden" name="isbn13" th:value="${book.isbn13}">
+                        <input type="hidden" name="title" th:value="${book.title}">
+                        <input type="hidden" name="author" th:value="${book.author}">
+                        <input type="hidden" name="publisher" th:value="${book.publisher}">
+                        <input type="hidden" name="priceStandard" th:value="${book.priceStandard}">
+                        <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank}">
+                        <input type="hidden" name="cover" th:value="${book.cover}">
+                        <button type="submit" style="background: none; border: none; padding: 0;">
+                            <img th:src="${book.cover}" alt="도서 이미지">
+                            <div class="book-title" th:text="${book.title}">도서 제목</div>
+                        </button>
+                    </form>
+                    <div class="book-author" th:text="'저자: ' + ${book.author}">저자</div>
+                    <div class="book-publisher" th:text="'출판사: ' + ${book.publisher}">출판사</div>
+                    <div class="book-price" th:text="'가격: ' + ${#numbers.formatDecimal(book.priceStandard, 0, 0) + ' 원'}">가격</div>
+                    <div class="book-rating">
+                        <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).floor(book.customerReviewRank.doubleValue() / 2.0))}" class="star">★</span>
+                        <span th:if="${(book.customerReviewRank.doubleValue() / 2.0) % 1.0 >= 0.5}" class="star">⯪</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5 - T(java.lang.Math).floor(book.customerReviewRank.doubleValue() / 2.0) - ((book.customerReviewRank.doubleValue() / 2.0) % 1.0 >= 0.5 ? 1 : 0))}" class="star" style="color: lightgray;">☆</span>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </th:block>
+</div>
+
+<div class="pagination">
+    <button th:if="${currentPage > 1}" th:onclick="|location.href='?query=${query}&page=${currentPage - 1}'|">이전</button>
+    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+        <button th:classappend="${i == currentPage} ? 'active'" th:onclick="|location.href='?query=${query}&page=${i}'|"
+                th:text="${i}">1</button>
+    </th:block>
+    <button th:if="${currentPage < totalPages}" th:onclick="|location.href='?query=${query}&page=${currentPage + 1}'|">다음</button>
+</div>
+
+</body>
+</html>

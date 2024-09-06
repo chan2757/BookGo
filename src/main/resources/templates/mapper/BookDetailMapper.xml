@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.BookDetailMapper">
+
+    <!-- 책 상세 정보를 가져오는 쿼리 -->
+    <select id="selectBookDetailByIsbn13" resultType="com.bookgo.vo.BookDetailVO">
+        SELECT *
+        FROM book_detail
+        WHERE isbn13 = #{isbn13}
+    </select>
+
+    <!-- 책 상세 정보를 삽입하는 쿼리 -->
+    <insert id="insertBookDetail" parameterType="com.bookgo.vo.BookDetailVO">
+        INSERT INTO book_detail (
+            isbn13,
+            title,
+            author,
+            publisher,
+            pubDate,
+            priceStandard,
+            customerReviewRank,
+            introduction,
+            category,
+            authorInfo,
+            mainImg,
+            contents,
+            recommendations,
+            bookInside,
+            publisherReview,
+            cover
+        ) VALUES (
+                     #{isbn13},
+                     #{title},
+                     #{author},
+                     #{publisher},
+                     #{pubDate, jdbcType=DATE},
+                     #{priceStandard, jdbcType=NUMERIC},
+                     #{customerReviewRank, jdbcType=NUMERIC},
+                     #{introduction, jdbcType=CLOB},
+                     #{category},
+                     #{authorInfo, jdbcType=CLOB},
+                     #{mainImg, jdbcType=VARCHAR},
+                     #{contents, jdbcType=CLOB},
+                     #{recommendations, jdbcType=CLOB},
+                     #{bookInside, jdbcType=CLOB},
+                     #{publisherReview, jdbcType=CLOB},
+                     #{cover, jdbcType=VARCHAR}
+                 )
+    </insert>
+
+
+
+</mapper>

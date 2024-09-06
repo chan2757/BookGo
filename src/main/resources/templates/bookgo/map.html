@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>도서관 지도</title>
+    <link rel="stylesheet" href="/static/css/map.css">
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=5t0okt77tk"></script>
+    <style>
+        #directions { margin-top: 20px; }
+        #route-guides { display: none; } /* 초기에는 숨김 */
+        #toggleButton { cursor: pointer; color: blue; text-decoration: underline; }
+        #resetButton { position: absolute; top: 10px; right: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>도서관 지도</h1>
+<div id="controls">
+    <button id="locationButton" onclick="getCurrentLocation()">현위치로 이동</button>
+    <input type="text" id="searchInput" placeholder="주소 또는 장소 검색" oninput="showAutocomplete(this.value)">
+    <ul id="autocompleteList"></ul>
+    <button id="searchButton" onclick="searchLocation()">검색</button>
+</div>
+<div id="menu">
+    <button id="allMenu" class="menu" onclick="changeMarker('all')">모두</button>
+    <button id="publicMenu" class="menu" onclick="changeMarker('public')">공공</button>
+    <button id="smallMenu" class="menu" onclick="changeMarker('small')">작은</button>
+</div>
+<ul id="searchResults"></ul>
+<div id="map" style="width: 900px; height: 600px;"></div>
+
+<!-- 추가된 경로 옵션 선택 UI -->
+<div id="routeOptions">
+    <label for="transportModeSelect">이동 수단:</label>
+    <select id="transportModeSelect" onchange="updateRoute()">
+        <option value="car">자동차</option>
+    </select>
+
+    <label for="routeTypeSelect">경로 유형:</label>
+    <select id="routeTypeSelect" onchange="updateRoute()">
+        <option value="trafast">가장 빠른 경로</option>
+        <option value="tracomfort">편한 경로</option>
+        <option value="traoptimal">최적 경로</option>
+    </select>
+</div>
+
+<!-- 경로 안내 정보를 표시할 영역 추가 -->
+<div id="directions">
+    <div id="route-summary"></div>
+    <div id="toggleButton" onclick="toggleRouteGuides()">상세 안내보기</div>
+    <div id="route-guides"></div>
+</div>
+
+<!-- 지도 초기화를 위한 리셋 버튼 추가 -->
+<button id="resetButton" onclick="resetMap()">다른 도서관 보기</button>
+
+<script src="../static/js/map.js"></script>
+
+</body>
+</html>
