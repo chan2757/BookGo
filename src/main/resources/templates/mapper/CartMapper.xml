@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reminder.geulbeotmall.cart.model.dao.CartMapper">
+	<!-- 장바구니 조회용 -->
+	<resultMap id="cartResultMap" type="com.bookgo.cart.dto.CartDTO">
+		<id property="cartNo" column="CART_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="prodNo" column="PROD_NO"/>
+		<result property="optionNo" column="OPTION_NO"/>
+		<result property="quantity" column="QUANTITY"/>
+		<association property="product" resultMap="productResultMap"/> <!-- 1:1 -->
+		<association property="category" resultMap="categoryResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="option" resultMap="optionResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<!-- 상품 조회용 -->
+	<resultMap id="productResultMap" type="com.bookgo.product.dto.ProductDTO">
+		<id property="prodNo" column="PROD_NO"/>
+		<result property="categoryNo" column="CATEGORY_NO"/>
+		<result property="brandNo" column="BRAND_NO"/>
+		<result property="prodName" column="PROD_NAME"/>
+		<result property="prodDesc" column="PROD_DESC"/>
+		<result property="productTag" column="PRODUCT_TAG"/>
+		<result property="discountRate" column="DISCOUNT_RATE"/>
+		<result property="prodPrice" column="PROD_PRICE"/>
+		<result property="prodOrigin" column="PROD_ORIGIN"/>
+		<result property="prodDetailContent" column="PROD_DETAIL_CONTENT"/>
+		<result property="prodDetailViewCount" column="PROD_DETAIL_VIEW_COUNT"/>
+		<result property="prodEnrollDate" column="PROD_ENROLL_DATE"/>
+		<result property="prodChangeDate" column="PROD_CHANGE_DATE"/>
+		<result property="prodAvailYn" column="PROD_AVAIL_YN"/>
+		<association property="category" resultMap="categoryResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+		<collection property="option" resultMap="optionResultMap"/> <!-- 1:N -->
+	</resultMap>
+	
+	<!-- 썸네일 조회용 -->
+	<resultMap id="thumbnailResultMap" type="com.bookgo.product.dto.AttachmentDTO">
+		<id property="attachmentNo" column="ATTACHMENT_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refRevwNo" column="REF_REVW_NO"/>
+		<result property="refInqNo" column="REF_INQ_NO"/>
+		<result property="origFileName" column="ORIG_FILE_NAME"/>
+		<result property="saveFileName" column="SAVE_FILE_NAME"/>
+		<result property="savePath" column="SAVE_PATH"/>
+		<result property="thumbnailPath" column="THUMBNAIL_PATH"/>
+		<result property="fileType" column="FILE_TYPE"/>
+		<result property="attachStatusYn" column="ATTACH_STATUS_YN"/>
+	</resultMap>
+	
+	<!-- 옵션 조회용 -->
+	<resultMap id="optionResultMap" type="com.bookgo.product.dto.OptionDTO">
+		<id property="optionNo" column="OPTION_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refStockNo" column="REF_STOCK_NO"/>
+		<result property="bodyColor" column="OPT_BODY_COLOR"/>
+		<result property="inkColor" column="OPT_INK_COLOR"/>
+		<result property="pointSize" column="OPT_POINT_SIZE"/>
+		<result property="extraCharge" column="OPT_EXTRA_CHARGE"/>
+		<association property="stock" resultMap="stockResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<!-- 재고 조회용 -->
+	<resultMap id="stockResultMap" type="com.bookgo.product.dto.StockDTO">
+		<id property="stockNo" column="STOCK_NO"/>
+		<result property="stockAmount" column="STOCK_AMOUNT"/>
+		<result property="stockDate" column="STOCK_DATE"/>
+	</resultMap>
+	
+	<!-- 카테고리 조회용 -->
+	<resultMap id="categoryResultMap" type="com.bookgo.product.dto.CategoryDTO">
+		<id property="categoryNo" column="CATEGORY_NO"/>
+		<result property="categoryName" column="CATEGORY_NAME"/>
+	</resultMap>
+	
+	<!-- 브랜드 조회용 -->
+	<resultMap id="brandResultMap" type="com.bookgo.product.dto.BrandDTO">
+		<id property="brandNo" column="BRAND_NO"/>
+		<result property="brandName" column="BRAND_NAME"/>
+	</resultMap>
+	
+	<!-- 주문 조회용 -->
+	<resultMap id="orderResultMap" type="com.bookgo.cart.dto.OrderDTO">
+		<result property="orderNo" column="ORDER_NO"/>
+		<result property="optionNo" column="OPTION_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="orderQuantity" column="ORDER_QUANTITY"/>
+		<result property="orderAmount" column="ORDER_AMOUNT"/>
+	</resultMap>
+	
+	<resultMap id="orderDetailResultMap" type="com.bookgo.cart.dto.OrderDetailDTO">
+		<id property="orderNo" column="ORDER_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="orderDate" column="ORDER_DATE"/>
+		<result property="rcvrName" column="RCVR_NAME"/>
+		<result property="rcvrPhone" column="RCVR_PHONE"/>
+		<result property="rcvrAddress" column="RCVR_ADDRESS"/>
+		<result property="dlvrReqMessage" column="DLVR_REQ_MESSAGE"/>
+		<result property="dlvrStatus" column="DLVR_STATUS"/>
+	</resultMap>
+		
+	<!-- 장바구니에 새 상품 목록 추가 -->
+	<insert id="addToCart">
+		<selectKey resultType="_int" keyProperty="cartNo" order="BEFORE">
+			SELECT
+				   NVL(MAX(CART_NO), 0) + 1
+			  FROM TBL_CART
+		</selectKey>
+		INSERT
+		  INTO TBL_CART
+		(
+		  CART_NO
+		, MEMBER_ID
+		, PROD_NO
+		, OPTION_NO
+		, QUANTITY
+		)
+		VALUES
+		(
+		  #{ cartNo }
+		<if test="memberId != null">, #{ memberId }</if>
+		<if test="memberId == null">, NULL</if>
+		, #{ prodNo }
+		, #{ optionNo }
+		, #{ quantity }
+		)
+	</insert>
+	
+	<!-- 이미 담겨 있는 상품은 기존 목록에서 수량만 증가 또는 사용자 요청에 따른 수량 변경 -->
+	<update id="updateQuantityInCart">
+		UPDATE
+			   TBL_CART
+		   SET QUANTITY = #{ quantity }
+		 WHERE OPTION_NO = #{ optionNo }
+		   AND MEMBER_ID = #{ memberId }
+	</update>
+	
+	<!-- 회원용 장바구니에서 선택 상품 삭제 -->
+	<delete id="deleteItemFromCart">
+		DELETE
+		  FROM TBL_CART
+		 WHERE OPTION_NO = #{ optionNo }
+		   AND MEMBER_ID = #{ memberId }
+	</delete>
+	
+	<!-- 회원용 장바구니 전체 목록 조회 -->
+	<select id="getCurrentCart" resultMap="cartResultMap">
+		SELECT
+			   A.CART_NO
+			 , A.MEMBER_ID
+			 , A.PROD_NO
+			 , A.OPTION_NO
+			 , A.QUANTITY
+			 , B.PROD_NAME
+			 , B.DISCOUNT_RATE
+			 , B.PROD_PRICE
+			 , C.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+		  FROM TBL_CART A
+		  LEFT JOIN TBL_PRODUCT B ON(A.PROD_NO = B.PROD_NO)
+		  LEFT JOIN TBL_BRAND C ON(C.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(A.PROD_NO = T.REF_PROD_NO)
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO) <!-- 상품 하나에 여러 옵션이 등록되어 있으므로 옵션별 알맞은 정보를 가져오기 위해서는 장바구니에 담긴 option 번호 기준으로 연결 -->
+		 WHERE MEMBER_ID = #{ username }
+		   AND T.FILE_TYPE = 'THUMB_MAIN'
+		 ORDER BY C.BRAND_NAME, A.CART_NO ASC
+	</select>
+	
+	<!-- 옵션번호 기준 옵션 정보 조회 -->
+	<select id="searchOptionInfoByOptionNo" resultMap="optionResultMap">
+		SELECT
+			   OPTION_NO
+			 , REF_PROD_NO
+			 , REF_STOCK_NO
+			 , OPT_BODY_COLOR
+			 , OPT_INK_COLOR
+			 , OPT_POINT_SIZE
+			 , OPT_EXTRA_CHARGE
+		  FROM TBL_OPTION
+		 WHERE OPTION_NO = #{ optionNo }
+	</select>
+	
+	<!-- 옵션번호 기준 상품 정보 조회 -->
+	<select id="searchProductInfoByOptionNo" resultMap="productResultMap">
+		SELECT
+			   A.PROD_NO
+			 , B.CATEGORY_NAME
+			 , C.BRAND_NAME
+			 , A.PROD_NAME
+			 , A.PROD_DESC
+			 , A.PRODUCT_TAG
+			 , A.DISCOUNT_RATE
+			 , A.PROD_PRICE
+			 , A.PROD_ORIGIN
+			 , A.PROD_DETAIL_CONTENT
+			 , A.PROD_DETAIL_VIEW_COUNT
+			 , A.PROD_ENROLL_DATE
+			 , A.PROD_CHANGE_DATE
+			 , A.PROD_AVAIL_YN
+			 , T.THUMBNAIL_PATH
+		  FROM TBL_PRODUCT A
+		  LEFT JOIN TBL_CATEGORY B ON(A.CATEGORY_NO = B.CATEGORY_NO)
+		  LEFT JOIN TBL_BRAND C ON(A.BRAND_NO = C.BRAND_NO)
+		  LEFT JOIN TBL_OPTION O ON(A.PROD_NO = O.REF_PROD_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(A.PROD_NO = T.REF_PROD_NO)
+		 WHERE O.OPTION_NO = #{ optionNo }
+	</select>
+	
+	<!-- 옵션번호 기준 브랜드 정보 조회 -->
+	<select id="searchBrandInfoByOptionNo" resultMap="brandResultMap">
+		SELECT
+			   *
+		  FROM TBL_BRAND A
+		  LEFT JOIN TBL_PRODUCT B ON (A.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_OPTION C ON (C.REF_PROD_NO = B.PROD_NO)
+		 WHERE OPTION_NO = #{ optionNo }
+	</select>
+	
+	<!-- 옵션번호 기준 장바구니 단일 상품 조회 -->
+	<select id="getCartItemByOptionNo" resultMap="cartResultMap">
+		SELECT
+			   A.CART_NO
+			 , A.MEMBER_ID
+			 , A.PROD_NO
+			 , A.OPTION_NO
+			 , A.QUANTITY
+			 , B.PROD_NAME
+			 , B.DISCOUNT_RATE
+			 , B.PROD_PRICE
+			 , C.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+		  FROM TBL_CART A
+		  LEFT JOIN TBL_PRODUCT B ON(A.PROD_NO = B.PROD_NO)
+		  LEFT JOIN TBL_BRAND C ON(C.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(A.PROD_NO = T.REF_PROD_NO)
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		 WHERE A.MEMBER_ID = #{ username }
+		   AND A.OPTION_NO = #{ optionNo }
+	</select>
+</mapper>

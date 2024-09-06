@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/default}">
+<head>
+	<meta charset="UTF-8">
+	<title>Orde</title>
+	<!-- CSS -->
+    <th:block layout:fragment="css">
+    	<link th:href="@{/css/customtable.css}" rel="stylesheet">
+	    <link th:href="@{/css/mycart.css}" rel="stylesheet">
+	</th:block>
+	<link th:href="@{/css/dashboard.css}" rel="stylesheet">
+</head>
+<body layout:fragment="content">
+	<div class="title-wrapper">
+        <h2>주문/결제</h2>
+    </div>
+    <div class="container order-wrapper">
+	    <div class="step">
+	    	<span>STEP1. 장바구니</span><i class="fa-solid fa-angle-right"></i>
+	    	<span class="step-active">STEP2. 주문/결제</span><i class="fa-solid fa-angle-right"></i>
+	    	<span>STEP3. 주문완료</span>
+	    </div>
+		<div class="orderBox">
+			<form id="orderForm" name="orderForm" class="order-form" th:action="@{/cart/order}" method="post">
+				<fieldset>
+					<legend>주문자 정보</legend>
+				</fieldset>
+				<table>
+					<tbody>
+						<tr th:with="member=${ member }">
+							<th>주문자</th>
+							<td><input type="text" id="memberId" name="memberId" th:value="${ member.username }" readonly></td>
+							<th>휴대폰 번호</th>
+							<td><input type="text" id="phone" name="phone" th:value="${ member.phone }" readonly></td>
+							<th>이메일</th>
+							<td><input type="text" id="email" name="email" th:value="${ member.email }" readonly></td>
+						</tr>
+					</tbody>
+				</table>
+				<fieldset class="getMemberAddress">
+					<legend>배송지 정보</legend>
+					<label for="getMemberAddress"> <!-- label for 속성과 input id 연결 -->
+						<input type="checkbox" class="input-checkbox check" id="getMemberAddress" name="getMemberAddress">
+						주문자 정보와 동일
+					</label>
+				</fieldset>
+				<table class="delivery-table">
+					<colgroup>
+						<col style="width: 10%;">
+						<col>
+					</colgroup>
+					<thead>
+						<tr>
+							<td colspan="2">
+								<div class="delivery-list">
+									<input type="radio" id="savedAddress" name="delivery-item">
+									<label for="savedAddress">기본 배송지</label>
+									<input type="radio" id="setNewAddress" name="delivery-item" checked>
+									<label for="setNewAddress">신규 배송지</label>
+									<input type="radio" id="getRecentAddress" name="delivery-item">
+									<label for="getRecentAddress">최근 배송지</label>
+								</div>
+							</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th>이름</th> <!-- 한글만 입력 -->
+							<td>
+								<input type="text" name="hiddenName" th:value="${ member.name }" hidden="hidden">
+								<input type="text" onKeyup="this.value = this.value.replace(/[^가-힣.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="rcvrName" name="rcvrName" autocomplete="off" placeholder="이름 입력" title="이름 입력" oninvalid="this.setCustomValidity('이름 입력')" oninput="setCustomValidity('')">
+							</td>
+						</tr>
+						<tr>
+							<th>휴대폰 번호</th> <!-- 숫자만 입력 -->
+							<td>
+								<input type="text" name="hiddenPhone" th:value="${ member.phone }" hidden="hidden">
+								<input type="text" onKeyup="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="rcvrPhone" autocomplete="off" name="rcvrPhone" placeholder="숫자만 입력(-제외)" title="휴대폰 번호 입력" oninvalid="this.setCustomValidity('휴대폰 번호 입력')" oninput="setCustomValidity('')" maxlength="11">
+							</td>
+						</tr>
+						<tr>
+							<th>주소</th>
+							<td>
+								<div class="address-info">
+									<input type="text" name="hiddenAddress" th:value="${ member.address }" hidden="hidden">
+									<input type="button" onclick="DaumPostcode()" class="btn-outline-dark" id="searchPostalCode" style="width: 40%;" value="우편번호검색"></input>
+									<input type="text" id="postalCode" name="postalCode" readonly>
+									<input type="text" id="address" name="address" readonly>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+							<div class="address-detail">
+								<input type="text" id="detailAddress" name="detailAddress" placeholder="상세 주소 입력">
+							</div>
+							</td>
+						</tr>
+						<!-- DeliveryRequest ENUM 호출 -->
+						<tr>
+							<th>배송메모</th>
+							<td style="text-align: start !important;">
+								<div style="display: flex;">
+									<div id="optionSelector" class="dropdown" tabindex="0">
+										<span class="current" style="line-height: 40px;">배송메모 선택</span>
+										<div class="list">
+											<ul>
+												<li class="option" th:each="delivery : ${T(com.reminder.geulbeotmall.cart.model.dto.DeliveryRequest).values()}" th:text="${ delivery.getLabel() }"></li>
+												<li class="option">직접 입력</li>
+											</ul>
+										</div>
+										<i class="fa-solid fa-chevron-down"></i>
+									</div>
+									<input type="text" id="typeOwnMessage" name="typeOwnMessage" hidden="hidden">
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<fieldset>
+					<legend>주문상품 정보</legend>
+				</fieldset>
+				<table class="product-table dataTable-table">
+					<thead>
+			    		<tr>
+			    			<th colspan="2"><span>상품명(옵션)</span></th>
+			    			<th><span>판매가</span></th>
+			    			<th><span>수량</span></th>
+			    			<th><span>주문금액</span></th>
+			    			<th><span>업체</span></th>
+			    			<th><span>배송비</span></th>
+			    		</tr>
+		    		</thead>
+					<tbody>
+						<tr th:each="orderItem : ${ session.orderItem }" th:if="${not #lists.isEmpty(orderItem)}">
+							<td><img th:src="${ orderItem.product.attachmentList[0].thumbnailPath }" style="width: 100px; height: 100px;"></td>
+							<!-- 상품명(옵션) -->
+			    			<td class="option-area" th:value="${ orderItem.optionNo }">
+				    			<a th:href="@{/product/details/(no=${orderItem.product.prodNo})}">[[${ orderItem.product.prodName }]]</a>
+				    			<p>
+			    					<span>[[${ orderItem.option.pointSize }]]mm</span>
+				    				<th:block th:if="${ orderItem.option.bodyColor != '(해당없음)' }">
+				    					<span th:text="|/ ${#strings.replace(orderItem.option.bodyColor, '$', ',')}|"></span>
+				    				</th:block>
+				    				<th:block th:if="${ orderItem.option.inkColor != '(해당없음)' }">
+				    					<span th:text="|/ ${#strings.replace(orderItem.option.inkColor, '$', ',')}|"></span>
+				    				</th:block>
+				    			</p>
+			    			</td>
+				    			
+			    			<!-- 상품금액(세 자리마다 구분자 삽입) -->
+			    			<!-- A. 할인 대상이 아닌 경우 원가 그대로 출력 -->
+			    			<th:block th:if="${orderItem.product.discountRate} == 0">
+				    			<td>
+				    				<span class="prodPrice origPrice" th:value="${ orderItem.product.prodPrice }">[[${#numbers.formatInteger(orderItem.product.prodPrice, 3, 'COMMA')}]]원</span>
+				    			</td>
+			    			</th:block>
+			    			<!-- B. 적용된 할인율이 0% 이상인 경우 판매가 산정하여 출력 -->
+			    			<th:block th:if="${orderItem.product.discountRate} > 0">
+			    				<td>
+			    					<del class="origPrice" th:value="${ orderItem.product.prodPrice }"><span>[[${#numbers.formatInteger(orderItem.product.prodPrice, 3, 'COMMA')}]]원</span></del><br>
+			    					<span class="prodPrice discounted" th:value="${ orderItem.product.prodPrice - (orderItem.product.prodPrice * orderItem.product.discountRate / 100) }">[[${#numbers.formatInteger(orderItem.product.prodPrice - (orderItem.product.prodPrice * orderItem.product.discountRate / 100), 3, 'COMMA')}]]원</span>
+				    			</td>
+			    			</th:block>
+			    			
+			    			<!-- 수량 -->
+			    			<td class="quantity-area" th:value="${ orderItem.quantity }">[[${ orderItem.quantity }]]</td>
+			    			
+			    			<!-- 주문금액(세 자리마다 구분자 삽입) -->
+			    			<th:block th:if="${orderItem.product.discountRate} == 0">
+			    				<td class="orderPrice" th:value="${ orderItem.product.prodPrice * orderItem.quantity }">[[${#numbers.formatInteger((orderItem.product.prodPrice * orderItem.quantity), 3, 'COMMA')}]]원</td>
+			    			</th:block>
+			    			<th:block th:if="${orderItem.product.discountRate} > 0">
+			    				<td class="orderPrice" th:value="${ (orderItem.product.prodPrice - (orderItem.product.prodPrice * orderItem.product.discountRate / 100)) * orderItem.quantity }">[[${#numbers.formatInteger(((orderItem.product.prodPrice - (orderItem.product.prodPrice * orderItem.product.discountRate / 100)) * orderItem.quantity), 3, 'COMMA')}]]원</td>
+			    			</th:block>
+			    			
+			    			<!-- 업체명 -->
+			    			<td class="brand info">[[${ orderItem.brand.brandName }]]</td>
+			    			
+			    			<!-- 배송비 -->
+		    				<td class="delivery info"></td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="payment-area">
+					<div class="payment-method">
+						<fieldset>
+							<legend>적립금 사용</legend>
+						</fieldset>
+						<table>
+							<colgroup>
+								<col style="width: 10%;">
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>적립금</th>
+									<td class="reserve-amount-td"> <!-- 숫자만 입력, 세 자리마다 구분자 삽입 -->
+										<input type="text" value="0" onKeyup="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');" id="reserve" autocomplete="off" name="reserve" placeholder="0" title="적립금 입력" oninvalid="this.setCustomValidity('적립금 입력')" oninput="setCustomValidity('')">
+										<label for="reserve">원</label>
+										<button type="button" class="button-apply btn btn-sm btn-dark" onclick="applyReserve()">적용</button>
+									</td>
+								</tr>
+								<tr>
+									<th>사용안내</th>
+									<td class="reserve-td">
+										<small>최소 1,000원 이상 사용가능&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;현재까지 누적된 적립금은</small><b id="totalReserve">&nbsp;[[${ memberPoint }]]원</b><small>&nbsp;입니다.</small>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<fieldset>
+							<legend>결제수단 선택</legend>
+						</fieldset>
+						<table>
+							<colgroup>
+								<col style="width: 10%;">
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>결제방법</th>
+									<td>
+										<label>
+											<input type="radio" name="methods" value="card" checked="checked">
+											<span>신용카드</span>
+										</label>
+										<label>
+											<input type="radio" name="methods" value="trans">
+											<span>실시간계좌이체</span>
+										</label>
+										<label>
+											<input type="radio" name="methods" value="vbank">
+											<span>가상계좌</span>
+										</label>
+										<label>
+											<input type="radio" name="methods" value="phone">
+											<span>휴대폰결제</span>
+										</label>
+									</td>
+								</tr>
+								<tr>
+									<th>결제안내</th>
+									<td class="interest-free-td">
+										<p class="interest-free-detail"><a data-toggle="modal" href="#interest-free">무이자할부안내</a></p>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="payment-info">
+						<fieldset>
+							<legend>결제정보</legend>
+							<div>
+								<ul>
+									<li>
+										<b>주문금액</b>
+										<span class="order-amount"></span>
+									</li>
+									<li>
+										<b>배송비</b>
+										<span class="delivery-fee"></span>
+									</li>
+									<li>
+										<b>적립금</b>
+										<span class="reserve-used">0원</span>
+									</li>
+								</ul>
+							</div>
+							<legend>약관동의</legend>
+							<div>
+								<label class="label-checkbox">
+			                        <input type="checkbox" class="input-checkbox checkAll" id="checkAll">
+			                        <span>전체 동의</span>
+			                    </label>
+			                    <label class="label-checkbox">
+			                        <input type="checkbox" name="checkTerm" class="input-checkbox term" id="term1">
+			                        <span><b style="color: #ff0000;">(필수)</b>상품 설명에 명시된 내용과 사용조건을 확인하였으며, 취소/환불 규정에 동의합니다.</span>
+			                    </label>
+			                    <label class="label-checkbox">
+			                        <input type="checkbox" name="checkTerm" class="input-checkbox term" id="term2">
+			                        <span><b style="color: #ff0000;">(필수)</b>결제대행서비스 이용약관동의</span>
+			                        <p class="terms-detail"><a href="#" target="_blank">자세히</a></p>
+			                    </label>
+			                    <label class="label-checkbox">
+			                        <input type="checkbox" name="checkTerm" class="input-checkbox term" id="term3">
+			                        <span><b style="color: #ff0000;">(필수)</b>개인정보 수집 및 이용 동의</span>
+			                        <p class="terms-detail"><a href="#" target="_blank">자세히</a></p>
+			                    </label>
+			                    <label class="label-checkbox">
+			                        <input type="checkbox" name="checkTerm" class="input-checkbox term" id="term4">
+			                        <span><b style="color: #ff0000;">(필수)</b>개인정보 제공/위탁 동의</span>
+			                        <p class="terms-detail"><a href="#" target="_blank">자세히</a></p>
+			                    </label>
+								<ul class="total-price-info">
+									<li>
+										<b>총 결제금액</b>
+										<span class="payment-amount">00,000</span>
+										원
+									</li>
+								</ul>
+							</div>
+						</fieldset>
+					</div>
+				</div>
+				<div class="paymentBox">
+					<button type="button" class="cancelBtn btn" onclick="history.back()">취소</button>
+					<button type="button" class="payBtn btn btn-dark" onclick="requestPay()">주문결제</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<!-- Modal -->
+	<div id="interest-free" class="modal fade" tabindex="-1" role="dialog">
+		<div class="modal-lg modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+      			<div class="modal-header">
+					<h3>무이자할부안내</h3>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body">
+					<table class="dataTable-table">
+						<caption><strong>카드 무이자 할부 혜택</strong></caption>
+						<colgroup>
+							<col style="width: 200px;"/>
+							<col/>
+							<col style="width: 200px;"/>
+						</colgroup>
+						<thead>
+							<tr>
+								<th>카드사</th>
+								<th>할부적용 금액</th>
+								<th>할부개월</th>
+							</tr>
+						</thead>
+						<!-- InstallmentPlan ENUM 호출 -->
+						<tbody>
+							<tr th:each="installment : ${T(com.reminder.geulbeotmall.cart.model.dto.InstallmentPlan).values()}">
+								<td align="center" th:text="${ installment.getLabel() }"></td>
+								<td align="center" th:text="${ installment.getMinimumSpending() }"></td>
+								<td align="center" th:text="${ installment.getInterestFreePeriod() }"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-dark" data-bs-dismiss="modal">확인</button>
+				</div> 
+			</div>
+		</div>
+	</div>
+	<!-- JS -->
+    <th:block layout:fragment="script">
+    	<script th:src="@{/js/order.js}" type="text/javascript"></script>
+    	<script th:src="@{/js/payment.js}" type="text/javascript"></script>
+    	
+    	<!-- 주소 API -->
+	    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+		<!-- iamport.payment.js -->
+		<script src="https://cdn.iamport.kr/js/iamport.payment-1.1.8.js"></script>
+	</th:block>
+</body>
+</html>

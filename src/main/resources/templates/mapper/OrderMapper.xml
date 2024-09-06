@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reminder.geulbeotmall.cart.model.dao.OrderMapper">
+	<!-- 상품 조회용 -->
+	<resultMap id="productResultMap" type="com.bookgo.product.dto.ProductDTO">
+		<id property="prodNo" column="PROD_NO"/>
+		<result property="categoryNo" column="CATEGORY_NO"/>
+		<result property="brandNo" column="BRAND_NO"/>
+		<result property="prodName" column="PROD_NAME"/>
+		<result property="prodDesc" column="PROD_DESC"/>
+		<result property="productTag" column="PRODUCT_TAG"/>
+		<result property="discountRate" column="DISCOUNT_RATE"/>
+		<result property="prodPrice" column="PROD_PRICE"/>
+		<result property="prodOrigin" column="PROD_ORIGIN"/>
+		<result property="prodDetailContent" column="PROD_DETAIL_CONTENT"/>
+		<result property="prodDetailViewCount" column="PROD_DETAIL_VIEW_COUNT"/>
+		<result property="prodEnrollDate" column="PROD_ENROLL_DATE"/>
+		<result property="prodChangeDate" column="PROD_CHANGE_DATE"/>
+		<result property="prodAvailYn" column="PROD_AVAIL_YN"/>
+		<association property="category" resultMap="categoryResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+		<collection property="option" resultMap="optionResultMap"/> <!-- 1:N -->
+	</resultMap>
+	
+	<!-- 썸네일 조회용 -->
+	<resultMap id="thumbnailResultMap" type="com.bookgo.product.dto.AttachmentDTO">
+		<id property="attachmentNo" column="ATTACHMENT_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refRevwNo" column="REF_REVW_NO"/>
+		<result property="refInqNo" column="REF_INQ_NO"/>
+		<result property="origFileName" column="ORIG_FILE_NAME"/>
+		<result property="saveFileName" column="SAVE_FILE_NAME"/>
+		<result property="savePath" column="SAVE_PATH"/>
+		<result property="thumbnailPath" column="THUMBNAIL_PATH"/>
+		<result property="fileType" column="FILE_TYPE"/>
+		<result property="attachStatusYn" column="ATTACH_STATUS_YN"/>
+	</resultMap>
+	
+	<!-- 옵션 조회용 -->
+	<resultMap id="optionResultMap" type="com.bookgo.product.dto.OptionDTO">
+		<id property="optionNo" column="OPTION_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refStockNo" column="REF_STOCK_NO"/>
+		<result property="bodyColor" column="OPT_BODY_COLOR"/>
+		<result property="inkColor" column="OPT_INK_COLOR"/>
+		<result property="pointSize" column="OPT_POINT_SIZE"/>
+		<result property="extraCharge" column="OPT_EXTRA_CHARGE"/>
+		<association property="stock" resultMap="stockResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<!-- 재고 조회용 -->
+	<resultMap id="stockResultMap" type="com.bookgo.product.dto.StockDTO">
+		<id property="stockNo" column="STOCK_NO"/>
+		<result property="stockAmount" column="STOCK_AMOUNT"/>
+		<result property="stockDate" column="STOCK_DATE"/>
+	</resultMap>
+	
+	<!-- 카테고리 조회용 -->
+	<resultMap id="categoryResultMap" type="com.bookgo.product.dto.CategoryDTO">
+		<id property="categoryNo" column="CATEGORY_NO"/>
+		<result property="categoryName" column="CATEGORY_NAME"/>
+		<result property="categorySection" column="CATEGORY_SECTION"/>
+	</resultMap>
+	
+	<!-- 브랜드 조회용 -->
+	<resultMap id="brandResultMap" type="com.bookgo.product.dto.BrandDTO">
+		<id property="brandNo" column="BRAND_NO"/>
+		<result property="brandName" column="BRAND_NAME"/>
+	</resultMap>
+	
+	<!-- 주문배송정보 -->
+	<insert id="addOrderDetail">
+		INSERT
+		  INTO TBL_ORDER_DETAIL
+		(
+		  ORDER_NO
+		, MEMBER_ID
+		, ORDER_DATE
+		, RCVR_NAME
+		, RCVR_PHONE
+		, RCVR_ADDRESS
+		, DLVR_REQ_MESSAGE
+		, DLVR_STATUS
+		)
+		VALUES
+		(
+		  #{ orderNo }
+		, #{ memberId }
+		, #{ orderDate }
+		, #{ rcvrName }
+		, #{ rcvrPhone }
+		, #{ rcvrAddress }
+		, #{ dlvrReqMessage }
+		, #{ dlvrStatus }
+		)
+	</insert>
+	
+	<!-- 주문상품정보 -->
+	<insert id="addOrderInfo">
+		INSERT
+		  INTO TBL_ORDER
+		(
+		  ORDER_NO
+		, OPTION_NO
+		, ORDER_QUANTITY
+		, ORDER_AMOUNT
+		)
+		VALUES
+		(
+		  #{ orderNo }
+		, #{ optionNo }
+		, #{ orderQuantity }
+		, #{ orderAmount }
+		)
+	</insert>
+	
+	<!-- 배송정보 -->
+	<insert id="addDeliveryInfo">
+		INSERT
+		  INTO TBL_DELIVERY
+		(
+		  ORDER_NO
+		, DELIVERY_FEE
+		, DELIVERY_COMPANY
+		, DISPATCH_DATE
+		, DELIVERY_DATE
+		)
+		VALUES
+		(
+		  #{ orderNo }
+		, #{ deliveryFee }
+		, #{ deliveryCompany }
+		<if test="dispatchDate != null"> <!-- dummy data 생성용 -->
+		, #{ dispatchDate }
+		, #{ deliveryDate }
+		</if>
+		<if test="dispatchDate == null">
+		, NULL
+		, NULL
+		</if>
+		)
+	</insert>
+	
+	<!-- 적립금사용정보 -->
+	<insert id="addPointInfo">
+		INSERT
+		  INTO TBL_POINT
+		(
+		  POINT_NO
+		, PAYMENT_NO
+		, BONUS_REASON
+		, POINT_AMOUNT
+		, POINT_DATETIME
+		, POINT_STATUS
+		)
+		VALUES
+		(
+		  SEQ_POINT_NO.NEXTVAL
+		, #{ paymentNo }
+		, NULL
+		, #{ pointAmount }
+		, #{ pointDateTime }
+		, #{ pointStatus }
+		)
+	</insert>
+	
+	<!-- 결제정보 -->
+	<insert id="addPaymentInfo">
+		INSERT
+		  INTO TBL_PAYMENT
+		(
+		  PAYMENT_NO
+		, ORDER_NO
+		, PAYMENT_METHOD
+		, PAYMENT_AMOUNT
+		, PAYMENT_DATETIME
+		)
+		VALUES
+		(
+		  #{ paymentNo }
+		, #{ orderNo }
+		, #{ paymentMethod }
+		, #{ paymentAmount }
+		, #{ paymentDateTime }
+		)
+	</insert>
+	
+	<!-- 주문에 따른 재고 수량 차감 -->
+	<!-- 재입고를 고려하여 먼저 입고된 순서대로 차감 반영 -->
+	<update id="decreaseStockAmount">
+		UPDATE
+			   TBL_STOCK
+		   SET STOCK_AMOUNT = STOCK_AMOUNT - #{ orderQuantity }
+		 WHERE STOCK_NO = (SELECT
+		 						  O.STOCK_NO
+		 					 FROM (SELECT
+		 					 			  A.STOCK_NO
+										, A.STOCK_AMOUNT
+										, MIN(A.STOCK_DATE) OLDEST
+										, B.OPTION_NO
+									 FROM TBL_STOCK A
+									 LEFT JOIN TBL_OPTION B ON (A.STOCK_NO = B.REF_STOCK_NO)
+									WHERE B.OPTION_NO = #{ optionNo }
+									  AND A.STOCK_AMOUNT > 0
+									  AND ROWNUM = 1
+									GROUP BY A.STOCK_NO, B.OPTION_NO, A.STOCK_AMOUNT)O)
+	</update>
+	
+	<!-- 결제금액의 10% 적립금 | 적립,사용,취소로 구분 -->
+	<insert id="addPoint">
+		INSERT
+		  INTO TBL_POINT
+		(
+		  POINT_NO
+		, PAYMENT_NO
+		, BONUS_REASON
+		, POINT_AMOUNT
+		, POINT_DATETIME
+		, POINT_STATUS
+		)
+		VALUES
+		(
+		  SEQ_POINT_NO.NEXTVAL
+		, #{ paymentNo }
+		, NULL
+		, #{ pointAmount }
+		, #{ pointDateTime }
+		, #{ pointStatus }
+		)
+	</insert>
+	
+	<!-- 주문서 작성용 위시리스트 상품 정보 조회 -->
+	<select id="getWishItemByOptionNo" resultMap="optionResultMap">
+		SELECT
+			   A.OPTION_NO
+			 , A.REF_PROD_NO
+			 , B.PROD_NAME
+			 , B.DISCOUNT_RATE
+			 , B.PROD_PRICE
+			 , C.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+			 , A.OPT_BODY_COLOR
+			 , A.OPT_INK_COLOR
+			 , A.OPT_POINT_SIZE
+			 , A.OPT_EXTRA_CHARGE
+		  FROM TBL_OPTION A
+		  LEFT JOIN TBL_PRODUCT B ON(A.REF_PROD_NO = B.PROD_NO)
+		  LEFT JOIN TBL_BRAND C ON(C.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(B.PROD_NO = T.REF_PROD_NO)
+		 WHERE A.OPTION_NO = #{ optionNo }
+	</select>
+	
+	<!-- 주문상세서 작성용 건별 개수 *총 n건 표기* -->
+	<select id="getTheNumberOfEachOrder" resultType="_int">
+		SELECT
+			   COUNT(A.OPTION_NO)
+		  FROM TBL_ORDER A
+		  LEFT JOIN TBL_ORDER_DETAIL B ON(A.ORDER_NO = B.ORDER_NO)
+		 WHERE A.ORDER_NO = #{ orderNo }
+	</select>
+</mapper>

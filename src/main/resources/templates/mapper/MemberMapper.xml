@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reminder.geulbeotmall.member.model.dao.MemberMapper">
+	
+	<!-- 회원 조회용 -->
+	<resultMap id="memberResultMap" type="com.bookgo.mypage.dto.MemberDTO">
+		<id property="memberId" column="MEMBER_ID"/>
+		<result property="memberPwd" column="MEMBER_PWD"/>
+		<result property="name" column="NAME"/>
+		<result property="phone" column="PHONE"/>
+		<result property="email" column="EMAIL"/>
+		<result property="address" column="ADDRESS"/>
+		<result property="agreement" column="AGREEMENT"/>
+		<result property="accInactiveYn" column="ACC_INACTIVE_YN"/>
+		<result property="tempPwdYn" column="TEMP_PWD_YN"/>
+		<result property="accumLoginCount" column="ACCUM_LOGIN_COUNT"/>
+		<result property="loginFailedCount" column="LOGIN_FAILED_COUNT"/>
+		<result property="latestLoginDate" column="LATEST_LOGIN_DATE"/>
+		<result property="accCreationDate" column="ACC_CREATION_DATE"/>
+		<result property="accChangedDate" column="ACC_CHANGED_DATE"/>
+		<result property="accClosingDate" column="ACC_CLOSING_DATE"/>
+		<result property="accClosingYn" column="ACC_CLOSING_YN"/>
+		<collection property="roleList" resultMap="roleResultMap"/> <!-- 1:N -->
+	</resultMap>
+	
+	<resultMap id="roleResultMap" type="com.bookgo.mypage.dto.RoleDTO">
+		<id property="memberId" column="REF_MEMBER_ID"/>
+		<id property="authorityCode" column="REF_AUTHORITY_CODE"/>
+		<association property="authority" resultMap="authorityResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<resultMap id="authorityResultMap" type="com.bookgo.mypage.dto.AuthorityDTO">
+		<id property="authCode" column="AUTHORITY_CODE"/>
+		<result property="authName" column="AUTHORITY_NAME"/>
+		<result property="authDesc" column="AUTHORITY_DESC"/>
+	</resultMap>
+	
+	<!-- 위시리스트 조회용 -->
+	<resultMap id="wishListResultMap" type="com.bookgo.mypage.dto.WishListDTO">
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="optionNo" column="OPTION_NO"/>
+		<association property="product" resultMap="productResultMap"/> <!-- 1:1 -->
+		<association property="category" resultMap="categoryResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="option" resultMap="optionResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<!-- 상품 조회용 -->
+	<resultMap id="productResultMap" type="com.bookgo.product.dto.ProductDTO">
+		<id property="prodNo" column="PROD_NO"/>
+		<result property="categoryNo" column="CATEGORY_NO"/>
+		<result property="brandNo" column="BRAND_NO"/>
+		<result property="prodName" column="PROD_NAME"/>
+		<result property="prodDesc" column="PROD_DESC"/>
+		<result property="productTag" column="PRODUCT_TAG"/>
+		<result property="discountRate" column="DISCOUNT_RATE"/>
+		<result property="prodPrice" column="PROD_PRICE"/>
+		<result property="prodOrigin" column="PROD_ORIGIN"/>
+		<result property="prodDetailContent" column="PROD_DETAIL_CONTENT"/>
+		<result property="prodDetailViewCount" column="PROD_DETAIL_VIEW_COUNT"/>
+		<result property="prodEnrollDate" column="PROD_ENROLL_DATE"/>
+		<result property="prodChangeDate" column="PROD_CHANGE_DATE"/>
+		<result property="prodAvailYn" column="PROD_AVAIL_YN"/>
+		<association property="category" resultMap="categoryResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+		<collection property="option" resultMap="optionResultMap"/> <!-- 1:N -->
+	</resultMap>
+	
+	<!-- 썸네일 조회용 -->
+	<resultMap id="thumbnailResultMap" type="com.bookgo.product.dto.AttachmentDTO">
+		<id property="attachmentNo" column="ATTACHMENT_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refRevwNo" column="REF_REVW_NO"/>
+		<result property="refInqNo" column="REF_INQ_NO"/>
+		<result property="origFileName" column="ORIG_FILE_NAME"/>
+		<result property="saveFileName" column="SAVE_FILE_NAME"/>
+		<result property="savePath" column="SAVE_PATH"/>
+		<result property="thumbnailPath" column="THUMBNAIL_PATH"/>
+		<result property="fileType" column="FILE_TYPE"/>
+		<result property="attachStatusYn" column="ATTACH_STATUS_YN"/>
+	</resultMap>
+	
+	<!-- 옵션 조회용 -->
+	<resultMap id="optionResultMap" type="com.bookgo.product.dto.OptionDTO">
+		<id property="optionNo" column="OPTION_NO"/>
+		<result property="refProdNo" column="REF_PROD_NO"/>
+		<result property="refStockNo" column="REF_STOCK_NO"/>
+		<result property="bodyColor" column="OPT_BODY_COLOR"/>
+		<result property="inkColor" column="OPT_INK_COLOR"/>
+		<result property="pointSize" column="OPT_POINT_SIZE"/>
+		<result property="extraCharge" column="OPT_EXTRA_CHARGE"/>
+		<association property="stock" resultMap="stockResultMap"/> <!-- 1:1 -->
+	</resultMap>
+	
+	<!-- 재고 조회용 -->
+	<resultMap id="stockResultMap" type="com.bookgo.product.dto.StockDTO">
+		<id property="stockNo" column="STOCK_NO"/>
+		<result property="stockAmount" column="STOCK_AMOUNT"/>
+		<result property="stockDate" column="STOCK_DATE"/>
+	</resultMap>
+	
+	<!-- 카테고리 조회용 -->
+	<resultMap id="categoryResultMap" type="com.bookgo.product.dto.CategoryDTO">
+		<id property="categoryNo" column="CATEGORY_NO"/>
+		<result property="categoryName" column="CATEGORY_NAME"/>
+	</resultMap>
+	
+	<!-- 브랜드 조회용 -->
+	<resultMap id="brandResultMap" type="com.bookgo.product.dto.BrandDTO">
+		<id property="brandNo" column="BRAND_NO"/>
+		<result property="brandName" column="BRAND_NAME"/>
+	</resultMap>
+	
+	<!-- 주문배송정보 조회용 -->
+	<resultMap id="orderDetailResultMap" type="com.bookgo.cart.dto.OrderDetailDTO">
+		<id property="orderNo" column="ORDER_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="orderDate" column="ORDER_DATE"/>
+		<result property="rcvrName" column="RCVR_NAME"/>
+		<result property="rcvrPhone" column="RCVR_PHONE"/>
+		<result property="rcvrAddress" column="RCVR_ADDRESS"/>
+		<result property="dlvrReqMessage" column="DLVR_REQ_MESSAGE"/>
+		<result property="dlvrStatus" column="DLVR_STATUS"/>
+		<association property="order" resultMap="orderResultMap"/> <!-- 1:1 -->
+		<association property="payment" resultMap="paymentResultMap"/> <!-- 1:1 -->
+		<association property="delivery" resultMap="deliveryResultMap"/> <!-- 1:1 -->
+		<association property="point" resultMap="pointResultMap"/> <!-- 1:1 -->
+		<association property="product" resultMap="productResultMap"/> <!-- 1:1 -->
+		<association property="brand" resultMap="brandResultMap"/> <!-- 1:1 -->
+		<association property="attachmentList" resultMap="thumbnailResultMap"/> <!-- 1:1 -->
+		<collection property="option" resultMap="optionResultMap"/> <!-- 1:N -->
+	</resultMap>
+	
+	<!-- 주문상품정보 조회용 -->
+	<resultMap id="orderResultMap" type="com.bookgo.cartl.dto.OrderDTO">
+		<result property="orderNo" column="ORDER_NO"/>
+		<result property="optionNo" column="OPTION_NO"/>
+		<result property="orderQuantity" column="ORDER_QUANTITY"/>
+		<result property="orderAmount" column="ORDER_AMOUNT"/>
+		<association property="orderDetail" resultMap="orderDetailResultMap"/>
+		<association property="delivery" resultMap="deliveryResultMap"/>
+		<association property="product" resultMap="productResultMap"/>
+		<association property="brand" resultMap="brandResultMap"/>
+		<association property="attachmentList" resultMap="thumbnailResultMap"/>
+		<collection property="option" resultMap="optionResultMap"/>
+	</resultMap>
+	
+	<!-- 주문결제정보 조회용 -->
+	<resultMap id="paymentResultMap" type="com.bookgo.cart.dto.PaymentDTO">
+		<id property="paymentNo" column="PAYMENT_NO"/>
+		<result property="orderNo" column="ORDER_NO"/>
+		<result property="paymentMethod" column="PAYMENT_METHOD"/>
+		<result property="paymentAmount" column="PAYMENT_AMOUNT"/>
+		<result property="paymentDateTime" column="PAYMENT_DATETIME"/>
+	</resultMap>
+	
+	<!-- 배송정보 조회용 -->
+	<resultMap id="deliveryResultMap" type="com.bookgo.cart.dto.DeliveryDTO">
+		<result property="orderNo" column="ORDER_NO"/>
+		<result property="deliveryFee" column="DELIVERY_FEE"/>
+		<result property="deliveryCompany" column="DELIVERY_COMPANY"/>
+		<result property="dispatchDate" column="DISPATCH_DATE"/>
+		<result property="deliveryDate" column="DELIVERY_DATE"/>
+	</resultMap>
+	
+	<!-- 적립금 조회용 -->
+	<resultMap id="pointResultMap" type="com.bookgo.cart.dto.PointDTO">
+		<id property="pointNo" column="POINT_NO"/>
+		<result property="paymentNo" column="PAYMENT_NO"/>
+		<result property="bonusReason" column="BONUS_REASON"/>
+		<result property="pointAmount" column="POINT_AMOUNT"/>
+		<result property="pointDateTime" column="POINT_DATETIME"/>
+		<result property="pointStatus" column="POINT_STATUS"/>
+		<association property="payment" resultMap="paymentResultMap"/>
+	</resultMap>
+	
+	<!-- 리뷰 조회용 -->
+	<resultMap id="reviewResultMap" type="com.boockgo.review.dto.ReviewDTO">
+		<id property="reviewNo" column="REVIEW_NO"/>
+		<result property="optionNo" column="OPTION_NO"/>
+		<result property="orderNo" column="ORDER_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="revwTitle" column="REVW_TITLE"/>
+		<result property="revwContent" column="REVW_CONTENT"/>
+		<result property="revwRegDate" column="REVW_REG_DATE"/>
+		<result property="revwHits" column="REVW_HITS"/>
+		<result property="revwRatings" column="REVW_RATINGS"/>
+		<association property="option" resultMap="optionResultMap"/>
+		<association property="product" resultMap="productResultMap"/>
+		<collection property="attachmentList" resultMap="thumbnailResultMap"/>
+	</resultMap>
+	
+	<select id="findMemberById" resultMap="memberResultMap">
+		SELECT
+			   A.MEMBER_ID
+			 , A.MEMBER_PWD
+			 , A.NAME
+			 , A.PHONE
+			 , A.EMAIL
+			 , A.ADDRESS
+			 , A.AGREEMENT
+			 , A.ACC_INACTIVE_YN
+			 , A.TEMP_PWD_YN
+			 , A.ACCUM_LOGIN_COUNT
+			 , A.LOGIN_FAILED_COUNT
+			 , A.LATEST_LOGIN_DATE
+			 , A.ACC_CREATION_DATE
+			 , A.ACC_CHANGED_DATE
+			 , A.ACC_CLOSING_DATE
+			 , A.ACC_CLOSING_YN
+			 , B.MEMBER_ID REF_MEMBER_ID <!-- 하단의 다섯 목록은 DB에 저장된 정보 토대로 ROLE_ADMIN/ROLE_MEMBER 구분 위해 JOIN 후 SELECT 필요 -->
+			 , B.AUTHORITY_CODE REF_AUTH_CODE
+			 , C.AUTHORITY_CODE REF_AUTH_CODE2
+			 , C.AUTHORITY_NAME
+			 , C.AUTHORITY_DESC
+		  FROM TBL_MEMBER A
+		  LEFT JOIN TBL_ROLE B ON(A.MEMBER_ID = B.MEMBER_ID)
+		  LEFT JOIN TBL_AUTHORITY C ON(B.AUTHORITY_CODE = C.AUTHORITY_CODE)
+		 WHERE A.MEMBER_ID = #{ username }
+	</select>
+	
+	<select id="findMemberByEmail" resultMap="memberResultMap">
+		SELECT
+			   A.MEMBER_ID
+			 , A.MEMBER_PWD
+			 , A.NAME
+			 , A.PHONE
+			 , A.EMAIL
+			 , A.ADDRESS
+			 , A.AGREEMENT
+			 , A.ACC_INACTIVE_YN
+			 , A.TEMP_PWD_YN
+			 , A.ACCUM_LOGIN_COUNT
+			 , A.LOGIN_FAILED_COUNT
+			 , A.LATEST_LOGIN_DATE
+			 , A.ACC_CREATION_DATE
+			 , A.ACC_CHANGED_DATE
+			 , A.ACC_CLOSING_DATE
+			 , A.ACC_CLOSING_YN
+			 , B.MEMBER_ID REF_MEMBER_ID <!-- 하단의 다섯 목록은 DB에 저장된 정보 토대로 ROLE_ADMIN/ROLE_MEMBER 구분 위해 JOIN 후 SELECT 필요 -->
+			 , B.AUTHORITY_CODE REF_AUTH_CODE
+			 , C.AUTHORITY_CODE REF_AUTH_CODE2
+			 , C.AUTHORITY_NAME
+			 , C.AUTHORITY_DESC
+		  FROM TBL_MEMBER A
+		  LEFT JOIN TBL_ROLE B ON(A.MEMBER_ID = B.MEMBER_ID)
+		  LEFT JOIN TBL_AUTHORITY C ON(B.AUTHORITY_CODE = C.AUTHORITY_CODE)
+		 WHERE A.EMAIL = #{ email }
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="insertMember">
+		INSERT
+		  INTO TBL_MEMBER
+		(
+		  MEMBER_ID
+		, MEMBER_PWD
+		, NAME
+		, PHONE
+		, EMAIL
+		, ADDRESS
+		, AGREEMENT
+		, ACC_INACTIVE_YN
+		, TEMP_PWD_YN
+		, ACCUM_LOGIN_COUNT
+		, LOGIN_FAILED_COUNT
+		, LATEST_LOGIN_DATE
+		, ACC_CREATION_DATE
+		, ACC_CHANGED_DATE
+		, ACC_CLOSING_DATE
+		, ACC_CLOSING_YN
+		)
+		VALUES
+		(
+		  #{ memberId }
+		, #{ memberPwd }
+		, #{ name }
+		, #{ phone }
+		, #{ email }
+		, #{ address }
+		, DECODE(#{ agreement }, 'Y', 'Y', 'N')
+		, #{ accInactiveYn }
+		, DEFAULT
+		, DEFAULT
+		, DEFAULT
+		, NULL
+		<if test="accCreationDate != null"> <!-- dummy data 생성용 -->
+		, #{ accCreationDate }
+		, #{ accChangedDate }
+		</if>
+		<if test="accCreationDate == null">
+		, SYSDATE
+		, SYSDATE
+		</if>
+		, NULL
+		, DEFAULT
+		)
+	</insert>
+	
+	<insert id="insertRole">
+		INSERT
+		  INTO TBL_ROLE
+		(
+		  MEMBER_ID
+		, AUTHORITY_CODE
+		)
+		VALUES
+		(
+		  #{ memberId }
+		, #{ authorityCode }
+		)
+	</insert>
+	
+	<insert id="insertAuthentication">
+		INSERT
+		  INTO TBL_AUTHENTICATION
+		(
+		  MEMBER_ID
+		, AUTH_PHONE_YN
+		, AUTH_DATE
+		)
+		VALUES
+		(
+		  #{ memberId }
+		, 'N'
+		, NULL
+		)
+	</insert>
+	
+	<!-- 신규 회원가입 혜택 2,000 포인트 등록 -->
+	<insert id="addNewMemberBonusPoints">
+		INSERT
+		  INTO TBL_POINT
+		(
+		  POINT_NO
+		, PAYMENT_NO
+		, BONUS_REASON
+		, POINT_AMOUNT
+		, POINT_DATETIME
+		, POINT_STATUS
+		)
+		VALUES
+		(
+		  SEQ_POINT_NO.NEXTVAL
+		, NULL
+		, #{ bonusReason }
+		, #{ pointAmount }
+		, #{ pointDateTime }
+		, #{ pointStatus }
+		)
+	</insert>
+	
+	<!-- 비활성화 계정 확인 -->
+	<select id="checkIsInactiveAccount" resultType="java.lang.Character">
+		SELECT
+			   ACC_INACTIVE_YN
+		  FROM TBL_MEMBER
+		 WHERE MEMBER_ID = #{ memberId }
+	</select>
+	
+	<!-- 이메일 인증 및 계정 활성화 -->
+	<update id="activateAccountByEmail">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_INACTIVE_YN = 'N'
+		 WHERE EMAIL = #{ email }
+	</update>
+	
+	<!-- 휴대폰 본인인증 여부 조회 -->
+	<select id="checkIsAuthenticated" resultType="java.lang.Character">
+		SELECT
+			   AUTH_PHONE_YN
+		  FROM TBL_AUTHENTICATION
+		 WHERE MEMBER_ID = #{ memberId }
+	</select>
+	
+	<!-- 휴대폰 본인인증 성공 결과 반영 -->
+	<update id="updateAuthentication">
+		UPDATE
+			   TBL_AUTHENTICATION
+		   SET AUTH_PHONE_YN = #{ authPhoneYn }
+		     , AUTH_DATE = SYSDATE
+		 WHERE MEMBER_ID = #{ memberId }
+	</update>
+	
+	<!-- 아이디 찾기 *아이디 일부만 조회, 현재 활동 중인 회원에 한함* -->
+	<select id="findMemberId" resultMap="memberResultMap">
+		SELECT
+			   SUBSTR(MEMBER_ID, 1, 4) || RPAD('*', LENGTH(MEMBER_ID)-4, '*') MEMBER_ID
+			 , ACC_CREATION_DATE
+		  FROM TBL_MEMBER
+		 WHERE ACC_CLOSING_YN = 'N'
+		   AND NAME = #{ name }
+		   AND EMAIL = #{ email }
+	</select>
+	
+	<!-- 비밀번호 찾기 *임시 비밀번호 저장, 현재 활동 중인 회원에 한함* -->
+	<update id="generateTempPwd">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_CHANGED_DATE = SYSDATE
+		     , TEMP_PWD_YN = #{ tempPwdYn }
+		     , MEMBER_PWD = #{ memberPwd }
+		 WHERE ACC_CLOSING_YN = 'N'
+		   AND MEMBER_ID = #{ memberId }
+		   AND NAME = #{ name }
+		   AND EMAIL = #{ email }
+	</update>
+	
+	<!-- 회원가입 중 아이디 중복 검사 -->
+	<select id="checkId" parameterType="String" resultType="int">
+		SELECT
+			   COUNT(*)
+		  FROM TBL_MEMBER
+		 WHERE MEMBER_ID = #{ memberId }
+	</select>
+	
+	<!-- 회원가입 중 이메일 중복 검사 -->
+	<select id="checkEmail" parameterType="String" resultType="int">
+		SELECT
+			   COUNT(*)
+		  FROM TBL_MEMBER
+		 WHERE EMAIL = #{ email }
+	</select>
+	
+	<!-- 회원가입 완료 시 이메일 인증 후 계정 활성화 -->
+	<update id="updateAccActivation">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_INACTIVE_YN = 'N'
+		 WHERE MEMBER_ID = #{ memberId }
+	</update>
+	
+	<!-- 회원 정보 수정 -->
+	<update id="changeMemberInfo">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_CHANGED_DATE = SYSDATE
+		     , TEMP_PWD_YN = #{ tempPwdYn }
+		<if test="memberPwd != null">, MEMBER_PWD = #{ memberPwd }</if>
+		<if test="name != null">, NAME = #{ name }</if>
+		<if test="phone != null">, PHONE = #{ phone }</if>
+		<if test="email != null">, EMAIL = #{ email }</if>
+		<if test="address != null">, ADDRESS = #{ address }</if>
+		<if test="agreement != null">, AGREEMENT = #{ agreement }</if>
+		 WHERE MEMBER_ID = #{ memberId }
+	</update>
+	
+	<!-- 로그인 성공 횟수 누적 -->
+	<update id="updateAccumLoginCount">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACCUM_LOGIN_COUNT = ACCUM_LOGIN_COUNT+1
+		     , LATEST_LOGIN_DATE = SYSDATE
+		     , LOGIN_FAILED_COUNT = 0
+		 WHERE MEMBER_ID = #{ username }
+	</update>
+	
+	<!-- 로그인 성공 시 최근 로그인 일시 업데이트 -->
+	<update id="updateLatestLoginDate">
+		UPDATE
+			   TBL_MEMBER
+		   SET LATEST_LOGIN_DATE = SYSDATE
+		 WHERE MEMBER_ID = #{ username }
+	</update>
+	
+	<!-- 현재까지 기록된 로그인 실패 횟수 리셋 -->
+	<update id="resetLoginFailedCount">
+		UPDATE
+			   TBL_MEMBER
+		   SET LOGIN_FAILED_COUNT = 0
+		 WHERE MEMBER_ID = #{ username }
+	</update>
+	
+	<!-- 로그인 실패 횟수 증가 -->
+	<update id="updateLoginFailedCount">
+		UPDATE
+			   TBL_MEMBER
+		   SET LOGIN_FAILED_COUNT = LOGIN_FAILED_COUNT+1
+		 WHERE MEMBER_ID = #{ username }
+	</update>
+	
+	<!-- 로그인 실패 횟수 조회 -->
+	<select id="checkLoginFailedCount" parameterType="String" resultType="int">
+		SELECT
+			   COUNT(*)
+		  FROM TBL_MEMBER
+		 WHERE MEMBER_ID = #{ username }
+	</select>
+	
+	<!-- 로그인 실패 횟수 5회 초과 시 계정 비활성화 -->
+	<update id="deactivateUsername">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_INACTIVE_YN = 'Y'
+		 WHERE MEMBER_ID = #{ username }
+	</update>
+	
+	<select id="getMemberDetails" resultMap="memberResultMap">
+		SELECT
+			   A.MEMBER_ID
+			 , A.MEMBER_PWD
+			 , A.NAME
+			 , A.PHONE
+			 , A.EMAIL
+			 , A.ADDRESS
+			 , A.AGREEMENT
+			 , A.ACC_INACTIVE_YN
+			 , A.TEMP_PWD_YN
+			 , A.ACCUM_LOGIN_COUNT
+			 , A.LOGIN_FAILED_COUNT
+			 , A.LATEST_LOGIN_DATE
+			 , A.ACC_CREATION_DATE
+			 , A.ACC_CHANGED_DATE
+			 , A.ACC_CLOSING_DATE
+			 , A.ACC_CLOSING_YN
+			 , C.AUTHORITY_DESC
+		  FROM TBL_MEMBER A
+		  LEFT JOIN TBL_ROLE B ON(A.MEMBER_ID = B.MEMBER_ID)
+		  LEFT JOIN TBL_AUTHORITY C ON(B.AUTHORITY_CODE = C.AUTHORITY_CODE)
+		 WHERE A.MEMBER_ID = #{ memberId }
+		 GROUP BY A.MEMBER_ID, A.MEMBER_PWD, A.NAME, A.PHONE, A.EMAIL, A.ADDRESS, A.AGREEMENT, A.ACC_INACTIVE_YN, A.TEMP_PWD_YN, A.ACCUM_LOGIN_COUNT, A.LOGIN_FAILED_COUNT, A.LATEST_LOGIN_DATE, A.ACC_CREATION_DATE, A.ACC_CHANGED_DATE, A.ACC_CLOSING_DATE, A.ACC_CLOSING_YN, C.AUTHORITY_DESC
+	</select>
+	
+	<!-- 누적 주문/배송목록 조회 -->
+	<select id="getMemberOrderList" resultMap="orderDetailResultMap">
+	SELECT
+		   Z.*
+	  FROM (
+			SELECT
+				   ROW_NUMBER() OVER(PARTITION BY B.ORDER_NO ORDER BY P.PROD_PRICE DESC) REPR
+				 , A.ORDER_NO
+				 , A.ORDER_DATE
+				 , A.DLVR_STATUS
+				 , B.OPTION_NO
+				 , O.OPT_BODY_COLOR
+				 , O.OPT_INK_COLOR
+				 , O.OPT_POINT_SIZE
+				 , O.OPT_EXTRA_CHARGE
+				 , P.PROD_NO
+				 , P.PROD_NAME
+				 , D.BRAND_NAME
+				 , T.THUMBNAIL_PATH
+			  FROM TBL_ORDER_DETAIL A
+			  LEFT JOIN TBL_ORDER B ON(A.ORDER_NO = B.ORDER_NO)
+			  LEFT JOIN TBL_PAYMENT C ON(B.ORDER_NO = C.ORDER_NO)
+			  LEFT JOIN TBL_OPTION O ON(B.OPTION_NO = O.OPTION_NO)
+			  LEFT JOIN TBL_PRODUCT P ON(O.REF_PROD_NO = P.PROD_NO)
+			  LEFT JOIN TBL_BRAND D ON(P.BRAND_NO = D.BRAND_NO)
+			  LEFT JOIN TBL_ATTACHMENT T ON(P.PROD_NO = T.REF_PROD_NO)
+			 WHERE A.MEMBER_ID = #{ memberId }
+			   AND FILE_TYPE = 'THUMB_MAIN'
+	  	   ) Z
+	 WHERE Z.REPR = 1
+	</select>
+	
+	<!-- 주문/배송목록 상세정보조회 -->
+	<select id="getMemberOrderDetails" resultMap="orderDetailResultMap">
+		SELECT
+			   A.ORDER_NO
+			 , A.ORDER_DATE
+			 , A.RCVR_NAME
+			 , A.RCVR_PHONE
+			 , A.RCVR_ADDRESS
+			 , A.DLVR_REQ_MESSAGE
+			 , A.DLVR_STATUS
+			 , B.OPTION_NO
+			 , B.ORDER_QUANTITY
+			 , B.ORDER_AMOUNT
+			 , C.PAYMENT_NO
+			 , C.PAYMENT_METHOD
+			 , C.PAYMENT_AMOUNT
+			 , C.PAYMENT_DATETIME
+			 , L.DELIVERY_FEE
+			 , L.DELIVERY_COMPANY
+			 , L.DISPATCH_DATE
+			 , L.DELIVERY_DATE
+			 , N.POINT_AMOUNT
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+			 , P.PROD_NO
+			 , P.PROD_NAME
+			 , D.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+		  FROM TBL_ORDER_DETAIL A
+		  LEFT JOIN TBL_ORDER B ON(A.ORDER_NO = B.ORDER_NO)
+		  LEFT JOIN TBL_PAYMENT C ON(B.ORDER_NO = C.ORDER_NO)
+		  LEFT JOIN TBL_DELIVERY L ON(C.ORDER_NO = L.ORDER_NO)
+		  LEFT JOIN TBL_POINT N ON(C.PAYMENT_NO = N.PAYMENT_NO)
+		  LEFT JOIN TBL_OPTION O ON(B.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT P ON(O.REF_PROD_NO = P.PROD_NO)
+		  LEFT JOIN TBL_BRAND D ON(P.BRAND_NO = D.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(P.PROD_NO = T.REF_PROD_NO)
+		 WHERE A.MEMBER_ID = #{ memberId }
+		   AND T.FILE_TYPE = 'THUMB_MAIN'
+		   AND A.ORDER_NO = #{ orderNo }
+		 ORDER BY P.PROD_PRICE DESC <!-- 주문 목록 중 고가의 상품 먼저 출력 -->
+	</select>
+	
+	<!-- 주문번호별 주문금액 합계 조회 -->
+	<select id="getTotalOrderAmountByOrderNo" resultType="_int">
+		SELECT
+			   SUM(ORDER_AMOUNT)
+		  FROM TBL_ORDER
+		 WHERE ORDER_NO = #{ orderNo }
+	</select>
+	
+	<!-- 주문번호별 상품 옵션 조회 -->
+	<select id="getOptionListByOrderNo" resultMap="orderResultMap">
+		SELECT
+			   A.OPTION_NO
+			 , A.ORDER_QUANTITY
+			 , A.ORDER_AMOUNT
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+			 , P.PROD_NO
+			 , P.PROD_NAME
+			 , B.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+		  FROM TBL_ORDER A
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT P ON(O.REF_PROD_NO = P.PROD_NO)
+		  LEFT JOIN TBL_BRAND B ON(P.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(P.PROD_NO = T.REF_PROD_NO)
+		 WHERE A.ORDER_NO = #{ orderNo }
+		   AND T.FILE_TYPE = 'THUMB_MAIN'
+		   AND A.ORDER_NO = #{ orderNo }
+		 ORDER BY P.PROD_PRICE DESC <!-- 주문 목록 중 고가의 상품 먼저 출력 -->
+	</select>
+	
+	<!-- 작성 가능한 리뷰 조회 -->
+	<select id="getItemsToPostAReview" resultMap="orderResultMap">
+		SELECT
+			   A.ORDER_NO
+			 , A.OPTION_NO
+			 , B.ORDER_DATE
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+			 , P.PROD_NO
+			 , P.PROD_NAME
+			 , B.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+		  FROM TBL_ORDER A
+		  LEFT JOIN TBL_ORDER_DETAIL B ON(A.ORDER_NO = B.ORDER_NO)
+		  LEFT JOIN TBL_DELIVERY D ON(A.ORDER_NO = D.ORDER_NO)
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT P ON(O.REF_PROD_NO = P.PROD_NO)
+		  LEFT JOIN TBL_BRAND B ON(P.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(P.PROD_NO = T.REF_PROD_NO)
+		 WHERE B.MEMBER_ID = #{ memberId }
+		   AND (A.ORDER_NO, A.OPTION_NO) NOT IN (SELECT ORDER_NO, OPTION_NO FROM TBL_REVIEW)
+		   AND D.DELIVERY_DATE IS NOT NULL
+		 ORDER BY D.DELIVERY_DATE DESC
+	</select>
+	
+	<!-- 리뷰 작성용 주문정보 조회 -->
+	<select id="getOrderInfoToReview" resultMap="orderResultMap">
+		SELECT
+			   A.ORDER_NO
+			 , A.OPTION_NO
+			 , B.ORDER_DATE
+			 , L.DELIVERY_DATE
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE
+			 , P.PROD_NO
+			 , P.PROD_NAME
+			 , B.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+		  FROM TBL_ORDER A
+		  LEFT JOIN TBL_ORDER_DETAIL B ON(A.ORDER_NO = B.ORDER_NO)
+		  LEFT JOIN TBL_DELIVERY L ON(B.ORDER_NO = L.ORDER_NO)
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT P ON(O.REF_PROD_NO = P.PROD_NO)
+		  LEFT JOIN TBL_BRAND B ON(P.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(P.PROD_NO = T.REF_PROD_NO)
+		 WHERE B.MEMBER_ID = #{ memberId }
+		   AND A.ORDER_NO = #{ orderNo }
+		   AND A.OPTION_NO = #{ optionNo }
+	</select>
+	
+	<!-- 작성한 모든 리뷰 조회('휴지통 삭제글' 제외) -->
+	<select id="getMemberReviewPosts" resultMap="reviewResultMap">
+		SELECT
+			   A.REVIEW_NO
+			 , A.OPTION_NO
+			 , A.ORDER_NO
+			 , SUBSTR(A.MEMBER_ID, 1, 4) || RPAD('*', LENGTH(A.MEMBER_ID)-4, '*') MEMBER_ID
+			 , A.REVW_TITLE
+			 , A.REVW_CONTENT
+			 , A.REVW_REG_DATE
+			 , A.REVW_HITS
+			 , A.REVW_RATINGS
+			 , B.THUMBNAIL_PATH
+			 , C.REF_PROD_NO
+			 , C.OPT_BODY_COLOR
+			 , C.OPT_INK_COLOR
+			 , C.OPT_POINT_SIZE
+			 , C.OPT_EXTRA_CHARGE
+			 , D.PROD_NAME
+		  FROM TBL_REVIEW A
+		  LEFT JOIN TBL_ATTACHMENT B ON(A.REVIEW_NO = B.REF_REVW_NO)
+		  LEFT JOIN TBL_OPTION C ON(A.OPTION_NO = C.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT D ON(C.REF_PROD_NO = D.PROD_NO)
+		 WHERE A.MEMBER_ID = #{ memberId }
+		   AND A.REVIEW_NO NOT IN (SELECT REF_REVW_NO FROM TBL_TRASH)
+		 ORDER BY A.REVW_REG_DATE
+	</select>
+	
+	<!-- 현재 위시리스트 조회 -->
+	<select id="getMemberWishList" resultMap="wishListResultMap">
+		SELECT
+			   A.MEMBER_ID
+			 , A.OPTION_NO
+			 , B.PROD_NO
+			 , B.PROD_NAME
+			 , B.DISCOUNT_RATE
+			 , B.PROD_PRICE
+			 , C.BRAND_NAME
+			 , T.THUMBNAIL_PATH
+			 , O.OPT_BODY_COLOR
+			 , O.OPT_INK_COLOR
+			 , O.OPT_POINT_SIZE
+			 , O.OPT_EXTRA_CHARGE 
+		  FROM TBL_WISHLIST A
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT B ON(O.REF_PROD_NO = B.PROD_NO)
+		  LEFT JOIN TBL_BRAND C ON(C.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(B.PROD_NO = T.REF_PROD_NO)
+		 WHERE A.MEMBER_ID = #{ memberId }
+	</select>
+	
+	<!-- 위시리스트 상품번호 조회 -->
+	<select id="getProdNoFromWishList" resultType="_int">
+		SELECT
+			   DISTINCT(B.PROD_NO)
+		  FROM TBL_WISHLIST A
+		  LEFT JOIN TBL_OPTION O ON(A.OPTION_NO = O.OPTION_NO)
+		  LEFT JOIN TBL_PRODUCT B ON(O.REF_PROD_NO = B.PROD_NO)
+		  LEFT JOIN TBL_BRAND C ON(C.BRAND_NO = B.BRAND_NO)
+		  LEFT JOIN TBL_ATTACHMENT T ON(B.PROD_NO = T.REF_PROD_NO)
+		 WHERE A.MEMBER_ID = #{ memberId }
+	</select>
+	
+	<!-- 위시리스트 찜하기 추가 -->
+	<insert id="addToWishList">
+		INSERT
+		  INTO TBL_WISHLIST
+		(
+		  MEMBER_ID
+		, OPTION_NO
+		)
+		VALUES
+		(
+		  #{ memberId }
+		, #{ optionNo }
+		)
+	</insert>
+	
+	<!-- 위시리스트 선택 항목 삭제 -->
+	<delete id="deleteItemFromWishList">
+		DELETE
+		  FROM TBL_WISHLIST
+		 WHERE MEMBER_ID = #{ memberId }
+		   AND OPTION_NO = #{ optionNo }
+	</delete>
+	
+	<!-- 적립금 사용내역 조회 *주문/결제 시 0원 사용 또한 기록되므로 0원 이상의 내역에 한하여 보여줌* -->
+	<select id="getReserveDetails" resultMap="pointResultMap">
+		SELECT
+			   A.POINT_NO
+			 , A.BONUS_REASON
+			 , A.POINT_AMOUNT
+			 , A.POINT_DATETIME
+			 , A.POINT_STATUS
+			 , B.ORDER_NO
+		  FROM TBL_POINT A
+		  LEFT JOIN TBL_PAYMENT B ON(A.PAYMENT_NO = B.PAYMENT_NO)
+		  LEFT JOIN TBL_ORDER_DETAIL C ON(B.ORDER_NO = C.ORDER_NO)
+		 WHERE C.MEMBER_ID = #{ memberId }
+		   AND A.POINT_AMOUNT > 0
+		    OR A.BONUS_REASON LIKE '%' || #{ memberId } || '%'
+		 ORDER BY A.POINT_DATETIME
+	</select>
+	
+	<!-- 현재 보유 적립금 -->
+	<select id="getMemberPoint" resultType="_int">
+	<![CDATA[
+		SELECT
+			   NVL((SELECT SUM(POINT_AMOUNT) BONUS FROM TBL_POINT WHERE BONUS_REASON LIKE '%' || '가입[' || #{ memberId } || ']' || '%'), 0)
+			   +
+			   NVL((SELECT SUM(POINT_AMOUNT) SAVE FROM TBL_POINT A
+				      LEFT JOIN TBL_PAYMENT B ON(A.PAYMENT_NO = B.PAYMENT_NO)
+				      LEFT JOIN TBL_ORDER_DETAIL C ON(B.ORDER_NO = C.ORDER_NO)
+				     WHERE C.MEMBER_ID = #{ memberId } AND POINT_STATUS = '적립'), 0) - NVL((SELECT SUM(POINT_AMOUNT) USED FROM TBL_POINT A
+																						      LEFT JOIN TBL_PAYMENT B ON(A.PAYMENT_NO = B.PAYMENT_NO)
+																						      LEFT JOIN TBL_ORDER_DETAIL C ON(B.ORDER_NO = C.ORDER_NO)
+																						     WHERE C.MEMBER_ID = #{ memberId } AND POINT_STATUS = '사용'), 0)
+		  FROM DUAL
+	]]>
+	</select>
+	
+	<!-- 배송상태별 최근 3개월 주문내역 -->
+	<select id="getMemberOrderCountByDlvrStatus" resultType="_int">
+		SELECT
+			   NVL(COUNT(ORDER_NO), 0)
+		  FROM TBL_ORDER_DETAIL
+		 WHERE MEMBER_ID = #{ memberId }
+		   AND DLVR_STATUS = #{ dlvrStatus }
+		   AND TO_DATE(ORDER_DATE, 'YYYY.MM.DD AM HH:MI:SS') >= ADD_MONTHS(TRUNC(SYSDATE), -3)
+	</select>
+	
+	<!-- 회원 탈퇴 -->
+	<update id="closeMemberAccount">
+		UPDATE
+			   TBL_MEMBER
+		   SET ACC_CLOSING_DATE = SYSDATE
+		     , ACC_CLOSING_YN = 'Y'
+		 WHERE MEMBER_ID = #{ memberId }
+	</update>
+	
+	<!-- 관리자 확인 -->
+	<select id="checkAdminOrNot" resultType="Integer">
+		SELECT
+			   COUNT(MEMBER_ID)
+		  FROM TBL_ROLE
+		 WHERE MEMBER_ID = #{ memberId }
+		   AND AUTHORITY_CODE = 2
+	</select>
+	
+	<!-- 랜덤 회원 1명 추출 *dummy data test* -->
+	<select id="getRandomMember" resultMap="memberResultMap">
+		SELECT *
+		  FROM (SELECT * FROM TBL_MEMBER ORDER BY DBMS_RANDOM.RANDOM)
+		<![CDATA[
+		 WHERE ROWNUM <= 1
+		]]>
+	</select>
+</mapper>

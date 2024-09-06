@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/default}">
+<head>
+	<meta charset="UTF-8">
+	<title>My Page</title>
+	<!--/* CSS */-->
+   	<link th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <th:block layout:fragment="css">
+	    <link th:href="@{/css/customtable.css}" rel="stylesheet">
+	    <link th:href="@{/css/post.css}" rel="stylesheet">
+	</th:block>
+</head>
+<body th:replace="/fragments/mypage.html :: mypage">
+	<div layout:fragment="mypageContent">
+		<nav class="mypage-breadcrumb" aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/">HOME</a></li>
+				<li class="breadcrumb-item"><a th:href="@{/mypage/main}">마이페이지</a></li>
+			    <li class="breadcrumb-item active" aria-current="page">상품리뷰</li>
+			</ol>
+		</nav>
+		<div class="mypage-area">
+			<fieldset>
+				<legend>상품리뷰</legend>
+			</fieldset>
+			<ul class="review-notice">
+				<li>BookGo는 텍스트리뷰 <b>100원</b> / 포토리뷰 <b>300원</b>을 적립해 드리고 있습니다.</li>
+				<li>상품 문의, 확인되지 않은 사항, 미풍양속을 해치는 글은 관리자가 임의로 삭제할 수 있으니 양해 바랍니다.</li>
+			</ul>
+			<!-- 작성 가능한 리뷰 | 나의 상품리뷰 -->
+			<ul class="nav nav-tabs" id="reviewTab" role="tablist">
+				<li class="nav-item" role="presentation">
+					<button class="nav-link active" id="write-tab" data-bs-toggle="tab" data-bs-target="#write" type="button" role="tab" aria-controls="write" aria-selected="true">작성 가능한 리뷰</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab" aria-controls="review" aria-selected="false">나의 상품리뷰</button>
+				</li>
+			</ul>
+			<div class="tab-content" id="myReviewTabContent">
+				<div class="tab-pane fade show active" id="write" role="tabpanel" aria-labelledby="write-tab">
+					<div class="dataTable-container">
+						<table class="reviewlist-table dataTable-table">
+					    	<tbody>
+					    		<tr th:each="itemList : ${ itemList }" th:if="${not #lists.isEmpty(itemList)}">
+					    			<td th:value="${ itemList.orderNo }"><img th:src="${ itemList.product.attachmentList[0].thumbnailPath }" style="width: 80px; height: 80px;"></td>
+					    			<td class="option-area" th:value="${ itemList.optionNo }">
+						    			<a th:href="@{/product/details(no=${itemList.product.prodNo})}">[[${ itemList.product.prodName }]]</a>
+						    			<p>
+					    					<span>[[${ itemList.option.pointSize }]]mm</span>
+						    				<th:block th:if="${ itemList.option.bodyColor != '(해당없음)' }">
+						    					<span th:text="|/ ${#strings.replace(itemList.option.bodyColor, '$', ',')}|"></span>
+						    				</th:block>
+						    				<th:block th:if="${ itemList.option.inkColor != '(해당없음)' }">
+						    					<span th:text="|/ ${#strings.replace(itemList.option.inkColor, '$', ',')}|"></span>
+						    				</th:block>
+						    			</p>
+					    			</td>
+					    			<td>
+						    			<div class="buttonBox">
+						    				<button type="button" class="reviewBtn btn btn-sm btn-dark" th:onclick="|location.href='@{/review/write(order=${itemList.orderNo}, option=${itemList.optionNo})}'|">리뷰쓰기</button>
+						    			</div>
+					    			</td>
+					    		</tr>
+					    		<tr class="noitem" th:unless="${#lists.size(itemList)} > 0">
+			                		<td colspan="9">
+				                		<div><i class="fa-solid fa-circle-exclamation" style="font-size: 300%;"></i></div>
+				                		<div>작성 가능한 리뷰가 없습니다.</div>
+			                		</td>
+			                	</tr>
+					    	</tbody>
+					    </table>
+					</div>
+				</div>
+				<div class="tab-pane fade show" id="review" role="tabpanel" aria-labelledby="review-tab">
+					<div class="dataTable-container">
+						<table class="postlist-table dataTable-table">
+							<thead style="border-top: 0 !important;">
+					    		<tr>
+					    			<th><span>#</span></th>
+					    			<th colspan="2"><span>제목</span></th>
+					    			<th><span>작성일</span></th>
+					    			<th><span>조회수</span></th>
+					    			<th><span>수정/삭제</span></th>
+					    		</tr>
+					    	</thead>
+					    	<tbody>
+					    		<tr th:each="postList : ${ postList }" th:if="${not #lists.isEmpty(postList)}">
+					    			<td th:text="${ postListStat.count }"></td>
+					    			<th:block th:if="${ postList.attachmentList[0].thumbnailPath != null }">
+						    			<td th:value="${ postList.orderNo }"><img th:src="${ postList.attachmentList[0].thumbnailPath }" style="width: 80px; height: 80px;"></td>
+					    			</th:block>
+					    			<th:block th:if="${ postList.attachmentList[0].thumbnailPath == null }">
+					    				<td th:value="${ postList.orderNo }" style="text-align: center;"><div id="imageNotFound"><span class="fs-4">BookGo</span></div></td>
+					    			</th:block>
+					    			<td>
+					    				<p class="review-detail" th:value="${ postList.reviewNo }">
+					    					<a data-toggle="modal" th:href="'#review-content' + ${ postList.reviewNo }">[[${ postList.revwTitle }]]</a>
+					    				</p>
+										<th:block layout:fragment="reviewModal">
+											<div th:replace="/fragments/modal.html :: reviewModal"></div>
+										</th:block>
+					    			</td>
+					    			<td th:text="${#dates.format(postList.revwRegDate, 'yy.MM.dd')}"></td>
+					    			<td th:text="${ postList.revwHits }"></td>
+					    			<td>
+					    				<button type="button" class="btn btn-sm btn-light" th:onclick="|location.href='@{/review/write(order=${postList.orderNo}, option=${postList.optionNo})}'|">수정</button>
+					    				<!--/* 삭제 버튼은 작성일로부터 7일 경과 후 활성화 */-->
+					    				<th:block th:with="days=${T(java.util.concurrent.TimeUnit).DAYS}, millis=${T(java.util.concurrent.TimeUnit).MILLISECONDS}">
+					    					<a th:if="${days.convert(#dates.createNow().getTime(), millis) - days.convert(postList.revwRegDate.getTime(), millis) > 7}" th:href="@{/review/delete(no=${postList.reviewNo})}"><button type="button" class="btn btn-sm btn-light">삭제</button></a>
+					    				</th:block>
+					    			</td>
+					    		</tr>
+					    		<tr class="noitem" th:unless="${#lists.size(postList)} > 0">
+			                		<td colspan="9">
+				                		<div><i class="fa-solid fa-circle-exclamation" style="font-size: 300%;"></i></div>
+				                		<div>작성한 리뷰가 없습니다.</div>
+			                		</td>
+			                	</tr>
+					    	</tbody>
+					    </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--/* Alert Messages */-->
+    <section th:replace="/fragments/alert.html :: alert"></section>
+	<!--/* JS */-->
+    <th:block layout:fragment="script">
+    	<script type="text/javascript">
+	    	/* Modal */
+	    	document.addEventListener('DOMContentLoaded', function(){
+		    	$('.review-detail').on('click', function(){
+		    		let target = '#' + $(this).parent().children(1)[1].id;
+		    		console.log(target);
+		    		$(target).modal('show');
+			    	/* Rating */
+			    	let value = $(this).parent().children(1)[1].children[0].children[0].children[1].children[1].children[2].children[2].attributes[1].textContent;
+			    	for(let i=0; i < value; i++) {
+			    		let star = $(this).parent().children(1)[1].children[0].children[0].children[1].children[1].children[2].children[2].children[i];
+			    		star.style.color = '#00008b';
+			    	}
+		    		return false;
+		    	});
+	    	});
+    	</script>
+    </th:block>
+</body>
+</html>

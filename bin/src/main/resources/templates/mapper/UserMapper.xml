@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookgo.BookGoUserDAO">
+    <insert id="userJoin">
+        insert into BOOKGO_USER(USER_NO, USER_NAME, USER_ID, USER_NICKNAME, USER_PASSWD, USER_PHONE, USER_EMAIL, USER_ZIPCODE, USER_ADDRESS1, USER_ADDRESS2, ADMIN_CHECK, USER_REGDATE, USER_POINT) 
+        values(BOOKGO_USER_SEQ.NEXTVAL, #{USER_NO}, #{USER_NAME}, #{USER_ID}, #{USER_NICKNAME}, #{USER_PASSWD}, #{USER_PHONE}, #{USER_EMAIL}, #{USER_ZIPCODE}, #{USER_ADDRESS1}, #{USER_ADDRESS2}, 0, sysdate, #{USER_POINT});
+    </insert>
+</mapper>
