@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.bookgo.paging.dto.Criteria;
+import com.bookgo.paging.dto.ItemCriteria;
 import com.bookgo.product.dto.AttachmentDTO;
 import com.bookgo.product.dto.BrandDTO;
 import com.bookgo.product.dto.CategoryDTO;

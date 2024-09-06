@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.bookgo.cart.dao.CartMapper;
 import com.bookgo.cart.dto.CartDTO;
+import com.bookgo.product.dto.BrandDTO;
 import com.bookgo.product.dto.OptionDTO;
 import com.bookgo.product.dto.ProductDTO;
 
@@ -43,6 +44,11 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public ProductDTO searchProductInfoByOptionNo(int optionNo) {
 		return cartMapper.searchProductInfoByOptionNo(optionNo);
+	}
+	
+	@Override
+	public BrandDTO searchBrandInfoByOptionNo(int optionNo) {
+		return cartMapper.searchBrandInfoByOptionNo(optionNo);
 	}
 
 }

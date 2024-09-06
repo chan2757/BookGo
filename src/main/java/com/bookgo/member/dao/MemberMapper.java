@@ -8,11 +8,44 @@ import com.bookgo.cart.dto.OrderDTO;
 import com.bookgo.cart.dto.OrderDetailDTO;
 import com.bookgo.cart.dto.PointDTO;
 import com.bookgo.mypage.dto.MemberDTO;
+import com.bookgo.mypage.dto.RoleDTO;
 import com.bookgo.mypage.dto.WishListDTO;
 import com.bookgo.review.dto.ReviewDTO;
 
 @Mapper
 public interface MemberMapper {
+	
+	/* 회원가입 */
+	int checkId(String memberId);				//아이디 중복 검사
+	
+	int checkEmail(String email);				//이메일 중복 검사
+	
+	int insertMember(MemberDTO member);			//회원 정보 등록
+
+	int insertRole(RoleDTO role);				//회원 권한 등록
+	
+	int insertAuthentication(String memberId);	//회원 인증 등록
+	
+	int activateAccountByEmail(String email);   //이메일 인증 및 계정 활성화
+
+	char checkIsInactiveAccount(String memberId);
+	
+	int addNewMemberBonusPoints(PointDTO point);
+	
+	/* 로그인 */
+	void updateAccumLoginCount(String username);  //성공 시 로그인 횟수 누적
+	
+	void updateLatestLoginDate(String username);  //성공 시 최근 로그인 일시 업데이트
+	
+	void resetLoginFailedCount(String username);  //성공 시 로그인 실패 횟수 리셋
+	
+	void updateLoginFailedCount(String username); //실패 시 로그인 실패 횟수 증가
+	
+	int checkLoginFailedCount(String username);   //로그인 실패 횟수 조회
+	
+	MemberDTO findMemberById(String username);
+
+	void deactivateUsername(String username);
 
 	/* 마이페이지 */
 	void addToWishList(String memberId, int optionNo);
@@ -52,6 +85,15 @@ public interface MemberMapper {
 	int changeMemberInfo(MemberDTO memberDTO);
 	
 	int closeMemberAccount(String memberId);
+	
+	/* 아이디/비밀번호 찾기 */
+	MemberDTO findMemberId(String name, String email);
+
+	int generateTempPwd(MemberDTO memberDTO);
+
+	MemberDTO findMemberByEmail(String email);
+
+	Integer checkAdminOrNot(String memberId);
 	
 
 	/* 랜덤 회원 추출 */
