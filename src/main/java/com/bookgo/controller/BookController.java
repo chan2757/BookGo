@@ -1,5 +1,7 @@
 package com.bookgo.controller;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -8,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Map;
 
 @Controller
 @RequestMapping({"/bookgo/books", "/bookgo/book"})
@@ -82,5 +82,29 @@ public class BookController {
     public String searchByPublisher(@RequestParam String publisher, @RequestParam(defaultValue = "1") int page, Model model) {
         logger.info("출판사 검색 요청: {}, 페이지: {}", publisher, page);
         return searchBooks(publisher, page, "Publisher", model);
+    }
+    
+    @GetMapping("/admin")
+    public String adminPage() {
+        logger.info("관리자 페이지 진입");
+        return "admin";
+    }
+
+    @GetMapping("/inquiry")
+    public String inquiryPage() {
+        logger.info("문의 관리 페이지 진입");
+        return "inquiry";
+    }
+
+    @GetMapping("/member")
+    public String memberPage() {
+        logger.info("회원 관리 페이지 진입");
+        return "member";
+    }
+
+    @GetMapping("/inventory")
+    public String inventoryPage() {
+        logger.info("재고 관리 페이지 진입");
+        return "inventory";
     }
 }
