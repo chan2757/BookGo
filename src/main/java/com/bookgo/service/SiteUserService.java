@@ -174,5 +174,11 @@ public class SiteUserService {
         }
     }
 
+    // username을 이용하여 사용자 id 조회
+    public int getUserIdByUsername(String username) {
+        // userMapper를 사용하여 username으로 id를 조회
+        return userMapper.getUserIdByUsername(username);
+    }
+
 
 }

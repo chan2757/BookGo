@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.BookCartMapper">
+
+    <!-- 유저 아이디로 카트번호 조회 -->
+    <select id="getCartIdByUserId" parameterType="int" resultType="int">
+        SELECT cart_id
+        FROM book_cart
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 카트 테이블에 유저 ID로 카트 생성 -->
+    <insert id="insertBookCart" parameterType="int">
+        INSERT INTO book_cart (cart_id, user_id)
+        VALUES (cart_seq.NEXTVAL, #{userId})
+    </insert>
+
+    <!-- 카트아이템 테이블에서 카트번호와 13ISBN으로 아이템 조회 -->
+    <select id="getCartItemByCartIdAndIsbn13" parameterType="map" resultType="com.bookgo.vo.BookCartItemVO">
+        SELECT cart_id, isbn13, quantity
+        FROM book_cart_item
+        WHERE cart_id = #{cartId} AND isbn13 = #{isbn13}
+    </select>
+
+    <!-- 카트아이템 테이블에 수량 업데이트 -->
+    <update id="updateCartItemQuantity" parameterType="map">
+        UPDATE book_cart_item
+        SET quantity = quantity + #{quantity}
+        WHERE cart_id = #{cartId} AND isbn13 = #{isbn13}
+    </update>
+
+    <!-- 카트아이템 테이블에 새로운 아이템 추가 -->
+    <insert id="insertCartItem" parameterType="com.bookgo.vo.BookCartItemVO">
+        INSERT INTO book_cart_item (cart_id, isbn13, quantity)
+        VALUES (#{cartId}, #{isbn13}, #{quantity})
+    </insert>
+
+    <!-- 장바구니 상세 조회: 사용자의 카트아이디를 통해 카트의 모든 아이템 상세 조회 -->
+    <select id="getCartDetailsByCartId" parameterType="int" resultType="com.bookgo.vo.CartDetailVO">
+        SELECT
+            ci.cart_id AS cartId,
+            ci.isbn13,
+            bp.title,
+            bp.authors,
+            bp.publisher,
+            bp.priceStandard AS price,
+            bp.cover,
+            ci.quantity
+        FROM
+            book_cart_item ci
+                JOIN book_products bp ON ci.isbn13 = bp.isbn13
+        WHERE
+            ci.cart_id = #{cartId}
+    </select>
+
+    <!-- BookCartMapper.xml -->
+    <update id="updateCartItemQuantitywith" parameterType="map">
+        UPDATE book_cart_item
+        SET quantity = #{quantity}
+        WHERE cart_id = #{cartId}
+          AND isbn13 = #{isbn13}
+    </update>
+
+</mapper>

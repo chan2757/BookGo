@@ -7,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/bookgo/book/detail")
@@ -35,6 +32,18 @@ public class BookDetailController {
         model.addAttribute("bookDetail", bookDetail);
 
         System.out.println(bookDetail.toString());
+
+        return "bookgo/bookDetail"; // bookDetail.html 페이지로 이동
+    }
+
+    // GET 매핑 추가: 제목 클릭 시 책 상세 페이지로 이동
+    @GetMapping
+    public String showBookDetail(@RequestParam String isbn13, Model model) {
+        logger.info("Fetching details for ISBN: {}", isbn13);
+
+        // ISBN13을 사용하여 책 상세 정보 가져오기
+        BookDetailVO bookDetail = bookDetailService.getBookDetail(isbn13, new BookDpVO());
+        model.addAttribute("bookDetail", bookDetail);
 
         return "bookgo/bookDetail"; // bookDetail.html 페이지로 이동
     }

@@ -98,6 +98,8 @@
       <img class="cover" th:if="${bookDetail.cover != null}" th:src="${bookDetail.cover}" alt="책 커버 이미지">
     </div>
 
+    <input type="hidden" id="isbn13" th:value="${bookDetail.isbn13}" />
+
     <!-- Right Section: Title, Authors, Publisher Info -->
     <div class="right-section">
       <div class="info-box">
@@ -155,8 +157,8 @@
 
       // 책바구니에 담기 버튼 클릭 이벤트
       document.getElementById('addToCartButton').addEventListener('click', function () {
-        // bookDetail에서 ISBN13 값을 가져옵니다.
-        const isbn13 = document.getElementById('isbn13').textContent.trim(); // 예시 ID: 'isbn13'
+        // 히든 필드에서 ISBN13 값을 가져옵니다.
+        const isbn13 = document.getElementById('isbn13').value.trim();
 
         // 수량을 입력 필드에서 가져옵니다.
         const quantity = parseInt(document.getElementById('quantity').value, 10);
@@ -166,6 +168,9 @@
           alert('유효한 수량을 입력하세요.');
           return;
         }
+
+        console.log('ISBN:', isbn13);
+        console.log('Quantity:', quantity);
 
         // AJAX 요청을 통해 서버에 책을 추가합니다.
         fetch('/cart/add', {
@@ -186,6 +191,7 @@
                   alert('장바구니에 추가하는 중 오류가 발생했습니다.');
                 });
       });
+    });
 
   </script>
 

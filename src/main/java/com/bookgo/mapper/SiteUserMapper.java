@@ -28,4 +28,6 @@ public interface SiteUserMapper {
     String getPasswordByUsername(String username);
 
     void updateUserField(Map<String, Object> updateData);
+
+    int getUserIdByUsername(String username);
 }
