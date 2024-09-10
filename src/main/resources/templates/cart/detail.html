@@ -77,6 +77,9 @@
 <div class="container">
     <h2>장바구니 상세 페이지</h2>
 
+    <!-- 상단에 전역적으로 cartId를 정의 -->
+    <input type="hidden" th:value="${cartDetails[0]?.cartId}" class="cart-id">
+
     <div th:if="${cartDetails == null || cartDetails.isEmpty()}" class="empty-message">
         장바구니에 담긴 상품이 없습니다.
     </div>
@@ -85,6 +88,9 @@
         <div th:each="cartItem, iterStat : ${cartDetails}" class="cart-item">
             <!-- 책 커버 이미지 -->
             <img th:src="${cartItem.cover}" alt="책 커버 이미지">
+
+            <!-- 각 행마다 isbn13을 출력 -->
+            <input type="hidden" th:value="${cartItem.isbn13}" class="isbn13">
 
             <!-- 책 정보 -->
             <div class="item-details">
@@ -101,7 +107,7 @@
                     <!-- 수량 변경 input 필드 -->
                     <p class="item-quantity">
                         수량:
-                        <input type="number" min="1" th:value="${cartItem.quantity}" data-cart-id="${cartItem.cartId}" data-isbn13="${cartItem.isbn13}" class="quantity-input">
+                        <input type="number" min="1" th:value="${cartItem.quantity}" class="quantity-input">
                     </p>
                     <!-- 각 행의 합계 표시 -->
                     <p class="item-total">합계: <span class="item-total-price" th:text="${cartItem.price * cartItem.quantity}"></span> 원</p>
@@ -120,6 +126,14 @@
     document.addEventListener('DOMContentLoaded', function () {
         let totalPrice = 0;
 
+        // 각 카트 아이템의 정보를 콘솔에 출력
+        document.querySelectorAll('.cart-item').forEach(function (item) {
+            const cartId = document.querySelector('.cart-id').value; // 상단에서 가져옴
+            const isbn13 = item.querySelector('.isbn13').value;
+            const quantity = item.querySelector('.quantity-input').value;
+            console.log(`Cart Item - Cart ID: ${cartId}, ISBN13: ${isbn13}, Quantity: ${quantity}`);
+        });
+
         // 모든 합계 요소를 가져와서 총합을 계산합니다.
         document.querySelectorAll('.item-total-price').forEach(function (item) {
             totalPrice += parseInt(item.textContent) || 0;
@@ -131,8 +145,8 @@
         // 수량 변경 시 DB 업데이트하는 이벤트 추가
         document.querySelectorAll('.quantity-input').forEach(function (input) {
             input.addEventListener('change', function () {
-                const cartId = input.dataset.cartId;
-                const isbn13 = input.dataset.isbn13;
+                const cartId = document.querySelector('.cart-id').value; // 상단에서 가져옴
+                const isbn13 = input.closest('.cart-item').querySelector('.isbn13').value;
                 const quantity = parseInt(input.value);
 
                 if (quantity < 1) {
