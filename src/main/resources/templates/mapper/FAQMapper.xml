@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.FAQMapper">
+
+    <!-- FAQ_CATEGORY 테이블에서 CATEGORYNAME과 CATEGORYID를 조회 -->
+    <select id="getCategoryList" resultType="map">
+        SELECT CATEGORYID, CATEGORYNAME
+        FROM FAQCATEGORY
+    </select>
+
+    <!-- FAQBOARD 테이블에서 선택된 CATEGORYID에 해당하는 질문과 답변 조회 (공개 상태) -->
+    <select id="getFAQByCategoryId" parameterType="int" resultType="com.bookgo.vo.FAQBoardVO">
+        SELECT FAQID, QUESTION, ANSWER, CREATEDDATE
+        FROM FAQBOARD
+        WHERE CATEGORYID = #{categoryId}
+          AND VISIBILITY = '공개'
+        ORDER BY CREATEDDATE DESC
+    </select>
+</mapper>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 페이지</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>결제 정보 입력하기</h2>
+    <form id="paymentForm">
+        <div class="form-group">
+            <label for="buyerName">유저 이름</label>
+            <input type="text" class="form-control" id="buyerName" th:value="${username}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="buyerFName">이름</label>
+            <input type="text" class="form-control" id="buyerFName" th:value="${fullName}" placeholder="이름을 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="buyerEmail">이메일</label>
+            <input type="email" class="form-control" id="buyerEmail" th:value="${email}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="buyerTel">전화번호</label>
+            <input type="text" class="form-control" id="buyerTel" th:value="${phone}" placeholder="전화번호를 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="buyerAddr">주소</label>
+            <input type="text" class="form-control" id="buyerAddr" th:value="${address}" placeholder="주소를 입력하세요" required>
+        </div>
+
+        <div class="form-group">
+            <label for="cartId">상품명(결제상품묶음번호)</label>
+            <input type="text" class="form-control" id="cartId" th:value="${cartId}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="requestPrice">결제 금액</label>
+            <input type="number" class="form-control" id="requestPrice" value="189000" required>
+        </div>
+        <div class="text-right">
+            <button type="button" class="btn btn-primary" onclick="requestPayment()">결제하기</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<script>
+    function requestPayment() {
+        const orderId = "bookgo_" + $("#buyerName").val() + "_" + UUID();
+
+        const totalAmount = Number($("#requestPrice").val());
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            alert('올바른 결제 금액을 입력해주세요.');
+            console.log('totalAmount:', totalAmount);
+            return;
+        }
+
+        // reqPayData 생성
+        const reqPayData = {
+            orderId: orderId,
+            buyerName: $("#buyerName").val(),
+            buyerFName: $("#buyerFName").val(),
+            buyerEmail: $("#buyerEmail").val(),
+            buyerTel: $("#buyerTel").val(),
+            buyerAddr: $("#buyerAddr").val(),
+            cartId: $("#cartId").val(),
+            requestPrice: totalAmount
+        };
+
+        // reqPayData를 세션에 저장하는 AJAX 요청
+        $.ajax({
+            url: '/pay/storePaymentData', // 서버에서 세션에 데이터를 저장하는 엔드포인트
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(reqPayData), // reqPayData를 직접 전송
+            success: function() {
+                // 결제 요청
+                const paymentData = {
+                    cid: 'TC0ONETIME',
+                    partner_order_id: orderId,
+                    partner_user_id: $("#buyerName").val(),
+                    item_name: $("#cartId").val(),
+                    quantity: 1,
+                    total_amount: totalAmount,
+                    tax_free_amount: 0,
+                    approval_url: 'http://localhost:8080/pay/success',
+                    cancel_url: 'http://localhost:8080/pay/cancel',
+                    fail_url: 'http://localhost:8080/pay/fail'
+                };
+
+                $.ajax({
+                    url: '/pay/request',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(paymentData),
+                    success: function(response) {
+                        console.log('서버 응답:', response);
+                        window.location.href = response.next_redirect_pc_url; // 결제 승인 URL로 리다이렉트
+                    },
+                    error: function(error) {
+                        console.log('서버 응답 에러:', error);
+                        alert('결제 요청에 실패했습니다: ' + error.responseText);
+                    }
+                });
+            },
+            error: function(error) {
+                console.log('세션 저장 실패:', error);
+                alert('결제 데이터 저장에 실패했습니다.');
+            }
+        });
+    }
+
+    function UUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+</script>
+
+</body>
+</html>

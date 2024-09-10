@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 상세</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <style>
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .post-info {
+      margin-left: 10px;
+      color: #6c757d;
+    }
+    .post-content {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+    .post-footer {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 20px;
+    }
+    .btn-back {
+      margin-top: 20px;
+    }
+    .post-image {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    .comment-section {
+      margin-top: 30px;
+    }
+    .comment-item {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .comment-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .comment-content {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{includes/header :: headerFragment}"></div>
+<div class="container">
+  <div class="card mt-4">
+    <div class="card-body">
+      <div class="post-header">
+        <h5 class="card-title" id="post-title" th:text="${post.title}">제목이 표시될 자리</h5>
+        <input type="text" id="edit-title" class="form-control" style="display: none;" th:value="${post.title}">
+        <input type="hidden" id="post-id" th:value="${post.postId}">
+        <div class="post-info">
+          <span th:text="${post.username}">작성자</span>
+          <span class="ml-3" th:text="'조회수: ' + ${post.viewCount}">조회수</span>
+          <span class="ml-3" th:text="'추천수: ' + ${post.recommendCount}" id="recommendCount">추천수</span>
+        </div>
+      </div>
+
+      <div class="post-content">
+        <p id="post-content" th:text="${post.content}">내용이 표시될 자리</p>
+        <textarea id="edit-content" class="form-control" style="display: none;" th:text="${post.content}"></textarea>
+      </div>
+
+      <div th:each="file : ${#strings.arraySplit(post.filename, ',')}">
+        <div th:if="${#strings.contains(file.toLowerCase(), '.jpg') || #strings.contains(file.toLowerCase(), '.jpeg') || #strings.contains(file.toLowerCase(), '.jfif') || #strings.contains(file.toLowerCase(), '.png') || #strings.contains(file.toLowerCase(), '.gif')}">
+          <img th:src="@{'/uploads/' + ${file}}" class="post-image" alt="첨부 이미지">
+        </div>
+        <div th:if="${!#strings.contains(file.toLowerCase(), '.jpg') && !#strings.contains(file.toLowerCase(), '.jpeg') && !#strings.contains(file.toLowerCase(), '.jfif') && !#strings.contains(file.toLowerCase(), '.png') && !#strings.contains(file.toLowerCase(), '.gif')}">
+          <a th:href="@{'/uploads/' + ${file}}" class="btn btn-link" download th:text="파일">파일 다운로드</a>
+        </div>
+      </div>
+
+
+      <div class="post-footer">
+        <button id="recommend-btn" class="btn btn-success">👍 추천하기</button>
+        <small class="text-muted" th:text="'작성일: ' + ${post.createdDate}">작성일</small>
+      </div>
+
+      <div th:if="${currentUsername == post.username}" class="post-footer">
+        <button id="edit-btn" class="btn btn-warning">수정하기</button>
+        <button id="save-btn" class="btn btn-primary" style="display: none;">저장하기</button>
+        <button id="cancel-btn" class="btn btn-secondary" style="display: none;">취소하기</button>
+        <button class="btn btn-danger" onclick="deletePost(); return false;">삭제하기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comments-section">
+    <h5>댓글</h5>
+    <ul class="list-group">
+      <li th:each="comment : ${comments}" class="list-group-item d-flex justify-content-between align-items-center">
+        <input type="hidden" class="comment-id" th:value="${comment.commentId}"/>
+        <div class="comment-content">
+          <strong th:text="${comment.username}">작성자</strong>
+          <small class="text-muted ml-2" th:text="${comment.createdDate}">작성일</small>
+          <p class="comment-text" th:text="${comment.content}">댓글 내용</p>
+          <textarea class="form-control edit-comment" style="display: none;">[[${comment.content}]]</textarea>
+        </div>
+        <div class="comment-actions">
+          <button class="btn btn-sm btn-outline-success" onclick="recommendComment(this)">👍 추천 (<span th:text="${comment.recommendCount}">0</span>)</button>
+          <div th:if="${currentUsername == comment.username}">
+            <button class="btn btn-sm btn-outline-warning" onclick="editComment(this)">수정</button>
+            <button class="btn btn-sm btn-outline-primary" style="display: none;" onclick="saveComment(this)">저장</button>
+            <button class="btn btn-sm btn-outline-secondary" style="display: none;" onclick="cancelEdit(this)">취소</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteComment(this)">삭제</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <form id="comment-form">
+    <input type="hidden" name="postId" th:value="${post.postId}">
+    <div class="form-group">
+      <textarea class="form-control" name="content" id="new-comment" placeholder="댓글을 입력하세요" rows="3"></textarea>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="addComment()">댓글 등록</button>
+  </form>
+
+  <div class="btn-back">
+    <a href="/boardmain" class="btn btn-primary">목록으로 돌아가기</a>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#edit-btn').on('click', function() {
+      $('#post-title').hide();
+      $('#post-content').hide();
+      $('#edit-title').show();
+      $('#edit-content').show();
+      $('#edit-btn').hide();
+      $('#save-btn').show();
+      $('#cancel-btn').show();
+    });
+
+    $('#save-btn').on('click', function() {
+      if (!confirm('수정하시겠습니까?')) {
+        return;
+      }
+
+      const postId = $('#post-id').val();
+      const updatedTitle = $('#edit-title').val();
+      const updatedContent = $('#edit-content').val();
+
+      $.ajax({
+        url: `/board/update/${postId}`,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          title: updatedTitle,
+          content: updatedContent
+        }),
+        success: function(response) {
+          alert('수정이 성공적으로 완료되었습니다.');
+          $('#post-title').text(updatedTitle).show();
+          $('#post-content').text(updatedContent).show();
+          $('#edit-title').hide();
+          $('#edit-content').hide();
+          $('#save-btn').hide();
+          $('#cancel-btn').hide();
+          $('#edit-btn').show();
+        },
+        error: function() {
+          alert('수정에 실패했습니다.');
+        }
+      });
+    });
+
+    $('#cancel-btn').on('click', function() {
+      $('#edit-title').hide();
+      $('#edit-content').hide();
+      $('#post-title').show();
+      $('#post-content').show();
+      $('#save-btn').hide();
+      $('#cancel-btn').hide();
+      $('#edit-btn').show();
+    });
+  });
+
+  function deletePost() {
+    const postId = $('#post-id').val();
+
+    if (confirm('정말로 삭제하시겠습니까?')) {
+      fetch(`/board/delete/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => {
+                if (response.ok) {
+                  window.location.href = '/boardmain';
+                } else {
+                  alert('삭제에 실패했습니다.');
+                }
+              })
+              .catch(error => {
+                console.error('삭제 중 오류 발생:', error);
+                alert('삭제에 실패했습니다.');
+              });
+    }
+  }
+
+  function addComment() {
+    const postId = $('#post-id').val();
+    const content = $('#new-comment').val();
+
+    if (!content.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    $.ajax({
+      url: `/board/${postId}/comment`,
+      method: 'POST',
+      contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+      data: { content: content },
+      success: function() {
+        alert('댓글이 작성되었습니다.');
+        $('#new-comment').val('');
+        location.reload();
+      },
+      error: function(jqXHR) {
+        if (jqXHR.status === 401) {
+          alert(jqXHR.responseText || '로그인이 필요합니다.');
+        } else {
+          alert('댓글 작성에 실패했습니다.');
+        }
+      }
+    });
+  }
+
+  function recommendComment(button) {
+    const commentId = $(button).closest('.list-group-item').find('.comment-id').val();
+
+    const cookieName = `recommended_comment_${commentId}`;
+    const isRecommended = document.cookie.split('; ').some((item) => item.trim().startsWith(cookieName + '=true'));
+
+    if (isRecommended) {
+      alert('이미 추천하셨습니다.');
+      return;
+    }
+
+    $.ajax({
+      url: `/comment/recommend/${commentId}`,
+      method: 'POST',
+      success: function() {
+        alert('댓글이 추천되었습니다.');
+        document.cookie = `${cookieName}=true; path=/; max-age=3600;`;
+
+        const recommendCountSpan = $(button).find('span');
+        const currentCount = parseInt(recommendCountSpan.text()) || 0;
+        recommendCountSpan.text(currentCount + 1);
+      },
+      error: function() {
+        alert('추천에 실패했습니다.');
+      }
+    });
+  }
+
+  function editComment(button) {
+    const listItem = $(button).closest('.list-group-item');
+    const commentText = listItem.find('.comment-text').text();
+    listItem.find('.edit-comment').val(commentText);
+    listItem.find('.comment-text').hide();
+    listItem.find('.edit-comment').show();
+    $(button).hide();
+    listItem.find('.btn-outline-primary').show();
+    listItem.find('.btn-outline-secondary').show();
+  }
+
+  function saveComment(button) {
+    const listItem = $(button).closest('.list-group-item');
+    const commentId = listItem.find('.comment-id').val();
+    const updatedContent = listItem.find('.edit-comment').val();
+
+    $.ajax({
+      url: `/comment/edit/${commentId}`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ content: updatedContent }),
+      success: function() {
+        alert('댓글이 수정되었습니다.');
+        listItem.find('.comment-text').text(updatedContent).show();
+        listItem.find('.edit-comment').hide();
+        listItem.find('.btn-outline-primary').hide();
+        listItem.find('.btn-outline-secondary').hide();
+        listItem.find('.btn-outline-warning').show();
+      },
+      error: function() {
+        alert('댓글 수정에 실패했습니다.');
+      }
+    });
+  }
+
+  function cancelEdit(button) {
+    const listItem = $(button).closest('.list-group-item');
+    listItem.find('.edit-comment').hide();
+    listItem.find('.comment-text').show();
+    $(button).hide();
+    listItem.find('.btn-outline-primary').hide();
+    listItem.find('.btn-outline-warning').show();
+  }
+
+  function deleteComment(button) {
+    const commentId = $(button).closest('.list-group-item').find('.comment-id').val();
+    if (confirm('정말로 삭제하시겠습니까?')) {
+      $.ajax({
+        url: `/comment/delete/${commentId}`,
+        method: 'POST',
+        success: function() {
+          alert('댓글이 삭제되었습니다.');
+          location.reload();
+        },
+        error: function() {
+          alert('삭제에 실패했습니다.');
+        }
+      });
+    }
+  }
+</script>
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

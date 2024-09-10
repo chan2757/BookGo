@@ -1,0 +1,68 @@
+<!-- Footer Start -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<footer th:fragment="footerFragment">
+    <div class="container-fluid bg-secondary text-dark mt-5 pt-4 pb-4">
+        <div class="row px-xl-5">
+            <!-- 첫 번째 컬럼: 로고 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="/" class="text-decoration-none">
+                    <h1 class="display-4 font-weight-semi-bold">
+                        <span class="text-primary font-weight-bold border border-white px-3 mr-1">B</span>북고
+                    </h1>
+                </a>
+            </div>
+
+            <!-- 두 번째 컬럼: 소개 -->
+            <div class="col-lg-3 col-md-6 mb-4" style="margin-left: -100px; margin-right: 50px;">
+                <p class="text-justify mb-0">
+                    <br/>
+                    책과 도서관 검색을 위한 최고의 사이트, 북고에서 다양한 책을 만나보세요.<br/>
+                    북고는 최신 도서 정보와 리뷰를 공유하며, 독자들과 소통할 수 있는 플랫폼을 제공합니다.<br/>
+                    저희와 함께 책의 세계를 탐험하고, 소중한 도서 정보를 나누어 보세요!
+                </p>
+            </div>
+
+            <!-- 세 번째 컬럼: 연락처 정보 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5 class="font-weight-bold text-dark mb-2">연락처 정보</h5>
+                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-2"></i>서울특별시 강남구 역삼동</p>
+                <p class="mb-2"><i class="fa fa-envelope text-primary mr-2"></i>info@bookgo.co.kr</p>
+                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-2"></i>+82 10-1234-5678</p>
+            </div>
+
+            <!-- 네 번째 컬럼: 도서 카테고리 -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5 class="font-weight-bold text-dark mb-2">북고 길라잡이</h5>
+                <div class="d-flex flex-column">
+                    <a href="/index" class="nav-item nav-link"><i class="fa fa-angle-right mr-1"></i>Home</a>
+                    <a href="/boardmain" class="nav-item nav-link"><i class="fa fa-angle-right mr-1"></i>게시판</a>
+                    <a href="/map" class="nav-item nav-link"><i class="fa fa-angle-right mr-1"></i>도서관</a>
+                    <a href="/contact" class="nav-item nav-link"><i class="fa fa-angle-right mr-1"></i>고객센터</a>
+                </div>
+            </div>
+        </div>
+        <!-- 푸터 바닥 부분 -->
+        <div class="border-top border-light mt-3 pt-3">
+            <p class="text-center text-dark mb-0">
+                <!-- 숨겨진 관리자 로그인 링크 -->
+                 <a id="hidden-admin-link" href="/admin/login" class="text-dark font-weight-semi-bold">&copy;</a>
+                <a class="text-dark font-weight-semi-bold" href="#">북고</a>. 비상업적 용도의 테스트 페이지입니다. 책 정보는 알라딘과 교보문고로부터 가져왔습니다. 상업적 사용을 포함하여 무단 사용을 금합니다.
+            </p>
+        </div>
+    </div>
+    <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+</footer>
+</html>
+
+<!-- 스타일 및 스크립트 -->
+<style>
+    #hidden-admin-link {
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+
+<!-- Footer End -->

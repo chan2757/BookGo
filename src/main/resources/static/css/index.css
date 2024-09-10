@@ -1,0 +1,25 @@
+.qna-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.qna-list th, .qna-list td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.qna-list td:nth-child(1), /* 번호 */
+.qna-list td:nth-child(3), /* 작성자 */
+.qna-list td:nth-child(4), /* 작성일 */
+.qna-list td:nth-child(5)  /* 상세보기 */
+{
+    width: 100px;
+}
+
+
+.qna-list td:nth-child(2), /* 제목 */
+.qna-list th:nth-child(2)  /* 제목 헤더 */
+{
+    width: 300px;
+}

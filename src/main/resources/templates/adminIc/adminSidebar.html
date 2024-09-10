@@ -1,0 +1,47 @@
+<!-- templates/adminIc/adminSidebar.html -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<nav th:fragment="adminSidebarFragment" class="col-lg-2 sidebar vh-100 bg-dark">
+    <style>
+        /* 사이드바 스타일 */
+        .sidebar {
+            min-width: 200px; /* 최소 너비 설정 */
+            max-width: 250px; /* 최대 너비 설정 */
+            width: 250px; /* 기본 너비 설정 */
+        }
+
+        .navbar-brand {
+            font-size: 18px; /* 로고 글꼴 크기 설정 */
+        }
+
+        .nav-item .nav-link {
+            padding: 10px 15px; /* 링크 패딩 조정 */
+            font-size: 16px; /* 링크 글꼴 크기 조정 */
+        }
+    </style>
+    <nav class="navbar navbar-dark">
+        <a class="navbar-brand text-light" href="#">BookGo Admin</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link text-light" href="/admin/pay">
+                    <i class="fas fa-envelope"></i> 판매 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light" href="/admin/inquiry">
+                    <i class="fas fa-envelope"></i> 문의 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light" href="/admin/member">
+                    <i class="fas fa-users"></i> 회원 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light" href="/admin/inventory">
+                    <i class="fas fa-boxes"></i> 재고 관리
+                </a>
+            </li>
+        </ul>
+    </nav>
+</nav>
+</html>

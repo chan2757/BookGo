@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 결제 내역</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .card-header {
+            cursor: pointer;
+        }
+        .toggle-icon {
+            float: right;
+        }
+        .personal-info, .product-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .product-item p, .personal-info p {
+            margin-bottom: 5px;
+        }
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{includes/header :: headerFragment}"></div>
+
+<div class="container">
+    <h1 class="mt-4">내 결제 내역</h1>
+
+    <!-- 결제 내역 목록 -->
+    <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>
+    <div th:if="${paymentRequests}" class="mt-4">
+        <div th:each="request : ${paymentRequests}" class="card mb-3">
+            <div class="card-header" data-toggle="collapse" th:data-target="'#collapseProducts-' + ${request.requestId}">
+                <strong th:text="'결제일: ' + ${#dates.format(request.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></strong>
+                <span>아이디: <strong th:text="${request.username}"></strong></span>
+                <span class="text-right">총 가격: <strong th:text="${request.totalAmount} + ' 원'"></strong></span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div th:id="'collapseProducts-' + ${request.requestId}" class="collapse">
+                <div class="card-body">
+                    <!-- 결제 개인 정보 -->
+                    <div class="personal-info">
+                        <h5>- 결제 개인 정보</h5>
+                        <p><strong>이름:</strong> <span th:text="${request.fullName}"></span></p>
+                        <p><strong>이메일:</strong> <span th:text="${request.email}"></span></p>
+                        <p><strong>전화번호:</strong> <span th:text="${request.phone}"></span></p>
+                        <p><strong>주소:</strong> <span th:text="${request.address}"></span></p>
+                    </div>
+
+                    <!-- 결제 상품 리스트 -->
+                    <div class="mt-2" th:if="${request.products}">
+                        <div th:each="product : ${request.products}" class="product-item mb-2 d-flex justify-content-between">
+                            <div>
+                                <p><strong>상품명:</strong> <span th:text="${product.productName}"></span></p>
+                                <p><strong>ISBN:</strong> <span th:text="${product.isbn13}"></span></p>
+                            </div>
+                            <div class="text-right">
+                                <p><strong>수량:</strong> <span th:text="${product.quantity}"></span></p>
+                                <p><strong>단가:</strong> <span th:text="${product.itemPrice} + ' 원'"></span></p>
+                                <p><strong>총 가격:</strong> <span th:text="${product.totalPrice} + ' 원'"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(request.products)}">
+                        <p>결제 상품 내역이 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{includes/footer :: footerFragment}"></div>
+
+</body>
+</html>

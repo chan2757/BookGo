@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,69 +7,98 @@
     <title>회원가입</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
         }
+
+        header, footer {
+            display: block;
+            width: 100%;
+        }
+
         .signup-container {
-            width: 400px;
+            max-width: 500px;
+            margin: 50px auto;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .signup-container h2 {
-            margin-bottom: 20px;
             text-align: center;
+            margin-bottom: 20px;
         }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
         }
+
         .form-group input {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
-            font-size: 14px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 16px;
         }
+
         .form-group button {
             width: 100%;
             padding: 10px;
-            background-color: #5a67d8;
-            color: #ffffff;
             border: none;
             border-radius: 4px;
-            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
             font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         .form-group button:hover {
-            background-color: #434190;
+            background-color: #0056b3;
         }
+
         .error {
-            color: red;
-            font-size: 0.9em;
+            color: #dc3545;
+            font-size: 14px;
+            display: block;
             margin-top: 5px;
         }
+
     </style>
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 <div class="signup-container">
     <h2>회원가입</h2>
     <form id="signupForm" action="/user/signup" method="post" onsubmit="return validateForm()">
         <div class="form-group">
             <label for="username">아이디</label>
             <input type="text" id="username" name="username" required>
+            <button type="button" onclick="checkUsername()">중복 체크</button>
             <span id="usernameError" class="error"></span>
         </div>
         <div class="form-group">
@@ -80,7 +109,7 @@
         <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" id="email" name="email" required>
-            <button type="button" onclick="sendVerificationEmail()">이메일 인증</button>
+            <button type="button" onclick="checkEmail()">중복 체크</button>
             <span id="emailVerificationMessage" class="error"></span>
         </div>
         <div class="form-group">
@@ -247,9 +276,54 @@
             }
         }).open();
     }
+
+    function checkUsername() {
+        const username = document.getElementById('username').value;
+        fetch(`/user/checkUsername?username=${username}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.exists) {
+                    document.getElementById('usernameError').textContent = '이미 사용 중인 아이디입니다.';
+                } else {
+                    document.getElementById('usernameError').textContent = '사용 가능한 아이디입니다.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('usernameError').textContent = '아이디 확인 중 오류가 발생했습니다.';
+            });
+    }
+
+    function checkEmail() {
+        const email = document.getElementById('email').value;
+        fetch(`/user/checkEmail?email=${email}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.exists) {
+                    document.getElementById('emailVerificationMessage').textContent = '이미 사용 중인 이메일입니다.';
+                } else {
+                    document.getElementById('emailVerificationMessage').textContent = '사용 가능한 이메일입니다.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('emailVerificationMessage').textContent = '이메일 확인 중 오류가 발생했습니다.';
+            });
+    }
 </script>
 
 
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
 
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

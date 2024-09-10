@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookgo.mapper.BoardPostsMapper">
+
+    <!-- resultMap 정의 -->
+    <resultMap id="BoardPostResultMap" type="com.bookgo.vo.BoardPostsVO">
+        <id property="postId" column="POST_ID"/>
+        <result property="categoryId" column="CATEGORY_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="username" column="USERNAME"/>
+        <result property="title" column="TITLE"/>
+        <result property="content" column="CONTENT"/>
+        <result property="filename" column="FILENAME"/>
+        <result property="viewCount" column="VIEW_COUNT"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="recommendCount" column="RECOMMEND_COUNT"/>
+        <result property="categoryName" column="CATEGORY_NAME"/>
+    </resultMap>
+
+    <resultMap id="CategoryResultMap" type="com.bookgo.vo.CategoryVO">
+        <id property="categoryId" column="CATEGORY_ID"/>
+        <result property="categoryName" column="CATEGORY_NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+    </resultMap>
+
+    <!-- 전체 게시글 조회 (기본) -->
+    <select id="selectAllPosts" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        ORDER BY p.CATEGORY_ID ASC, p.POST_ID DESC
+    </select>
+
+    <!-- 카테고리별 게시글 조회 -->
+    <select id="selectPostsByCategory" parameterType="java.lang.Long" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        WHERE p.CATEGORY_ID = #{categoryId}
+    </select>
+
+    <!-- USERNAME으로 검색 -->
+    <select id="selectPostsByUsername" parameterType="java.lang.String" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        WHERE p.USERNAME LIKE '%' || #{username} || '%'
+    </select>
+
+    <!-- 내용으로 검색 -->
+    <select id="selectPostsByContent" parameterType="java.lang.String" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        WHERE p.CONTENT LIKE '%' || #{content} || '%'
+    </select>
+
+    <!-- 제목으로 검색 -->
+    <select id="selectPostsByTitle" parameterType="java.lang.String" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        WHERE p.TITLE LIKE '%' || #{title} || '%'
+    </select>
+
+    <!-- 게시글 상세 조회 -->
+    <select id="selectPostById" parameterType="java.lang.Integer" resultMap="BoardPostResultMap">
+        SELECT p.*, c.CATEGORY_NAME
+        FROM BOARD_POSTS p
+                 JOIN BOARD_CATEGORY c ON p.CATEGORY_ID = c.CATEGORY_ID
+        WHERE p.POST_ID = #{postId}
+    </select>
+
+    <select id="selectAllCategories" resultMap="CategoryResultMap">
+        SELECT CATEGORY_ID, CATEGORY_NAME, DESCRIPTION
+        FROM BOARD_CATEGORY
+        ORDER BY CATEGORY_ID
+    </select>
+
+    <update id="incrementViewCount" parameterType="java.lang.Integer">
+        UPDATE BOARD_POSTS
+        SET VIEW_COUNT = VIEW_COUNT + 1
+        WHERE POST_ID = #{postId}
+    </update>
+
+    <update id="incrementRecommendCount" parameterType="java.lang.Integer">
+        UPDATE BOARD_POSTS
+        SET RECOMMEND_COUNT = RECOMMEND_COUNT + 1
+        WHERE POST_ID = #{postId}
+    </update>
+
+    <insert id="insertPost" parameterType="com.bookgo.vo.BoardPostsVO">
+        INSERT INTO BOARD_POSTS (
+            CATEGORY_ID,
+            USER_ID,
+            USERNAME,
+            TITLE,
+            CONTENT,
+            FILENAME
+        )
+        VALUES (
+                   #{categoryId, jdbcType=NUMERIC},
+                   #{userId, jdbcType=NUMERIC},
+                   #{username, jdbcType=VARCHAR},
+                   #{title, jdbcType=VARCHAR},
+                   #{content, jdbcType=CLOB},
+                   #{filename, jdbcType=VARCHAR}
+               )
+    </insert>
+
+    <delete id="deletePost" parameterType="int">
+        DELETE FROM BOARD_POSTS
+        WHERE POST_ID = #{postId}
+    </delete>
+
+    <update id="updatePost" parameterType="map">
+        UPDATE BOARD_POSTS
+        SET TITLE = #{title},
+            CONTENT = #{content}
+        WHERE POST_ID = #{postId}
+    </update>
+
+
+    <select id="selectPostsByUserId" parameterType="long" resultMap="BoardPostResultMap">
+        SELECT * FROM BOARD_POSTS WHERE USER_ID = #{userId} ORDER BY CREATED_DATE DESC
+    </select>
+
+</mapper>

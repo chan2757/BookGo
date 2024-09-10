@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 취소</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 50px;
+        }
+        .cancel-message {
+            color: #dc3545;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .btn-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="cancel-message">결제가 취소되었습니다.</h1>
+    <p>결제가 취소되었습니다. 다시 시도하시려면 장바구니로 돌아가 결제를 진행해 주세요.</p>
+    <div class="btn-container">
+        <a href="/cart/detail" class="btn btn-primary">장바구니로 이동</a>
+        <a href="/index" class="btn btn-secondary">메인 페이지로 이동</a>
+    </div>
+</div>
+
+</body>
+</html>

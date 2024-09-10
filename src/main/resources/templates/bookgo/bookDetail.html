@@ -1,72 +1,87 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>책 상세 페이지</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      font-family: 'Poppins', Arial, sans-serif;
+      margin: 0;
       padding: 0;
       color: #333;
+      background-color: #f4f4f4;
     }
 
     .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .top-section {
-      width: 100%;
       display: flex;
-      justify-content: space-between;
+      gap: 20px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .left-section,
+    .right-section {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #fafafa;
     }
 
     .left-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px;
-      border: 1px solid #ddd;
-      max-width: 95%;
-      max-height: 95%;
+      text-align: center;
     }
 
-    .right-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      padding: 10px;
-      border: 1px solid #ddd;
-    }
-
-    .main-section {
-      width: 65%;
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* 이미지를 박스에 맞게 조정하고 넘치는 부분을 잘라냅니다 */
+    .cover {
+      width: 250px;
+      height: 350px;
+      object-fit: cover;
+      border-radius: 8px;
       margin-bottom: 10px;
+      transition: transform 0.3s;
+    }
+
+    .cover:hover {
+      transform: scale(1.05);
     }
 
     .info-box {
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .info-box h2 {
+      color: #007bff;
       margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .info-box p, .info-box ul {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .author-info, .publisher-info {
+      font-size: 16px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
     }
 
     .link-button {
-      margin-top: 5px;
       padding: 5px 10px;
       background-color: #007bff;
       color: white;
@@ -74,134 +89,92 @@
       border-radius: 5px;
       cursor: pointer;
       text-decoration: none;
-    }
-
-    .cover {
-      width: 200px;
-      height: 400px;
-      object-fit: cover;
-      margin-bottom: 10px;
+      font-size: 12px;
+      display: inline-block;
+      margin-left: 10px;
+      transition: background-color 0.3s;
     }
 
     .link-button:hover {
       background-color: #0056b3;
     }
-  </style>
 
+    .main-section {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+
+    .main-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+  </style>
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 
 <div class="container">
   <div class="top-section">
-    <!-- Left Section: Book Cover Image -->
     <div class="left-section">
-      <img class="cover" th:if="${bookDetail.cover != null}" th:src="${bookDetail.cover}" alt="책 커버 이미지">
+      <!-- 여러 파일 경로를 쉼표로 구분하여 표시 -->
+      <div th:each="imagePath : ${#strings.arraySplit(bookDetail.cover, ',')}">
+        <img class="cover" th:src="${imagePath.trim()}" alt="책 커버 이미지">
+      </div>
     </div>
 
     <input type="hidden" id="isbn13" th:value="${bookDetail.isbn13}" />
 
-    <!-- Right Section: Title, Authors, Publisher Info -->
     <div class="right-section">
       <div class="info-box">
         <h2 th:text="${bookDetail.title ?: '제목 없음'}">제목 없음</h2>
       </div>
       <div class="info-box">
-        <!-- 저자 정보 및 버튼 추가 -->
-        <h3>저자:</h3>
-        <ul>
-          <li th:each="author : ${bookDetail.authors}">
-      <span>
-        <a th:href="@{'https://www.google.com/search?q=' + ${author}}" target="_blank" th:text="${author}">저자 정보 없음</a>
-      </span>
-            <!-- 작가 이름 옆에 다른 저서 보기 버튼 추가 -->
-            <a th:href="@{'/bookgo/book/search/author?author=' + ${author}}" class="link-button" style="margin-left: 10px;">다른 저서 보기</a>
-          </li>
-        </ul>
-      </div>
-      <div class="info-box">
-        <!-- 출판사 정보 및 버튼 추가 -->
-        <p>출판사: <a th:href="@{'https://www.google.com/search?q=' + ${bookDetail.publisher}}" target="_blank" th:text="${bookDetail.publisher ?: '출판사 정보 없음'}">출판사 정보 없음</a></p>
-        <a th:href="@{'/bookgo/book/search/publisher?publisher=' + ${bookDetail.publisher}}" class="link-button">다른 출판물 보기</a>
+        <div class="author-info">
+          <span>저자:</span>
+          <ul>
+            <li th:each="author : ${bookDetail.authors}">
+              <span>
+                <a th:href="@{'https://www.google.com/search?q=' + ${author}}" target="_blank" th:text="${author}">저자 정보 없음</a>
+              </span>
+              <a th:href="@{'/bookgo/book/search/author?author=' + ${author}}" class="link-button">다른 저서 보기</a>
+            </li>
+          </ul>
+        </div>
+        <div class="publisher-info">
+          <span>출판사:</span>
+          <p>
+            <a th:href="@{'https://www.google.com/search?q=' + ${bookDetail.publisher}}" target="_blank" th:text="${bookDetail.publisher ?: '출판사 정보 없음'}">출판사 정보 없음</a>
+            <a th:href="@{'/bookgo/book/search/publisher?publisher=' + ${bookDetail.publisher}}" class="link-button">다른 출판물 보기</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 가격 정보 출력 -->
-  <div class="info-box-out">
+  <div class="info-box">
     <p>가격: <span th:text="${bookDetail.priceStandard}"></span> 원</p>
 
-    <div class="info-box">
+    <div th:if="${username != null}" class="info-box">
       <label for="quantity">수량:</label>
       <input type="number" id="quantity" value="1" min="1" style="width: 60px; margin-left: 10px;">
       <button id="addToCartButton" class="link-button" style="margin-left: 10px;">장바구니에 담기</button>
     </div>
   </div>
 
-  <!-- 카테고리 정보 출력 -->
   <div class="info-box">
-    <h3>카테고리:</h3>
     <p id="category-text" th:utext="${bookDetail.category ?: '카테고리 정보 없음'}">카테고리 정보 없음</p>
   </div>
 
-  <!-- JavaScript 코드 -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const categoryElement = document.getElementById('category-text');
-      let categoryText = categoryElement.textContent; // innerText 또는 textContent 사용
-
-      // "국" 앞에 <br>을 삽입
-      categoryText = categoryText.replace(/ (?=국)/g, '<br>국');
-
-      // HTML 내용 업데이트
-      categoryElement.innerHTML = categoryText; // innerHTML로 설정하여 <br> 태그를 반영
-
-      // 책바구니에 담기 버튼 클릭 이벤트
-      document.getElementById('addToCartButton').addEventListener('click', function () {
-        // 히든 필드에서 ISBN13 값을 가져옵니다.
-        const isbn13 = document.getElementById('isbn13').value.trim();
-
-        // 수량을 입력 필드에서 가져옵니다.
-        const quantity = parseInt(document.getElementById('quantity').value, 10);
-
-        // 수량이 유효한지 확인합니다.
-        if (isNaN(quantity) || quantity < 1) {
-          alert('유효한 수량을 입력하세요.');
-          return;
-        }
-
-        console.log('ISBN:', isbn13);
-        console.log('Quantity:', quantity);
-
-        // AJAX 요청을 통해 서버에 책을 추가합니다.
-        fetch('/cart/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ isbn13, quantity })
-        })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    alert('책이 장바구니에 추가되었습니다.');
-                  } else {
-                    alert('장바구니에 추가하는데 실패했습니다.');
-                  }
-                })
-                .catch(error => {
-                  console.error('Error adding to cart:', error);
-                  alert('장바구니에 추가하는 중 오류가 발생했습니다.');
-                });
-      });
-    });
-
-  </script>
-
-  <!-- Main Section: Main Image and Detailed Info -->
   <div class="main-section">
     <img th:if="${bookDetail.mainImg != null}" th:src="${bookDetail.mainImg}" alt="메인 이미지">
     <p th:if="${bookDetail.introduction != null}" th:utext="${bookDetail.introduction ?: '소개 정보 없음'}">책 소개 내용</p>
   </div>
 
-  <!-- Additional Content: Contents, Recommendations, etc. -->
   <div class="main-section">
     <h3 th:if="${bookDetail.contents != null}">목차</h3>
     <p th:if="${bookDetail.contents != null}" th:utext="${bookDetail.contents ?: '목차 정보 없음'}">목차 내용</p>
@@ -217,5 +190,11 @@
   </div>
 </div>
 
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

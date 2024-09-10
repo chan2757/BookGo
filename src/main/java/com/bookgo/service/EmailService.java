@@ -1,12 +1,12 @@
 package com.bookgo.service;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import javax.mail.internet.MimeMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -26,13 +26,12 @@ public class EmailService {
         StringBuilder code = new StringBuilder();
         for (int i = 0; i < 6; i++) {
             code.append(random.nextInt(10));
-            System.out.println(code);
         }
         return code.toString();
     }
 
     // 인증 메일 전송 메서드
-    public void sendVerificationEmail(String email) throws MessagingException, javax.mail.MessagingException {
+    public void sendVerificationEmail(String email) throws MessagingException {
         String verificationCode = generateVerificationCode();
         verificationCodes.put(email, verificationCode);
 
@@ -40,7 +39,6 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setFrom("yoyoung555@naver.com");
-
         helper.setTo(email);
         helper.setSubject("이메일 인증 요청");
         helper.setText("<h1>이메일 인증</h1><p>아래 인증번호를 입력하여 이메일 인증을 완료하세요:</p>" +
@@ -70,13 +68,12 @@ public class EmailService {
         return tempPassword.toString();
     }
 
-    // 비밀번호 재설정 안내 메일 전송 메서드 (메서드 이름 변경)
-    public void sendPasswordResetEmail(String email, String tempPassword) throws MessagingException, javax.mail.MessagingException {
+    // 비밀번호 재설정 안내 메일 전송 메서드
+    public void sendPasswordResetEmail(String email, String tempPassword) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setFrom("yoyoung555@naver.com");
-
         helper.setTo(email);
         helper.setSubject("비밀번호 재설정 안내");
         helper.setText("<h1>비밀번호 재설정</h1>" +

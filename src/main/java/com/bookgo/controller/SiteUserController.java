@@ -4,8 +4,12 @@ import com.bookgo.service.SiteUserService;
 import com.bookgo.vo.SiteUserVO;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -78,7 +82,7 @@ public class SiteUserController {
                     new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>())
             );
             System.out.println("로그인 성공: 아이디 - " + username);
-            return "redirect:/bookgo/index";
+            return "/index";
         } else {
             System.out.println("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.");
             model.addAttribute("loginErrorMessage", "아이디 또는 비밀번호가 잘못되었습니다.");
@@ -234,6 +238,56 @@ public class SiteUserController {
             e.printStackTrace();
         }
         return response;
+    }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestParam String newPassword,
+                                                 @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        try {
+            String username = userDetails.getUsername();
+            SiteUserService siteUserService;
+            userService.updatePassword(username, newPassword);
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경에 실패했습니다.");
+        }
+    }
+
+    @GetMapping("/checkUsername")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkUsername(@RequestParam String username) {
+        Map<String, Object> response = new HashMap<>();
+        boolean exists = userService.checkUsernameExists(username);
+
+        if (exists) {
+            response.put("exists", true);
+            response.put("message", "이미 사용 중인 아이디입니다.");
+        } else {
+            response.put("exists", false);
+            response.put("message", "사용 가능한 아이디입니다.");
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    // 이메일 중복 검사 메서드
+    @GetMapping("/checkEmail")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        boolean exists = userService.checkEmailExists(email);
+
+        if (exists) {
+            response.put("exists", true);
+            response.put("message", "이미 사용 중인 이메일입니다.");
+        } else {
+            response.put("exists", false);
+            response.put("message", "사용 가능한 이메일입니다.");
+        }
+        return ResponseEntity.ok(response);
     }
 
 

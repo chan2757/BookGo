@@ -33,8 +33,6 @@ public class EmailController {
         } catch (MessagingException e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "메일 발송에 실패하였습니다.");
-        } catch (javax.mail.MessagingException e) {
-            throw new RuntimeException(e);
         }
         return "redirect:/emailVerification";
     }
@@ -65,7 +63,7 @@ public class EmailController {
 
     // 임시 비밀번호 발송 요청을 처리
     @PostMapping("/sendTemporaryPassword")
-    public String sendTemporaryPassword(@RequestParam("username") String username, @RequestParam("email") String email, RedirectAttributes redirectAttributes) throws MessagingException, javax.mail.MessagingException {
+    public String sendTemporaryPassword(@RequestParam("username") String username, @RequestParam("email") String email, RedirectAttributes redirectAttributes) throws MessagingException {
         boolean result = userService.sendPasswordResetEmail(username, email);
         if (result) {
             redirectAttributes.addFlashAttribute("message", "임시 비밀번호가 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요.");

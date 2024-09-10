@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookgo Q&A</title>
+    <link rel="stylesheet" href="/css/style1.css">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <header>
+        <h1>Bookgo Q&A</h1>
+    </header>
+
+    <div class="container">
+        <h2>질문 목록</h2>
+        <table class="qna-list">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>제목</th>
+                    <th>작성자</th>
+                    <th>작성일</th>
+                </tr>
+            </thead>
+				<tbody>
+				    <tr th:each="qna : ${qnaList}">
+				        <td th:text="${qna.id}"></td>
+				        <td><a th:href="@{/qna/detail/{id}(id=${qna.id})}" th:text="${qna.title}"></a></td>
+				        <td th:text="${qna.writer}"></td>
+				        <td th:text="${#temporals.format(qna.writeDate, 'yyyy년 MM월 dd일 HH:mm:ss')}"></td>
+				    </tr>
+				</tbody>
+        </table>
+
+        <div class="actions">
+            <a class="button" href="/qna/new">질문 등록하기</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Bookgo Q&A Board</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<header th:fragment="adminHeaderFragment">
+  <div class="container-fluid">
+    <div class="row bg-secondary py-2 px-xl-5">
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="d-inline-flex align-items-center">
+          <!-- Home 버튼: 관리자 메인 페이지로 이동 -->
+          <button class="btn btn-light" onclick="location.href='/admin/main'">Home</button>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center text-lg-right">
+        <div class="d-inline-flex align-items-center">
+          <!-- 링크 간의 간격 조절 -->
+          <a href="/index" class="text-dark mr-3">User Dashboard</a>
+          <a href="/logout" class="text-dark">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+</html>

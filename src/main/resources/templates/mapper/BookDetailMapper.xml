@@ -30,46 +30,46 @@
     <select id="selectBookDetailByIsbn13" resultMap="BookDetailResultMap">
         SELECT *
         FROM book_detail
-        WHERE isbn13 = #{isbn13}
+        WHERE isbn13 = #{isbn13, jdbcType=VARCHAR}
     </select>
 
     <!-- 책 상세 정보를 삽입하는 쿼리 -->
     <insert id="insertBookDetail" parameterType="com.bookgo.vo.BookDetailVO">
         INSERT INTO book_detail (
-        isbn13,
-        title,
-        authors,
-        publisher,
-        pubDate,
-        priceStandard,
-        customerReviewRank,
-        introduction,
-        category,
-        authorInfo,
-        mainImg,
-        contents,
-        recommendations,
-        bookInside,
-        publisherReview,
-        cover
+            isbn13,
+            title,
+            authors,
+            publisher,
+            pubDate,
+            priceStandard,
+            customerReviewRank,
+            introduction,
+            category,
+            authorInfo,
+            mainImg,
+            contents,
+            recommendations,
+            bookInside,
+            publisherReview,
+            cover
         ) VALUES (
-        #{isbn13},
-        #{title},
-        #{authors, typeHandler=com.bookgo.handler.StringListTypeHandler},
-        #{publisher},
-        #{pubDate, jdbcType=DATE},
-        #{priceStandard, jdbcType=NUMERIC},
-        #{customerReviewRank, jdbcType=NUMERIC},
-        #{introduction, jdbcType=CLOB},
-        #{category, jdbcType=VARCHAR},
-        #{authorInfo, jdbcType=CLOB},
-        #{mainImg, jdbcType=VARCHAR},
-        #{contents, jdbcType=CLOB},
-        #{recommendations, jdbcType=CLOB},
-        #{bookInside, jdbcType=CLOB},
-        #{publisherReview, jdbcType=CLOB},
-        #{cover, jdbcType=VARCHAR}
-        )
+                     #{isbn13, jdbcType=VARCHAR},
+                     #{title, jdbcType=VARCHAR},
+                     #{authors, typeHandler=com.bookgo.handler.StringListTypeHandler, jdbcType=VARCHAR},
+                     #{publisher, jdbcType=VARCHAR},
+                     #{pubDate, jdbcType=DATE},
+                     #{priceStandard, jdbcType=NUMERIC},
+                     #{customerReviewRank, jdbcType=NUMERIC},
+                     #{introduction, jdbcType=CLOB},
+                     #{category, jdbcType=VARCHAR},
+                     #{authorInfo, jdbcType=CLOB},
+                     #{mainImg, jdbcType=VARCHAR},
+                     #{contents, jdbcType=CLOB},
+                     #{recommendations, jdbcType=CLOB},
+                     #{bookInside, jdbcType=CLOB},
+                     #{publisherReview, jdbcType=CLOB},
+                     #{cover, jdbcType=VARCHAR}
+                 )
     </insert>
 
 </mapper>

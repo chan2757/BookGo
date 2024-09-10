@@ -60,4 +60,6 @@ public interface BookCartMapper {
     List<CartDetailVO> getCartDetailsByCartId(@Param("cartId") int cartId);
 
     void updateCartItemQuantitywith(Map<String, Object> params);
+
+    int deleteCartItem(int cartId, String isbn13, int userId);
 }

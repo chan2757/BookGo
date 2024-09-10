@@ -1,0 +1,234 @@
+<!-- Topbar Start -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<header th:fragment="headerFragment">
+    <style>
+        /* 기존 CSS */
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-form .form-control {
+            flex: 1;
+            border-radius: 0;
+        }
+
+        .search-form .query-select {
+            max-width: 120px;
+            margin-left: 5px;
+            border-radius: 0;
+        }
+
+        .search-form .input-group-append .btn-primary {
+            border-radius: 0;
+        }
+
+        .dropdown-menu-custom {
+            max-width: 200px;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            font-size: 14px;
+        }
+
+        /* 애니메이션 효과 */
+        .search-form.highlight {
+            animation: pulse 0.5s;
+        }
+
+        @keyframes pulse {
+            0% {
+                border: 2px solid #007bff;
+                box-shadow: 0 0 5px #007bff;
+            }
+            100% {
+                border: 2px solid transparent;
+                box-shadow: 0 0 0 transparent;
+            }
+        }
+    </style>
+    <div class="container-fluid">
+        <!-- Topbar -->
+        <div class="row bg-secondary py-2 px-xl-5">
+            <div class="col-lg-12 text-center text-lg-right">
+                <div class="d-inline-flex align-items-center">
+                    <nav class="navbar navbar-expand-lg navbar-light py-1 py-lg-0 px-0">
+                        <a href="/index" class="text-decoration-none d-block d-lg-none">
+                            <h1 class="m-0 display-5 font-weight-semi-bold">
+                                <span class="text-primary font-weight-bold border px-3 mr-1">B</span>북고
+                            </h1>
+                        </a>
+                        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                            <div class="navbar-nav mr-auto py-0">
+                                <a href="/index" class="nav-item nav-link active">Home</a>
+                                <a href="#" class="nav-item nav-link" onclick="highlightSearchBar()">도서</a>
+                                <a href="/boardmain" class="nav-item nav-link">게시판</a>
+                                <a href="/map" class="nav-item nav-link">도서관</a>
+                                <div class="nav-item dropdown" th:if="${username != null}">
+                                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">마이페이지</a>
+                                    <div class="dropdown-menu rounded-0 m-0">
+                                        <a href="/mypagemenu" class="dropdown-item">메뉴</a>
+                                        <a href="/myinfo" class="dropdown-item">나의 정보</a>
+                                        <a href="/cart/detail" class="dropdown-item">장바구니</a>
+                                        <a href="/board/myboard" class="dropdown-item">내 글 보기</a>
+                                        <a href="/mypayment/list" class="dropdown-item">내 구매내역 보기</a>
+                                    </div>.
+                                </div>
+                                <a href="/contact" class="nav-item nav-link">고객센터</a>
+                            </div>
+                            <div class="navbar-nav ml-auto py-0">
+                                <!-- 로그인 상태 확인 후 조건부 렌더링 -->
+                                <div th:if="${username != null}">
+                                    <a href="#" class="nav-item nav-link">
+                                        <span th:text="${username}"></span>님
+                                    </a>
+                                </div><div th:if="${username != null}">
+                                <a href="/logout" class="nav-item nav-link">로그아웃</a>
+                            </div>
+
+                                <div th:if="${username == null}">
+                                    <a href="/login" class="nav-item nav-link">로그인</a>
+                                </div>
+                                <div th:if="${username == null}">
+                                    <a href="/signup" class="nav-item nav-link">회원가입</a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center py-3 px-xl-5">
+            <div class="col-lg-3 d-none d-lg-block">
+                <a href="" class="text-decoration-none">
+                    <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">B</span>BookGo</h1>
+                </a>
+            </div>
+            <div class="col-lg-6 col-6 text-left">
+                <form th:action="@{/bookgo/books/search}" method="get" class="search-form">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="query" placeholder="Search for Books and Library">
+                        <div class="input-group-append">
+                            <span class="input-group-text bg-transparent text-primary">
+                                <i class="fa fa-search"></i>
+                            </span>
+                        </div>
+                        <!-- 검색 기준 선택 드롭다운 메뉴 -->
+                        <select class="form-control" name="queryType">
+                            <option value="Title">제목</option>
+                            <option value="Author">저자</option>
+                            <option value="Publisher">출판사</option>
+                        </select>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">검색</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-3 col-6 text-right">
+                <a href="" class="btn border">
+                    <i class="fas fa-heart text-primary"></i>
+                    <span class="badge">0</span>
+                </a>
+                <a href="" class="btn border">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="badge">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+    <!-- Navbar -->
+    <div class="row border-top px-xl-5">
+        <div class="col-lg-3 d-none d-lg-block">
+            <a class="btn shadow-none d-flex align-items-center justify-content-between bg-primary text-white w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; margin-top: -1px; padding: 0 30px;">
+                <h5 class="m-0">도서 카테고리</h5>
+                <i class="fa fa-angle-down text-dark"></i>
+            </a>
+            <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" id="navbar-vertical">
+                <div class="navbar-nav w-100 overflow-hidden" style="height: 410px">
+                    <div class="nav-item dropdown">
+
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">철학</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">종교</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">사회과학</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">자연과학</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">기술과학</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">예술</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">언어</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">문학</a>
+                        <a href="#" class="nav-item nav-link" onclick="showAlert()">역사</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="col-lg-9">
+            <div id="header-carousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active" style="height: 470px;">
+                        <img class="img-fluid" th:src="@{/img/book-1.jpg}" alt="Image">
+                        <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                            <div class="p-3" style="max-width: 700px;">
+                                <h4 class="text-light text-uppercase font-weight-medium mb-3">내 주변의 도서관을 빠르게 찾아보세요</h4>
+                                <h3 class="display-4 text-white font-weight-semi-bold mb-4">Library Search</h3>
+                                <a href="/map" class="btn btn-light py-2 px-3">Find Now</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item" style="height: 470px;">
+                        <img class="img-fluid" th:src="@{/img/book-2.jpg}" alt="Image">
+                        <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                            <div class="p-3" style="max-width: 700px;">
+                                <h4 class="text-light text-uppercase font-weight-medium mb-3">다양한 도서를 찾고 구매해보세요</h4>
+                                <h3 class="display-4 text-white font-weight-semi-bold mb-4">Book Shop</h3>
+                                <a href="/shop" class="btn btn-light py-2 px-3">Shop Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
+                    <div class="btn btn-dark" style="width: 45px; height: 45px;">
+                        <span class="carousel-control-prev-icon mb-n2"></span>
+                    </div>
+                </a>
+                <a class="carousel-control-next" href="#header-carousel" data-slide="next">
+                    <div class="btn btn-dark" style="width: 45px; height: 45px;">
+                        <span class="carousel-control-next-icon mb-n2"></span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showAlert() {
+            alert("책장을 정리중 입니다 개별 검색기능을 이용해주세요");
+        }
+
+        function highlightSearchBar() {
+            const searchInput = document.querySelector('input[name="query"]');
+            const searchForm = document.querySelector('.search-form');
+
+            // 검색바에 포커스 이동
+            searchInput.focus();
+
+            // 애니메이션 효과를 두 번 적용
+            searchForm.classList.add('highlight');
+            setTimeout(() => {
+                searchForm.classList.remove('highlight');
+                setTimeout(() => {
+                    searchForm.classList.add('highlight');
+                    setTimeout(() => {
+                        searchForm.classList.remove('highlight');
+                    }, 700);
+                }, 50);
+            }, 500);
+        }
+    </script>
+</header>
+</html>
+<!-- Topbar End -->

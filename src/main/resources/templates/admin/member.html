@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 관리</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 8.333%;
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+
+        .main-content {
+            width: 91.667%;
+            padding: 20px;
+            position: relative;
+        }
+
+        .footer {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 30px 0;
+            margin-top: auto;
+        }
+
+        .table-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- 헤더 -->
+<div class="header">
+    <div th:insert="adminIc/adminHeader :: adminHeaderFragment"></div>
+</div>
+
+<!-- 그리드 레이아웃 -->
+<div class="admin-container">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div th:insert="adminIc/adminSidebar :: adminSidebarFragment"></div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <h2>회원 관리</h2>
+
+        <div class="table-container">
+            <table id="userTable" class="display" style="width:100%">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nickname</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Email</th>
+                    <th>Address 1</th>
+                    <th>Address 2</th>
+                    <th>Join Date</th>
+                    <th>Birth Date</th>
+                    <th>Role</th>
+                    <th>Full Name</th>
+                    <th>Phone Number</th>
+                    <th>Points</th>
+                    <th>Is Banned</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.nickname}"></td>
+                    <td   th:text="${user.username}"></td>
+                    <td>****</td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.address1}"></td>
+                    <td th:text="${user.address2}"></td>
+                    <td th:text="${#temporals.format(user.joinDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${#temporals.format(user.birthDate, 'yyyy-MM-dd')}"></td>
+                    <td class="editable" th:data-field="role" th:data-username="${user.username}" th:text="${user.role}"></td>
+                    <td th:text="${user.fullName}"></td>
+                    <td th:text="${user.phoneNumber}"></td>
+                    <td class="editable" th:data-field="points" th:data-username="${user.username}" th:text="${user.points}"></td>
+                    <td class="editable" th:data-field="isBanned" th:data-username="${user.username}" th:text="${user.isBanned}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <div class="container text-center">
+        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#userTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Korean.json"
+            }
+        });
+
+        // 필드를 클릭할 때 발생하는 이벤트
+        $('.editable').click(function () {
+            const $cell = $(this);
+            const field =  $(this).data('field')
+            const username =  $(this).data('username')
+            const id =  $(this).data('id')
+            const currentValue = $cell.text();
+
+            console.log(field, username, currentValue, id)
+
+
+
+            if (field === 'role') {
+                // Role 필드를 드롭다운으로 변경
+                const $select = $('<select>', {
+                    class: 'form-control',
+                    html: `
+                    <option value="USER" ${currentValue === 'USER' ? 'selected' : ''}>USER</option>
+                    <option value="ADMIN" ${currentValue === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                `,
+                    change: function () {
+                        saveChanges.call($cell, username, field, $select.val());
+                    },
+                    blur: function () {
+                        $cell.text(currentValue); // 포커스를 잃으면 원래 값으로 되돌림
+                    }
+                });
+                $cell.html($select);
+            } else if (field === 'isBanned') {
+                // Is Banned 필드를 드롭다운으로 변경
+                const $select = $('<select>', {
+                    class: 'form-control',
+                    html: `
+                    <option value="N" ${currentValue === 'N' ? 'selected' : ''}>N</option>
+                    <option value="Y" ${currentValue === 'Y' ? 'selected' : ''}>Y</option>
+                `,
+                    change: function () {
+                        saveChanges.call($cell, username, field, $select.val());
+                    },
+                    blur: function () {
+                        $cell.text(currentValue); // 포커스를 잃으면 원래 값으로 되돌림
+                    }
+                });
+                $cell.html($select);
+            } else if (field === 'points') {
+                // Points 필드를 입력 필드로 변경
+                const $input = $('<input>', {
+                    type: 'number',
+                    value: currentValue,
+                    class: 'form-control',
+                    blur: function () {
+                        saveChanges.call($cell, username, field, $input.val());
+                    },
+                    keyup: function (e) {
+                        if (e.which === 13) $input.blur(); // Enter 키로 저장
+                    }
+                });
+                $cell.html($input);
+                $input.focus();
+            }
+        });
+
+        function saveChanges(username, field, newValue) {
+            $.ajax({
+                url: '/admin/updateUserField',
+                type: 'POST',
+                data: {
+                    username: username,
+                    field: field,
+                    value: newValue
+                },
+                success: function (response) {
+                    this.text(newValue);
+                    alert('변경사항이 저장되었습니다.');
+                }.bind(this),
+                error: function () {
+                    alert('변경사항을 저장하는 데 실패했습니다.');
+                    this.text(this.data('originalValue')); // 실패 시 원래 값 복원
+                }.bind(this)
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

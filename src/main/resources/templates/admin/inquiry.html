@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 관리</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 8.333%;
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+
+        .main-content {
+            width: 91.667%;
+            padding: 20px;
+            position: relative;
+        }
+
+        .footer {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 30px 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 헤더 -->
+<div class="header">
+    <div th:insert="adminIc/adminHeader :: adminHeaderFragment"></div>
+</div>
+
+<!-- 그리드 레이아웃 -->
+<div class="admin-container">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div th:insert="adminIc/adminSidebar :: adminSidebarFragment"></div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <div class="container mt-5">
+            <h2 class="mb-4">문의 관리</h2>
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                <tr>
+                    <th>문의 ID</th>
+                    <th>사용자 이름</th>
+                    <th>제목</th>
+                    <th>내용</th>
+                    <th>작성일</th>
+                    <th style="min-width: 180px;">상태</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="inquiry : ${inquiries}">
+                    <td th:text="${inquiry.inquiryId}"></td>
+                    <td th:text="${inquiry.username}"></td>
+                    <td th:text="${inquiry.title}"></td>
+                    <td th:text="${inquiry.content}"></td>
+                    <td th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${inquiry.adminId == 0 ? '답변 준비 중' : '답변 완료'}"></td>
+                    <td>
+                        <div th:if="${inquiry != null}">
+                            <button class="btn btn-primary btn-sm" th:if="${inquiry.adminId == 0}"
+                                    data-toggle="modal" data-target="#replyModal"
+                                    th:attr="data-inquiry-id=${inquiry.inquiryId}">답변 작성</button>
+                            <div th:if="${inquiry.adminId != 0}">
+                                <p><strong>답변 일시:</strong> <span th:text="${#temporals.format(inquiry.replyDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+                                <p><strong>답변 내용:</strong> <span th:text="${inquiry.replyContent}"></span></p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 답변 작성 모달 -->
+<div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="replyModalLabel">답변 작성</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form th:action="@{/admin/inquiry/reply}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="inquiryId" name="inquiryId">
+                    <div class="form-group">
+                        <label for="replyContent">답변 내용</label>
+                        <textarea class="form-control" id="replyContent" name="replyContent" rows="5" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                    <button type="submit" class="btn btn-primary">답변 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 모달이 열릴 때마다 inquiryId 설정
+    $('#replyModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // 버튼에 있는 data-inquiry-id 속성 값 가져오기
+        var inquiryId = button.data('inquiry-id');
+        var modal = $(this);
+        modal.find('#inquiryId').val(inquiryId); // 모달의 숨겨진 input 필드에 문의 ID 설정
+    });
+</script>
+
+<!-- Footer -->
+<div class="footer">
+    <div class="container text-center">
+        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
+    </div>
+</div>
+</body>
+</html>

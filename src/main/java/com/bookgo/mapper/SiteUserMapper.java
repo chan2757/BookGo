@@ -4,6 +4,7 @@ import com.bookgo.vo.SiteUserVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -30,4 +31,10 @@ public interface SiteUserMapper {
     void updateUserField(Map<String, Object> updateData);
 
     int getUserIdByUsername(String username);
+
+    List<SiteUserVO> getAllUsers();
+
+    int countByEmail(String email);
+
+    int countByUsername(String username);
 }

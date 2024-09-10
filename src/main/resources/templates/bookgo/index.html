@@ -1,42 +1,225 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookGo 메인 페이지</title>
+    <meta charset="utf-8">
+    <title>BookGo - 도서 구매 및 도서관 검색 사이트</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+    <link th:href="@{/lib/owlcarousel/assets/owl.theme.default.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
+        .container-fluid.py-5 {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+            min-height: 500px;
         }
-        .container {
+
+        .slider-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #5d4037;
             text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #f1e4d3;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .button {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #5a67d8;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+
+        .slider-title:before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: #d4a373;
+            border-radius: 2px;
         }
-        .button:hover {
-            background-color: #434190;
+
+        .book-item {
+            max-height: 350px;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .book-item img {
+            max-height: 180px;
+            width: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .book-title {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 150px;
+            margin: 0 auto;
+        }
+
+        .book-author,
+        .book-publisher,
+        .book-price {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>BookGo 메인 페이지</h1>
-    <button class="button" onclick="location.href='/user/mypage'">마이페이지로 이동</button>
-    <button class="button" onclick="location.href='/bookgo/book/list'">리스트로 이동</button>
+<div th:replace="~{includes/header :: headerFragment}"></div>
+
+<!-- 베스트셀러 섹션 -->
+<div class="container-fluid py-5">
+    <h2 class="slider-title">베스트셀러</h2>
+    <div id="bestseller-slider" class="owl-carousel owl-theme">
+        <th:block th:each="book : ${bestsellerBooks}">
+            <div class="book-item text-center">
+                <form action="/bookgo/book/detail/view" method="post">
+                    <input type="hidden" name="cover" th:value="${book.cover}">
+                    <input type="hidden" name="title" th:value="${book.title}">
+                    <input type="hidden" name="publisher" th:value="${book.publisher}">
+                    <input type="hidden" name="authors" th:value="${#strings.listJoin(book.authors, ',')}">
+                    <input type="hidden" name="isbn13" th:value="${book.isbn13}">
+                    <input type="hidden" name="priceStandard" th:value="${book.priceStandard}">
+                    <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank}">
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <h5 class="book-title" th:text="${book.title}">도서 제목</h5>
+                        <img th:src="${book.cover}" alt="Book Cover">
+                    </button>
+                </form>
+                <p class="book-author" th:text="${book.authors != null && !book.authors.isEmpty() ? #strings.listJoin(book.authors, ', ') : '저자 정보 없음'}">저자 정보 없음</p>
+                <p class="book-publisher" th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">출판사 정보 없음</p>
+                <p class="book-price" th:text="${book.priceStandard != null ? '₩ ' + book.priceStandard : '가격 정보 없음'}">가격 정보 없음</p>
+            </div>
+        </th:block>
+    </div>
 </div>
+
+<!-- 신간 전체 리스트 섹션 -->
+<div class="container-fluid py-5">
+    <h2 class="slider-title">신간 전체 리스트</h2>
+    <div id="new-all-slider" class="owl-carousel owl-theme">
+        <th:block th:each="book : ${newAllBooks}">
+            <div class="book-item text-center">
+                <form action="/bookgo/book/detail/view" method="post">
+                    <input type="hidden" name="cover" th:value="${book.cover}">
+                    <input type="hidden" name="title" th:value="${book.title}">
+                    <input type="hidden" name="publisher" th:value="${book.publisher}">
+                    <input type="hidden" name="authors" th:value="${#strings.listJoin(book.authors, ',')}">
+                    <input type="hidden" name="isbn13" th:value="${book.isbn13}">
+                    <input type="hidden" name="priceStandard" th:value="${book.priceStandard}">
+                    <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank}">
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <h5 class="book-title" th:text="${book.title}">도서 제목</h5>
+                        <img th:src="${book.cover}" alt="Book Cover">
+                    </button>
+                </form>
+                <p class="book-author" th:text="${book.authors != null && !book.authors.isEmpty() ? #strings.listJoin(book.authors, ', ') : '저자 정보 없음'}">저자 정보 없음</p>
+                <p class="book-publisher" th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">출판사 정보 없음</p>
+                <p class="book-price" th:text="${book.priceStandard != null ? '₩ ' + book.priceStandard : '가격 정보 없음'}">가격 정보 없음</p>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<!-- 주목할 만한 신간 섹션 -->
+<div class="container-fluid py-5">
+    <h2 class="slider-title">주목할 만한 신간</h2>
+    <div id="new-special-slider" class="owl-carousel owl-theme">
+        <th:block th:each="book : ${newSpecialBooks}">
+            <div class="book-item text-center">
+                <form action="/bookgo/book/detail/view" method="post">
+                    <input type="hidden" name="cover" th:value="${book.cover}">
+                    <input type="hidden" name="title" th:value="${book.title}">
+                    <input type="hidden" name="publisher" th:value="${book.publisher}">
+                    <input type="hidden" name="authors" th:value="${#strings.listJoin(book.authors, ',')}">
+                    <input type="hidden" name="isbn13" th:value="${book.isbn13}">
+                    <input type="hidden" name="priceStandard" th:value="${book.priceStandard}">
+                    <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank}">
+                    <button type="submit" style="background: none; border: none; padding: 0;">
+                        <h5 class="book-title" th:text="${book.title}">도서 제목</h5>
+                        <img th:src="${book.cover}" alt="Book Cover">
+                    </button>
+                </form>
+                <p class="book-author" th:text="${book.authors != null && !book.authors.isEmpty() ? #strings.listJoin(book.authors, ', ') : '저자 정보 없음'}">저자 정보 없음</p>
+                <p class="book-publisher" th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">출판사 정보 없음</p>
+                <p class="book-price" th:text="${book.priceStandard != null ? '₩ ' + book.priceStandard : '가격 정보 없음'}">가격 정보 없음</p>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<div th:replace="~{includes/footer :: footerFragment}"></div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    $(document).ready(function () {
+        const sliders = ['bestseller-slider', 'new-special-slider', 'new-all-slider'];
+        sliders.forEach(sliderId => {
+            const $slider = $(`#${sliderId}`);
+            if ($slider.data('owl.carousel')) {
+                $slider.trigger('destroy.owl.carousel');
+            }
+
+            $slider.owlCarousel({
+                loop: true,
+                margin: 10,
+                nav: true,
+                navText: [
+                    '<span class="carousel-control-prev-icon mb-n2" aria-hidden="true"></span>',
+                    '<span class="carousel-control-next-icon mb-n2" aria-hidden="true"></span>'
+                ],
+                dots: true,
+                autoplay: true,
+                autoplayTimeout: 3000,
+                autoplaySpeed: 800,
+                responsive: {
+                    0: { items: 1 },
+                    600: { items: 2 },
+                    1000: { items: 7 }
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

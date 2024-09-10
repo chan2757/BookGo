@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 관리</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 8.333%;
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+        .main-content {
+            width: 91.667%;
+            padding: 20px;
+            position: relative;
+        }
+        .footer {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 30px 0;
+            margin-top: auto;
+        }
+        .table-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div th:insert="adminIc/adminHeader :: adminHeaderFragment"></div>
+</div>
+
+<div class="admin-container">
+    <div class="sidebar">
+        <div th:insert="adminIc/adminSidebar :: adminSidebarFragment"></div>
+    </div>
+
+    <div class="main-content">
+        <h2>결제 관리</h2>
+
+        <div class="table-container">
+            <table id="paymentTable" class="display" style="width:100%">
+                <thead>
+                <tr>
+                    <th>결제 요청 ID</th>
+                    <th>총 금액</th>
+                    <th>결제 일자</th>
+                    <th>이름</th>
+                    <th>이메일</th>
+                    <th>전화번호</th>
+                    <th>주소</th>
+                    <th>상품 목록</th>
+                    <th>액션</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="payment : ${paymentRequests}">
+                    <td th:text="${payment.requestId}" th:data-request-id="${payment.requestId}"></td>
+                    <td th:text="${payment.totalAmount}" th:data-total-amount="${payment.totalAmount}"></td>
+                    <td th:text="${#dates.format(payment.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${payment.fullName}"></td>
+                    <td th:text="${payment.email}"></td>
+                    <td th:text="${payment.phone}"></td>
+                    <td th:text="${payment.address}"></td>
+                    <td>
+                        <ul>
+                            <li th:each="product : ${payment.products}">
+                                <span th:text="${product.productName}"></span> -
+                                <span th:text="${product.quantity}"></span>개,
+
+                            </li>
+                        </ul>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger refund-button" th:data-request-id="${payment.requestId}" th:data-total-amount="${payment.totalAmount}">환불</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container text-center">
+        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#paymentTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Korean.json"
+            }
+        });
+
+        // 환불 버튼 클릭 이벤트
+        $('.refund-button').click(function () {
+            const requestId = $(this).data('request-id');
+            const totalAmount = $(this).data('total-amount');
+
+            console.log(requestId);
+            console.log(totalAmount);
+
+            const refundAmount = prompt(`환불할 금액을 입력하세요 (최대 ${totalAmount}원):`);
+            if (refundAmount && refundAmount > 0 && refundAmount <= totalAmount) {
+                // 서버에 환불 요청 보내기
+                $.ajax({
+                    url: '/pay/refund',
+                    type: 'POST',
+                    data: { requestId: requestId, refundAmount: refundAmount },
+                    success: function (response) {
+                        alert('환불이 성공적으로 처리되었습니다.');
+                        // 페이지 리로드 또는 데이터 갱신 로직 추가 가능
+                    },
+                    error: function (error) {
+                        alert('환불 처리에 실패했습니다.');
+                    }
+                });
+            } else {
+                alert('유효한 금액을 입력해주세요.');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

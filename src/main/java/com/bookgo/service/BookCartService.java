@@ -100,4 +100,17 @@ public class BookCartService {
         // 변경된 매퍼 메서드 호출
         bookCartMapper.updateCartItemQuantitywith(params);
     }
+
+    public void deleteCartItem(int cartId, String isbn13, int userId) {
+        // 로그 추가: 삭제할 항목의 정보
+        System.out.println("Deleting cart item - Cart ID: " + cartId + ", ISBN13: " + isbn13 + ", User ID: " + userId);
+
+        // 실제 삭제 쿼리 호출
+        int rowsAffected = bookCartMapper.deleteCartItem(cartId, isbn13, userId);
+
+        // 삭제가 정상적으로 이루어졌는지 확인
+        if (rowsAffected == 0) {
+            throw new RuntimeException("삭제할 장바구니 항목을 찾을 수 없습니다.");
+        }
+    }
 }

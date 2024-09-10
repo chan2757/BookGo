@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,11 +81,13 @@ public class BookCartController {
 
         List<CartDetailVO> cartDetails = bookCartService.getCartDetails(userId);
 
+        System.out.println("cartDetails: " + cartDetails);
+
         logger.info("Retrieved cartDetails: {}", cartDetails);
 
         if (cartDetails == null || cartDetails.isEmpty()) {
             logger.info("No cart items found for userId: {}", userId);
-            model.addAttribute("cartDetails", null);
+            model.addAttribute("cartDetails", Collections.emptyList()); // 빈 리스트로 설정
             model.addAttribute("message", "장바구니에 담긴 상품이 없습니다.");
         } else {
             model.addAttribute("cartDetails", cartDetails);
@@ -112,13 +115,14 @@ public class BookCartController {
             int userId = siteUserService.getUserIdByUsername(username);
             logger.info("Retrieved userId: {}", userId);
 
-            // cartId와 quantity를 안전하게 String으로 받고 Integer로 변환
-            int cartId = Integer.parseInt((String) request.get("cartId"));
+            // JSON에서 전달된 값이 String으로 되어 있다면 parse를 통해 int로 변환
+            int cartId = Integer.parseInt(request.get("cartId").toString());
             String isbn13 = (String) request.get("isbn13");
-            int quantity = Integer.parseInt((String) request.get("quantity"));
+            int quantity = Integer.parseInt(request.get("quantity").toString());
 
             logger.info("Updating cart item - Cart ID: {}, ISBN13: {}, Quantity: {}", cartId, isbn13, quantity);
 
+            // 서비스 메서드 호출하여 수량 업데이트
             bookCartService.updateCartItemQuantity(cartId, isbn13, quantity);
 
             response.put("success", true);
@@ -131,5 +135,42 @@ public class BookCartController {
 
         return response;
     }
+    /**
+     * 장바구니 항목 삭제 API
+     *
+     * @param request   삭제할 장바구니 항목 정보 (cartId, isbn13)
+     * @param principal 로그인된 유저 정보
+     * @return 삭제 결과를 반환하는 메시지
+     */
+    @PostMapping("/delete")
+    @ResponseBody
+    public Map<String, Object> deleteCartItem(@RequestBody Map<String, Object> request, Principal principal) {
+        Map<String, Object> response = new HashMap<>();
 
+        try {
+            String username = principal.getName();
+            logger.info("Logged in username: {}", username);
+
+            int userId = siteUserService.getUserIdByUsername(username);
+            logger.info("Retrieved userId: {}", userId);
+
+            // JSON에서 전달된 값이 String으로 되어 있다면 parse를 통해 int로 변환
+            int cartId = Integer.parseInt(request.get("cartId").toString());
+            String isbn13 = (String) request.get("isbn13");
+
+            logger.info("Deleting cart item - Cart ID: {}, ISBN13: {}", cartId, isbn13);
+
+            // 장바구니 항목 삭제
+            bookCartService.deleteCartItem(cartId, isbn13, userId);
+
+            response.put("success", true);
+            response.put("message", "장바구니 항목이 삭제되었습니다.");
+        } catch (Exception e) {
+            logger.error("Error deleting cart item: ", e);
+            response.put("success", false);
+            response.put("message", "장바구니 항목 삭제 중 오류가 발생했습니다.");
+        }
+
+        return response;
+    }
 }

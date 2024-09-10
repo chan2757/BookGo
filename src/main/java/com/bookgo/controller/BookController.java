@@ -1,5 +1,8 @@
 package com.bookgo.controller;
 
+import com.bookgo.service.BookDetailService;
+import com.bookgo.vo.BookDpVO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -7,9 +10,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping({"/bookgo/books", "/bookgo/book"})
@@ -18,6 +22,12 @@ public class BookController {
     private static final Logger logger = LoggerFactory.getLogger(BookController.class);
     private static final String ALADIN_API_KEY = "ttbyyd0000939001";
     private static final String BASE_URL = "http://www.aladin.co.kr/ttb/api/";
+
+    private final BookDetailService bookDetailService;
+
+    public BookController(BookDetailService bookDetailService) {
+        this.bookDetailService = bookDetailService;
+    }
 
     @GetMapping("/list")
     public String getBookList(@RequestParam(defaultValue = "Bestseller") String queryType,
@@ -45,7 +55,7 @@ public class BookController {
     @GetMapping("/search")
     public String searchBooks(@RequestParam String query,
                               @RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "Title") String queryType, Model model) {
+                              @RequestParam(defaultValue = "Keyword") String queryType, Model model) {
         logger.info("도서 검색 요청: {}, 페이지: {}", query, page);
 
         int start = (page - 1) * 20 + 1;
@@ -82,5 +92,47 @@ public class BookController {
     public String searchByPublisher(@RequestParam String publisher, @RequestParam(defaultValue = "1") int page, Model model) {
         logger.info("출판사 검색 요청: {}, 페이지: {}", publisher, page);
         return searchBooks(publisher, page, "Publisher", model);
+    }
+
+
+
+
+    // JSON 데이터를 BookDpVO 리스트로 변환하는 메서드
+    private List<BookDpVO> parseBooks(Map<String, Object> response) {
+        List<BookDpVO> books = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // JSON의 "item" 필드를 가져와서 List로 변환
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("item");
+
+        if (items != null) {
+            for (Map<String, Object> item : items) {
+                try {
+                    BookDpVO book = new BookDpVO();
+
+                    // 필드 매핑
+                    book.setTitle((String) item.get("title"));
+                    book.setPublisher((String) item.get("publisher"));
+                    book.setIsbn13((String) item.get("isbn13"));
+                    book.setPriceStandard((int) item.get("priceStandard"));
+                    book.setCover((String) item.get("cover"));
+                    book.setCustomerReviewRank(item.get("customerReviewRank") instanceof Integer
+                            ? (Integer) item.get("customerReviewRank")
+                            : Double.parseDouble(item.get("customerReviewRank").toString()));
+
+                    // 저자 문자열을 리스트로 변환
+                    String author = (String) item.get("author");
+                    if (author != null && !author.trim().isEmpty()) {
+                        book.setAuthors(Arrays.asList(author.split(",\\s*")));
+                    }
+
+                    books.add(book);
+                } catch (Exception e) {
+                    logger.error("도서 데이터 파싱 중 오류 발생: {}", e.getMessage());
+                }
+            }
+        }
+
+        return books;
     }
 }

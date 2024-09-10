@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.PaymentMapper">
+
+    <!-- PaymentRequestVO ResultMap -->
+    <resultMap id="PaymentRequestResultMap" type="com.bookgo.vo.PaymentRequestVO">
+        <id property="requestId" column="REQUEST_ID"/>
+        <result property="orderId" column="ORDER_ID"/>
+        <result property="username" column="USERNAME"/>
+        <result property="fullName" column="FULL_NAME"/>
+        <result property="email" column="EMAIL"/>
+        <result property="phone" column="PHONE"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="totalAmount" column="TOTAL_AMOUNT"/>
+        <result property="tid" column="TID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <!-- Insert PaymentRequestVO -->
+    <insert id="insertPaymentRequest" parameterType="com.bookgo.vo.PaymentRequestVO">
+        INSERT INTO PAYMENT_REQUEST (REQUEST_ID, ORDER_ID, USERNAME, FULL_NAME, EMAIL, PHONE, ADDRESS, TOTAL_AMOUNT, TID, CREATED_AT)
+        VALUES (PAYMENT_REQUEST_SEQ.NEXTVAL, #{orderId}, #{username}, #{fullName}, #{email}, #{phone}, #{address}, #{totalAmount}, #{tid}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- PaymentDetailVO ResultMap -->
+    <resultMap id="PaymentDetailResultMap" type="com.bookgo.vo.PaymentDetailVO">
+        <id property="detailId" column="DETAIL_ID"/>
+        <result property="requestId" column="REQUEST_ID"/>
+        <result property="productName" column="PRODUCT_NAME"/>
+        <result property="isbn13" column="ISBN13"/>
+        <result property="quantity" column="QUANTITY"/>
+        <result property="itemPrice" column="ITEM_PRICE"/>
+        <result property="totalPrice" column="TOTAL_PRICE"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <!-- Insert PaymentDetailVO -->
+    <insert id="insertPaymentDetail" parameterType="com.bookgo.vo.PaymentDetailVO">
+        INSERT INTO PAYMENT_DETAIL (DETAIL_ID, REQUEST_ID, PRODUCT_NAME, ISBN13, QUANTITY, ITEM_PRICE, TOTAL_PRICE, CREATED_AT)
+        VALUES (PAYMENT_DETAIL_SEQ.NEXTVAL, #{requestId}, #{productName}, #{isbn13}, #{quantity}, #{itemPrice}, #{totalPrice}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- REQUEST_ID로 TID와 TOTAL_AMOUNT 조회 -->
+    <select id="selectTidAndAmountByRequestId" parameterType="long" resultType="map">
+        SELECT TID, TOTAL_AMOUNT
+        FROM PAYMENT_REQUEST
+        WHERE REQUEST_ID = #{requestId}
+    </select>
+
+    <!-- REQUEST_ID로 결제 요청 삭제 -->
+    <delete id="deletePaymentRequestByRequestId" parameterType="long">
+        DELETE FROM PAYMENT_REQUEST
+        WHERE REQUEST_ID = #{requestId}
+    </delete>
+
+    <!-- REQUEST_ID로 결제 금액 수정 -->
+    <update id="updateTotalAmountByRequestId" parameterType="map">
+        UPDATE PAYMENT_REQUEST
+        SET TOTAL_AMOUNT = #{totalAmount}, UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE REQUEST_ID = #{requestId}
+    </update>
+
+</mapper>

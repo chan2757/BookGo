@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookgo.mapper.CommentMapper">
+
+    <resultMap id="CommentResultMap" type="com.bookgo.vo.CommentVO">
+        <id property="commentId" column="COMMENT_ID" />
+        <result property="postId" column="POST_ID" />
+        <result property="username" column="USERNAME" />
+        <result property="content" column="CONTENT" />
+        <result property="createdDate" column="CREATED_DATE" />
+        <result property="recommendCount" column="RECOMMEND_COUNT" />
+    </resultMap>
+
+    <!-- 특정 게시글의 댓글 조회 -->
+    <select id="selectCommentsByPostId" parameterType="long" resultMap="CommentResultMap">
+        SELECT COMMENT_ID, POST_ID, USERNAME, CONTENT, CREATED_DATE, RECOMMEND_COUNT
+        FROM COMMENTS
+        WHERE POST_ID = #{postId}
+        ORDER BY CREATED_DATE DESC
+    </select>
+
+    <!-- 댓글 추가 -->
+    <insert id="insertComment" parameterType="com.bookgo.vo.CommentVO">
+        INSERT INTO COMMENTS (POST_ID, USERNAME, CONTENT, CREATED_DATE, RECOMMEND_COUNT)
+        VALUES (#{postId}, #{username}, #{content}, SYSDATE, 0)
+    </insert>
+
+    <!-- 댓글 추천 수 증가 -->
+    <update id="incrementRecommendCount" parameterType="long">
+        UPDATE COMMENTS
+        SET RECOMMEND_COUNT = RECOMMEND_COUNT + 1
+        WHERE COMMENT_ID = #{commentId}
+    </update>
+
+    <!-- 댓글 ID로 조회 -->
+    <select id="getCommentById" parameterType="long" resultMap="CommentResultMap">
+        SELECT COMMENT_ID, POST_ID, USERNAME, CONTENT, CREATED_DATE, RECOMMEND_COUNT
+        FROM COMMENTS
+        WHERE COMMENT_ID = #{commentId}
+    </select>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComment" parameterType="long">
+        DELETE FROM COMMENTS
+        WHERE COMMENT_ID = #{commentId}
+    </delete>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComment" parameterType="com.bookgo.vo.CommentVO">
+        UPDATE COMMENTS
+        SET CONTENT = #{content}
+        WHERE COMMENT_ID = #{commentId}
+    </update>
+
+</mapper>

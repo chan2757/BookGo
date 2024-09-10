@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.BookProductMapper">
+
+    <!-- 모든 책 정보 조회 -->
+    <select id="getAllProducts" resultType="com.bookgo.vo.BookProductVO">
+        SELECT
+            ISBN13,
+            TITLE,
+            AUTHORS,
+            PUBLISHER,
+            PRICESTANDARD,
+            COVER,
+            STOCK
+        FROM BOOK_PRODUCTS
+    </select>
+
+    <!-- 책의 재고를 수정 -->
+    <update id="updateProductStock">
+        UPDATE BOOK_PRODUCTS
+        SET STOCK = #{stock}
+        WHERE ISBN13 = #{isbn13}
+    </update>
+
+</mapper>

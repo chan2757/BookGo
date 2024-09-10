@@ -22,12 +22,12 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    @Bean
+    @Bean(name = "customPasswordEncoder")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    @Bean(name = "adminAuthenticationManager")
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
         auth.authenticationProvider(daoAuthenticationProvider());
@@ -46,15 +46,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/user/signup", "/bookgo/index").permitAll()
+                        .requestMatchers("/uploads/**", "/static/**", "/css/**", "/js/**", "/img/**", "/webjars/**", "/admin/lib/**").permitAll() // Static 리소스 허용
+                        .requestMatchers("/index", "/user/login", "/user/signup", "/bookgo/**", "/board/**", "/boardmain", "/detail/**", "/detail", "/email/**").permitAll()
                         .requestMatchers("/user/infoDetail", "/user/mypage").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/admin/login").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 페이지 접근 설정
+                        .anyRequest().permitAll() // 나머지 모든 요청 허용
                 )
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/user/login")
                         .loginProcessingUrl("/user/loginProcess")
-                        .defaultSuccessUrl("/bookgo/index", true)
+                        .defaultSuccessUrl("/index", true) // 로그인 성공 후 이동할 URL
                         .failureUrl("/user/login?error=true")
                         .failureHandler((request, response, exception) -> {
                             System.out.println("로그인 실패: " + exception.getMessage());
@@ -63,8 +66,10 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/user/logout")
-                        .logoutSuccessUrl("/bookgo/index")
+                        .logoutUrl("/logout") // 로그아웃 URL 설정
+                        .logoutSuccessUrl("/index") // 로그아웃 성공 후 관리자 로그인 페이지로 이동
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
 

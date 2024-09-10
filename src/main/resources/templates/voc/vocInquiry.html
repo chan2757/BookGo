@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 상세</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div th:replace="~{includes/header :: headerFragment}"></div>
+<div class="container mt-4">
+    <h2>내 문의 내역</h2>
+
+    <!-- 문의 작성 버튼 -->
+    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#inquiryModal">문의 작성하기</button>
+
+    <!-- 문의 내역 테이블 -->
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>문의 제목</th>
+            <th>작성일</th>
+            <th>상태</th>
+        </tr>
+        </thead>
+        <tbody th:each="inquiry : ${inquiries}">
+        <tr class="inquiry-row">
+            <td th:text="${inquiry.title}" class="clickable"></td>
+            <td th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}" class="clickable"></td>
+            <td th:text="${inquiry.status}" class="clickable"></td>
+        </tr>
+        <tr class="collapse">
+            <td colspan="3">
+                <!-- 문의 내용 -->
+                <p><strong>문의 내용:</strong> <span th:text="${inquiry.content}"></span></p>
+
+                <!-- 답변 내용이 있을 경우 표시 -->
+                <div th:if="${inquiry.replyContent != null}">
+                    <p><strong>답변자:</strong> <span th:text="${inquiry.adminId}"></span></p>
+                    <p><strong>답변 일시:</strong> <span th:text="${#temporals.format(inquiry.replyDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+                    <p><strong>답변 내용:</strong> <span th:text="${inquiry.replyContent}"></span></p>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 문의 작성 모달 -->
+<div class="modal fade" id="inquiryModal" tabindex="-1" aria-labelledby="inquiryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inquiryModalLabel">문의 작성</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form th:action="@{/voc/inquiry/create}" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="title">문의 제목</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">문의 내용</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                    <button type="submit" class="btn btn-primary">문의 등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    $(document).ready(function () {
+        // 클릭하면 다음 행을 토글하여 드롭다운처럼 보이게 함
+        $('.inquiry-row').click(function () {
+            $(this).next('.collapse').toggle();
+        });
+    });
+</script>
+</body>
+</html>

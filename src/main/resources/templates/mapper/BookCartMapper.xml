@@ -64,4 +64,11 @@
           AND isbn13 = #{isbn13}
     </update>
 
+    <delete id="deleteCartItem" parameterType="map">
+        DELETE FROM BOOK_CART_ITEM
+        WHERE CART_ID = #{cartId}
+            AND ISBN13 = #{isbn13}
+
+    </delete>
+
 </mapper>

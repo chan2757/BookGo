@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,64 +7,84 @@
     <title>내 정보 확인</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
         }
+
+        header, footer {
+            display: block;
+            width: 100%;
+        }
+
         .container {
-            width: 400px;
+            max-width: 800px;
+            margin: 50px auto;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            text-align: center;
+
+        .info-group {
             margin-bottom: 20px;
         }
-        .info-group {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
+
         .info-group label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            flex: 1;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
         }
-        .info-group span, .info-group input {
-            flex: 2;
+
+        .info-group span {
+            display: block;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            background-color: #f8f8f8;
+            background-color: #f1f1f1;
         }
-        .info-group button {
-            margin-left: 10px;
-            padding: 5px 10px;
+
+        .edit-btn {
+            margin-top: 10px;
+            padding: 8px 12px;
             border: none;
             border-radius: 4px;
-            background-color: #5a67d8;
-            color: white;
+            background-color: #007bff;
+            color: #fff;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-        .info-group button:hover {
-            background-color: #434190;
+
+        .edit-btn:hover {
+            background-color: #0056b3;
         }
+
         .message {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
+            margin-top: 20px;
+            color: #dc3545;
+            font-size: 14px;
         }
+
     </style>
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 <div class="container">
     <h2>내 정보 확인</h2>
     <div class="info-group">
@@ -97,11 +117,15 @@
         <span id="phonenumber"></span>
         <button class="edit-btn" onclick="enableEdit('phonenumber')">수정</button>
     </div>
+
+    <!-- 비밀번호 변경 버튼을 여기로 이동 -->
+    <div class="info-group">
+        <button class="edit-btn" onclick="changePassword()">비밀번호 변경하기</button>
+    </div>
+
     <div class="info-group">
         <label for="points">포인트</label>
         <span id="points"></span>
-
-        <!-- <button class="edit-btn" onclick="enableEdit('points')">수정</button> -->
     </div>
     <div class="info-group">
         <label for="address1">주소</label>
@@ -115,6 +139,7 @@
     </div>
     <div id="userMessage" class="message"></div>
 </div>
+
 
 <script>
     // 페이지 로드 시 사용자 정보 가져오기
@@ -220,6 +245,45 @@
         button.onclick = function() { enableEdit(field) };
         return button;
     }
+
+    function changePassword() {
+        const newPassword = prompt('새로운 비밀번호를 입력하세요:');
+        const confirmPassword = prompt('비밀번호를 다시 입력하세요:');
+
+        if (newPassword && confirmPassword && newPassword === confirmPassword) {
+            fetch('/user/changePassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPassword })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('비밀번호가 성공적으로 변경되었습니다.');
+                    } else {
+                        alert('비밀번호 변경에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    alert('비밀번호 변경 중 오류가 발생했습니다.');
+                    console.error('Error changing password:', error);
+                });
+        } else {
+            alert('비밀번호가 일치하지 않거나 입력이 잘못되었습니다.');
+        }
+    }
 </script>
 </body>
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
 </html>

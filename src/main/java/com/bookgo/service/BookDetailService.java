@@ -1,18 +1,24 @@
 package com.bookgo.service;
 
+import com.bookgo.controller.BookController;
 import com.bookgo.vo.BookDetailVO;
-import com.bookgo.vo.BookDpVO; // DP VO 추가
+import com.bookgo.vo.BookDpVO;
 import com.bookgo.mapper.BookDetailMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class BookDetailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private static final String ALADIN_API_KEY = "ttbyyd0000939001"; // 알라딘 API 키
     private static final String BASE_URL = "http://www.aladin.co.kr/ttb/api/";
@@ -28,7 +34,10 @@ public class BookDetailService {
 
     // @Transactional 애노테이션은 메서드에 적용
     @Transactional
-    public BookDetailVO getBookDetail(String isbn13, BookDpVO dp) {
+    public BookDetailVO getBookDetail(BookDpVO dp) {
+        // DP에서 ISBN13을 추출하여 사용
+        String isbn13 = dp.getIsbn13();
+
         // MyBatis를 통해 데이터베이스에서 책 정보를 조회
         BookDetailVO bookDetail = bookDetailMapper.selectBookDetailByIsbn13(isbn13);
 
@@ -81,10 +90,8 @@ public class BookDetailService {
         return bookDetail;
     }
 
-
-
-    // 알라딘 API에서 책 정보를 가져오는 메서드 (사용하지 않는다면 주석처리 가능)
-    private BookDetailVO fetchBookDetailFromAladin(String isbn13) {
+    // 알라딘 API에서 책 정보를 가져와 BookDpVO를 생성하는 메서드
+    public BookDpVO createBookDpFromApi(String isbn13) {
         RestTemplate restTemplate = new RestTemplate();
         String apiUrl = BASE_URL + "ItemLookUp.aspx?ttbkey=" + ALADIN_API_KEY +
                 "&itemIdType=ISBN13&ItemId=" + isbn13 + "&output=js&Version=20131101";
@@ -94,25 +101,87 @@ public class BookDetailService {
 
         // 응답이 없거나 잘못된 경우 null 반환
         if (response == null || !response.containsKey("item")) {
+            System.out.println("알라딘 API 응답이 없습니다.");
             return null;
         }
 
-        // 응답에서 필요한 데이터를 추출하고 BookDetailVO에 설정
+        // 응답에서 필요한 데이터를 추출하고 BookDpVO에 설정
         Map<String, Object> item = ((List<Map<String, Object>>) response.get("item")).get(0);
-        BookDetailVO bookDetailVO = new BookDetailVO();
-        bookDetailVO.setIsbn13(isbn13);
-        bookDetailVO.setTitle((String) item.get("title"));
+        BookDpVO bookDpVO = new BookDpVO();
+        bookDpVO.setIsbn13(isbn13);
+        bookDpVO.setTitle((String) item.get("title"));
 
         // API에서 받은 저자 데이터를 리스트로 변환하여 설정
-        List<String> authors = Arrays.asList(((String) item.get("author")).split(",\\s*"));
-        bookDetailVO.setAuthors(authors);
+        String authorString = (String) item.get("author");
+        if (authorString != null) {
+            bookDpVO.setAuthor(authorString);
+        } else {
+            System.out.println("저자 정보가 없습니다.");
+        }
 
-        bookDetailVO.setPublisher((String) item.get("publisher"));
-        bookDetailVO.setPubDate((String) item.get("pubDate"));
-        bookDetailVO.setPriceStandard(Integer.parseInt(item.get("priceStandard").toString()));
-        bookDetailVO.setCustomerReviewRank(Double.parseDouble(item.get("customerReviewRank").toString()));
-        bookDetailVO.setIntroduction((String) item.get("description")); // 책 소개 설정
+        bookDpVO.setPublisher((String) item.get("publisher"));
+        bookDpVO.setPriceStandard(Integer.parseInt(item.get("priceStandard").toString()));
+        bookDpVO.setCustomerReviewRank(Double.parseDouble(item.get("customerReviewRank").toString()));
+        bookDpVO.setCover((String) item.get("cover"));
 
-        return bookDetailVO;
+        System.out.println("알라딘 API로부터 생성된 BookDpVO: " + bookDpVO);
+
+        return bookDpVO;
+    }
+
+    public List<BookDpVO> makeDpList(String queryType) {
+        List<BookDpVO> bookList = new ArrayList<>();
+        RestTemplate restTemplate = new RestTemplate();
+        String apiUrl = BASE_URL + "ItemList.aspx?ttbkey=" + ALADIN_API_KEY +
+                "&QueryType=" + queryType + "&MaxResults=30&start=1&SearchTarget=Book&output=js&Version=20131101";
+
+        // API 호출하여 데이터를 가져옴
+        Map<String, Object> response = restTemplate.getForObject(apiUrl, Map.class);
+
+        // 응답이 없거나 잘못된 경우 빈 리스트 반환
+        if (response == null || !response.containsKey("item")) {
+            return bookList;
+        }
+
+        // 응답에서 item 리스트를 가져옴
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("item");
+
+        // 각 item을 BookDpVO 객체로 변환하여 리스트에 추가
+        for (Map<String, Object> item : items) {
+            BookDpVO book = createBookDpFromApi(item);
+            bookList.add(book);
+        }
+
+        // 리스트의 내용을 로그로 출력
+        logger.debug("Book list: {}", bookList);
+
+        return bookList;
+    }
+
+    // API 응답을 BookDpVO로 변환하는 메소드
+    private BookDpVO createBookDpFromApi(Map<String, Object> item) {
+        BookDpVO bookDpVO = new BookDpVO();
+
+        bookDpVO.setIsbn13((String) item.get("isbn13"));
+        bookDpVO.setTitle((String) item.get("title"));
+        bookDpVO.setPublisher((String) item.get("publisher"));
+        bookDpVO.setCover((String) item.get("cover"));
+
+        // 저자를 문자열에서 리스트로 변환
+        String authorString = (String) item.get("author");
+        if (authorString != null && !authorString.trim().isEmpty()) {
+            bookDpVO.setAuthors(Arrays.asList(authorString.split(",\\s*")));
+        }
+
+        // 가격과 평점이 있는 경우 설정
+        if (item.get("priceStandard") != null) {
+            bookDpVO.setPriceStandard(Integer.parseInt(item.get("priceStandard").toString()));
+        }
+
+        if (item.get("customerReviewRank") != null) {
+            bookDpVO.setCustomerReviewRank(Double.parseDouble(item.get("customerReviewRank").toString()));
+        }
+
+        return bookDpVO;
     }
 }

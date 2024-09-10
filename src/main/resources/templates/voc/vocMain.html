@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>고객센터</title>
+  <!-- Bootstrap CSS 추가 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Favicon -->
+  <link th:href="@{/img/favicon.ico}" rel="icon">
+
+  <!-- Google Web Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Libraries Stylesheet -->
+  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+  <!-- Customized Bootstrap Stylesheet -->
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+
+<!-- 헤더를 포함 -->
+<div th:replace="includes/header :: headerFragment"></div>
+<!-- 고객센터 메인 컨테이너 -->
+<div class="container mt-5">
+  <h2 class="text-center mb-4">고객센터</h2>
+
+  <!-- Contact Us 섹션 -->
+  <section id="contact-us" class="mb-5">
+    <h3>Contact Us</h3>
+    <p>문의사항이 있으시면 아래 이메일로 연락주세요.</p>
+    <ul>
+      <li>이메일: yyd000@naver.com</li>
+      <li>전화번호: 010-5576-5996</li>
+    </ul>
+  </section>
+
+  <!-- 문의 게시판 -->
+  <section id="inquiry-board" class="mb-5">
+    <h3>문의 게시판</h3>
+    <p>고객님의 소중한 의견을 남겨주세요.</p>
+    <a href="/voc/vocInquiry" class="btn btn-primary">문의 게시판 가기</a>
+  </section>
+
+  <!-- QnA 게시판 -->
+  <section id="qna-board" class="mb-5">
+    <h3>FAQ 게시판</h3>
+    <p>자주 묻는 질문들을 확인해보세요.</p>
+    <a href="/voc/vocFAQ" class="btn btn-primary">FAQ 게시판 가기</a>
+  </section>
+
+  <!-- 1:1 채팅 요청 -->
+  <section id="chat-request" class="mb-5">
+    <h3>1:1 채팅 요청(현재 준비중 입니다. 감사합니다!!)</h3>
+    <p>실시간으로 상담이 필요하시면 아래 버튼을 눌러주세요.</p>
+    <a href="/voc/chat" class="btn btn-primary">1:1 채팅 요청하기</a>
+  </section>
+</div>
+<div th:replace="includes/footer :: footerFragment"></div>
+
+<!-- Bootstrap JS 추가 -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

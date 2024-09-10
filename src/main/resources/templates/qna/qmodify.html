@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수정하기</title>
+    <link rel="stylesheet" href="/css/style1.css">
+</head>
+<body>
+    <header>
+        <h1>Bookgo Q&A</h1>
+    </header>
+
+    <div class="container">
+        <h2>질문 수정하기</h2>
+        <form action="/qna/update" method="post">
+            <input type="hidden" name="id" th:value="${qna.id}">
+            <div class="form-group">
+                <label for="title">제목:</label>
+                <input type="text" id="title" name="title" th:value="${qna.title}" class="input-text">
+            </div>
+            <div class="form-group">
+                <label for="writer">작성자:</label>
+                <input type="text" id="writer" name="writer" th:value="${qna.writer}" class="input-text">
+            </div>
+            <div class="form-group">
+                <label for="content">내용:</label>
+                <textarea id="content" name="content" class="input-textarea" th:text="${qna.content}"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="filename">파일명:</label>
+                <input type="text" id="filename" name="filename" th:value="${qna.filename}" class="input-text">
+            </div>
+            <div class="actions">
+                <button type="submit" class="button">수정 완료</button>
+                <a class="button" href="/qna/">목록으로 돌아가기</a>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Bookgo Q&A Board</p>
+    </footer>
+</body>
+</html>

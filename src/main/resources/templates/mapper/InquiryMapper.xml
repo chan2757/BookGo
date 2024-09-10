@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.InquiryMapper">
+
+    <!-- InquiryVO와 매핑되는 resultMap 정의 -->
+    <resultMap id="InquiryResultMap" type="com.bookgo.vo.InquiryVO">
+        <id property="inquiryId" column="INQUIRY_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="username" column="USERNAME" />
+        <result property="title" column="TITLE" />
+        <result property="content" column="CONTENT" />
+        <result property="createdAt" column="CREATED_AT" javaType="java.time.LocalDateTime"/>
+        <result property="adminId" column="ADMINID" />
+        <result property="replyContent" column="REPLYCONTENT" />
+        <result property="replyDate" column="REPLYDATE" javaType="java.time.LocalDateTime"/>
+    </resultMap>
+
+    <!-- 사용자 ID로 문의 목록 조회 -->
+    <select id="getInquiriesByUserId" parameterType="int" resultMap="InquiryResultMap">
+        SELECT
+            i.INQUIRY_ID,
+            i.USER_ID,
+            i.USERNAME,
+            i.TITLE,
+            i.CONTENT,
+            i.CREATED_AT,
+            r.ADMINID,
+            r.REPLYCONTENT,
+            r.REPLYDATE
+        FROM INQUIRY i
+                 LEFT JOIN INQUIRY_REPLY r ON i.INQUIRY_ID = r.INQUIRY_ID
+        WHERE i.USER_ID = #{userId}
+        ORDER BY i.CREATED_AT DESC
+    </select>
+
+    <!-- 문의 생성 -->
+    <insert id="createInquiry" parameterType="com.bookgo.vo.InquiryVO">
+        INSERT INTO INQUIRY (INQUIRY_ID, USER_ID, USERNAME, TITLE, CONTENT, CREATED_AT)
+        VALUES (SEQ_INQUIRY_ID.NEXTVAL, #{userId}, #{username}, #{title}, #{content}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- 답변 등록 -->
+    <insert id="createReply" parameterType="com.bookgo.vo.InquiryVO">
+        INSERT INTO INQUIRY_REPLY (REPLY_ID, INQUIRY_ID, ADMINID, REPLYCONTENT, REPLYDATE)
+        VALUES (SEQ_REPLY_ID.NEXTVAL, #{inquiryId}, #{adminId}, #{replyContent}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- 모든 문의 조회 -->
+    <select id="getAllInquiries" resultMap="InquiryResultMap">
+        SELECT
+            i.INQUIRY_ID,
+            i.USER_ID,
+            i.USERNAME,
+            i.TITLE,
+            i.CONTENT,
+            i.CREATED_AT,
+            r.ADMINID,
+            r.REPLYCONTENT,
+            r.REPLYDATE
+        FROM INQUIRY i
+                 LEFT JOIN INQUIRY_REPLY r ON i.INQUIRY_ID = r.INQUIRY_ID
+        ORDER BY i.CREATED_AT DESC
+    </select>
+
+    <insert id="saveReply" parameterType="com.bookgo.vo.InquiryVO">
+        INSERT INTO INQUIRY_REPLY (REPLY_ID, INQUIRY_ID, ADMINID, REPLYCONTENT, REPLYDATE)
+        VALUES (SEQ_REPLY_ID.NEXTVAL, #{inquiryId}, #{adminId}, #{replyContent}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- INQUIRY 테이블의 행 수 조회 -->
+    <select id="countInquiries" resultType="int">
+        SELECT COUNT(*) FROM INQUIRY
+    </select>
+
+    <!-- INQUIRY_REPLY 테이블의 행 수 조회 -->
+    <select id="countReplies" resultType="int">
+        SELECT COUNT(*) FROM INQUIRY_REPLY
+    </select>
+
+</mapper>

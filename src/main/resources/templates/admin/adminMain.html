@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>BookGo Admin</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Admin Panel" name="keywords">
+    <meta content="Admin Panel" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 8.333%; /* 1/12의 너비로 설정 */
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+
+        .main-content {
+            width: 91.667%; /* 나머지 11/12의 너비로 설정 */
+            padding: 20px;
+            position: relative;
+        }
+
+        .notice-message {
+            display: none;
+            font-size: 14px;
+            color: #dc3545; /* Red color for the alarm message */
+            font-weight: bold;
+
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 5px;
+            text-align: center;
+            max-width: 300px;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .footer {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 30px 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+    <div th:insert="adminIc/adminHeader :: adminHeaderFragment"></div>
+</div>
+
+<!-- 그리드 레이아웃 -->
+<div class="admin-container">
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div th:insert="adminIc/adminSidebar :: adminSidebarFragment"></div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <!-- 자연스러운 위치에 알림 메시지 배치 -->
+        <span id="noticeMessage" class="notice-message"></span>
+
+        <div class="container py-4">
+            <h2>관리자 페이지</h2>
+            <div class="row">
+                <!-- 페이지 내용 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <div class="container text-center">
+        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="lib/easing/easing.min.js"></script>
+<script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // 페이지 로딩 시 답변 대기 문의 확인
+        checkPendingInquiries();
+
+        // 알림 메시지 클릭 시 /admin/inquiry로 이동
+        $('#noticeMessage').click(function () {
+            window.location.href = '/admin/inquiry';
+        });
+    });
+
+    function checkPendingInquiries() {
+        // 서버에서 문의와 답변 수가 같은지 확인하는 서비스 호출
+        $.ajax({
+            url: '/admin/checkInquiries',
+            type: 'GET',
+            success: function (response) {
+                // response가 false이면 관리자에게 알림 메시지 표시
+                if (!response) {
+                    $('#noticeMessage').text('관리자님! 답변을 기다리는 문의가 있습니다.').show();
+                }
+            },
+            error: function () {
+                console.error('문의 상태를 확인하는 데 실패했습니다.');
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

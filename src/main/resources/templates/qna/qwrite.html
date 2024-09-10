@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookgo Q&A - 질문 작성</title>
+    <link rel="stylesheet" href="/css/style1.css">
+</head>
+<body>
+    <header>
+        <h1>Bookgo Q&A 게시판</h1>
+    </header>
+
+    <div class="container">
+        <h2>질문 작성</h2>
+
+		<form action="/qna/insert" method="post" enctype="multipart/form-data">
+		    <table class="qna-list">
+				<tr>
+				    <th>제목</th>
+				    <td><input type="text" name="title" class="input-text" required></td>
+				</tr>
+				<tr>
+				    <th>작성자</th>
+				    <td><input type="text" name="writer" class="input-text" required></td>
+				</tr>
+				<tr>
+				    <th>내용</th>
+				    <td><textarea name="content" class="input-textarea" required></textarea></td>
+				</tr>
+				<tr>
+				    <th>첨부 파일</th>
+				    <td><input type="file" name="file"></td>
+				</tr>
+		    </table>
+		    <div class="actions">
+		        <button class="button" type="submit">저장</button>
+		        <a class="button" href="/qna/">취소</a>
+		    </div>
+		</form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Bookgo Q&A Board</p>
+    </footer>
+</body>
+</html>
