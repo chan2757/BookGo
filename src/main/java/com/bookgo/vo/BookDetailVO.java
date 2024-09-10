@@ -3,11 +3,13 @@ package com.bookgo.vo;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class BookDetailVO {
     private String title;
-    private String author;
+    private List<String> authors; // 저자 리스트로 변경
     private String publisher;        // 출판사
     private String pubDate;          // 출판일
     private int priceStandard;       // 정가
@@ -21,13 +23,13 @@ public class BookDetailVO {
     private String bookInside;
     private String publisherReview;
     private String isbn13;           // ISBN13 필드
-    private String cover;// 표지 이미지 URL (추가)
+    private String cover; // 표지 이미지 URL (추가)
 
     @Override
     public String toString() {
         return "BookDetailVO{" +
                 "title='" + title + '\'' +
-                ", author='" + author + '\'' +
+                ", authors=" + authors +
                 ", publisher='" + publisher + '\'' +
                 ", pubDate='" + pubDate + '\'' +
                 ", priceStandard=" + priceStandard +

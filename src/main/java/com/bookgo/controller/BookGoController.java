@@ -16,5 +16,7 @@ public class BookGoController {
 		
 		logger.info("메인 페이지 진입");
 	}
+
+
 		
 }

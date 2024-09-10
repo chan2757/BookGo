@@ -52,12 +52,10 @@
     }
 
     img {
-      max-width: 95%;
-      max-height: 95%;
-      height: auto;
-      width: auto;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 이미지를 박스에 맞게 조정하고 넘치는 부분을 잘라냅니다 */
       margin-bottom: 10px;
-      object-fit: contain;
     }
 
     .info-box {
@@ -78,10 +76,18 @@
       text-decoration: none;
     }
 
+    .cover {
+      width: 200px;
+      height: 400px;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
     .link-button:hover {
       background-color: #0056b3;
     }
   </style>
+
 </head>
 <body>
 
@@ -89,46 +95,119 @@
   <div class="top-section">
     <!-- Left Section: Book Cover Image -->
     <div class="left-section">
-      <img th:if="${bookDetail.cover != null}" th:src="${bookDetail.cover}" alt="책 커버 이미지">
+      <img class="cover" th:if="${bookDetail.cover != null}" th:src="${bookDetail.cover}" alt="책 커버 이미지">
     </div>
 
-    <!-- Right Section: Title, Author, Publisher Info -->
+    <!-- Right Section: Title, Authors, Publisher Info -->
     <div class="right-section">
       <div class="info-box">
         <h2 th:text="${bookDetail.title ?: '제목 없음'}">제목 없음</h2>
       </div>
       <div class="info-box">
         <!-- 저자 정보 및 버튼 추가 -->
-        <p>저자: <a th:href="@{'https://www.google.com/search?q=' +작가 + ${bookDetail.author}}" target="_blank" th:text="${bookDetail.author ?: '저자 정보 없음'}">저자 정보 없음</a></p>
-        <a th:href="@{'/bookgo/book/search/author?author=' + ${bookDetail.author}}" class="link-button">다른 저서 보기</a>
+        <h3>저자:</h3>
+        <ul>
+          <li th:each="author : ${bookDetail.authors}">
+      <span>
+        <a th:href="@{'https://www.google.com/search?q=' + ${author}}" target="_blank" th:text="${author}">저자 정보 없음</a>
+      </span>
+            <!-- 작가 이름 옆에 다른 저서 보기 버튼 추가 -->
+            <a th:href="@{'/bookgo/book/search/author?author=' + ${author}}" class="link-button" style="margin-left: 10px;">다른 저서 보기</a>
+          </li>
+        </ul>
       </div>
       <div class="info-box">
         <!-- 출판사 정보 및 버튼 추가 -->
-        <p>출판사: <a th:href="@{'https://www.google.com/search?q=' + 출판사 + ${bookDetail.publisher}}" target="_blank" th:text="${bookDetail.publisher ?: '출판사 정보 없음'}">출판사 정보 없음</a></p>
+        <p>출판사: <a th:href="@{'https://www.google.com/search?q=' + ${bookDetail.publisher}}" target="_blank" th:text="${bookDetail.publisher ?: '출판사 정보 없음'}">출판사 정보 없음</a></p>
         <a th:href="@{'/bookgo/book/search/publisher?publisher=' + ${bookDetail.publisher}}" class="link-button">다른 출판물 보기</a>
       </div>
     </div>
   </div>
 
+  <!-- 가격 정보 출력 -->
+  <div class="info-box-out">
+    <p>가격: <span th:text="${bookDetail.priceStandard}"></span> 원</p>
+
+    <div class="info-box">
+      <label for="quantity">수량:</label>
+      <input type="number" id="quantity" value="1" min="1" style="width: 60px; margin-left: 10px;">
+      <button id="addToCartButton" class="link-button" style="margin-left: 10px;">장바구니에 담기</button>
+    </div>
+  </div>
+
+  <!-- 카테고리 정보 출력 -->
+  <div class="info-box">
+    <h3>카테고리:</h3>
+    <p id="category-text" th:utext="${bookDetail.category ?: '카테고리 정보 없음'}">카테고리 정보 없음</p>
+  </div>
+
+  <!-- JavaScript 코드 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const categoryElement = document.getElementById('category-text');
+      let categoryText = categoryElement.textContent; // innerText 또는 textContent 사용
+
+      // "국" 앞에 <br>을 삽입
+      categoryText = categoryText.replace(/ (?=국)/g, '<br>국');
+
+      // HTML 내용 업데이트
+      categoryElement.innerHTML = categoryText; // innerHTML로 설정하여 <br> 태그를 반영
+
+      // 책바구니에 담기 버튼 클릭 이벤트
+      document.getElementById('addToCartButton').addEventListener('click', function () {
+        // bookDetail에서 ISBN13 값을 가져옵니다.
+        const isbn13 = document.getElementById('isbn13').textContent.trim(); // 예시 ID: 'isbn13'
+
+        // 수량을 입력 필드에서 가져옵니다.
+        const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+        // 수량이 유효한지 확인합니다.
+        if (isNaN(quantity) || quantity < 1) {
+          alert('유효한 수량을 입력하세요.');
+          return;
+        }
+
+        // AJAX 요청을 통해 서버에 책을 추가합니다.
+        fetch('/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isbn13, quantity })
+        })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('책이 장바구니에 추가되었습니다.');
+                  } else {
+                    alert('장바구니에 추가하는데 실패했습니다.');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error adding to cart:', error);
+                  alert('장바구니에 추가하는 중 오류가 발생했습니다.');
+                });
+      });
+
+  </script>
+
   <!-- Main Section: Main Image and Detailed Info -->
   <div class="main-section">
     <img th:if="${bookDetail.mainImg != null}" th:src="${bookDetail.mainImg}" alt="메인 이미지">
-    <p th:if="${bookDetail.introduction != null}" th:text="${bookDetail.introduction ?: '소개 정보 없음'}">책 소개 내용</p>
+    <p th:if="${bookDetail.introduction != null}" th:utext="${bookDetail.introduction ?: '소개 정보 없음'}">책 소개 내용</p>
   </div>
 
   <!-- Additional Content: Contents, Recommendations, etc. -->
   <div class="main-section">
     <h3 th:if="${bookDetail.contents != null}">목차</h3>
-    <p th:if="${bookDetail.contents != null}" th:text="${bookDetail.contents ?: '목차 정보 없음'}">목차 내용</p>
+    <p th:if="${bookDetail.contents != null}" th:utext="${bookDetail.contents ?: '목차 정보 없음'}">목차 내용</p>
 
     <h3 th:if="${bookDetail.recommendations != null}">추천사</h3>
-    <p th:if="${bookDetail.recommendations != null}" th:text="${bookDetail.recommendations ?: '추천사 정보 없음'}">추천사 내용</p>
+    <p th:if="${bookDetail.recommendations != null}" th:utext="${bookDetail.recommendations ?: '추천사 정보 없음'}">추천사 내용</p>
 
     <h3 th:if="${bookDetail.bookInside != null}">책 속으로</h3>
-    <p th:if="${bookDetail.bookInside != null}" th:text="${bookDetail.bookInside ?: '책 속으로 정보 없음'}">책 속으로 내용</p>
+    <p th:if="${bookDetail.bookInside != null}" th:utext="${bookDetail.bookInside ?: '책 속으로 정보 없음'}">책 속으로 내용</p>
 
     <h3 th:if="${bookDetail.publisherReview != null}">출판사 서평</h3>
-    <p th:if="${bookDetail.publisherReview != null}" th:text="${bookDetail.publisherReview ?: '출판사 서평 정보 없음'}">출판사 서평</p>
+    <p th:if="${bookDetail.publisherReview != null}" th:utext="${bookDetail.publisherReview ?: '출판사 서평 정보 없음'}">출판사 서평</p>
   </div>
 </div>
 

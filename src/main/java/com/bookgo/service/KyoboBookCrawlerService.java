@@ -17,210 +17,251 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class KyoboBookCrawlerService {
 
-    // 크롤링을 수행하여 BookDetailVO에 데이터를 추가하는 메서드
+    // ExecutorService를 사용하여 비동기 작업을 병렬로 실행
+    private final ExecutorService executor = Executors.newFixedThreadPool(4); // 4개의 스레드 풀을 사용
+
     public BookDetailVO crawlBookDetails(BookDetailVO bookDetail) {
-        // ChromeDriver 경로 설정 (chromedriver.exe가 위치한 경로로 수정)
         System.setProperty("webdriver.chrome.driver", "C:\\Users\\Joshua yoo\\chromedriver-win64\\chromedriver.exe");
 
-        // ChromeOptions 설정
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless"); // 헤드리스 모드 활성화
-        options.addArguments("--disable-gpu"); // GPU 비활성화 (리눅스 환경에서 호환성 문제 방지)
-        options.addArguments("--no-sandbox"); // 리눅스 환경에서 권한 문제 방지
-        options.addArguments("--disable-dev-shm-usage"); // 리눅스 환경에서 메모리 문제 방지
+        options.addArguments("--headless");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-features=NetworkService");
+        options.addArguments("--disable-javascript");
+        options.addArguments("--blink-settings=imagesEnabled=false");
+        options.addArguments("--disable-extensions");
 
-        // WebDriver 설정
         WebDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2)); // 대기 시간을 2초로 설정
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
         try {
-            // 교보문고 검색 페이지로 이동 (ISBN을 포함한 URL로 이동)
             String searchUrl = "https://search.kyobobook.co.kr/search?keyword=" + bookDetail.getIsbn13();
             driver.get(searchUrl);
 
-            // 검색 결과의 첫 번째 상품 링크 찾기 (대기)
             WebElement firstResultLink = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.prod_link")));
-            firstResultLink.click(); // 첫 번째 링크 클릭으로 상세 페이지로 이동
+            firstResultLink.click();
 
-            // 상세 페이지의 이미지 로딩 대기
             List<WebElement> imageElements = driver.findElements(By.cssSelector(".product_detail_area.detail_img .inner img"));
-
-            // 이미지가 있을 경우에만 처리
             if (!imageElements.isEmpty()) {
-                // 이미지 다운로드 및 설정 - ISBN으로 파일명을 설정
                 bookDetail.setMainImg(downloadDetailImage(driver, bookDetail.getIsbn13()));
             } else {
                 System.out.println("이미지가 존재하지 않습니다. 이미지 항목을 건너뜁니다.");
             }
 
-            // 크롤링된 데이터를 BookDetailVO에 추가
-            crawlBookIntroduction(driver, bookDetail);
-            crawlBookCategory(driver, bookDetail);
-            crawlAuthorInfo(driver, bookDetail);
-            crawlContents(driver, bookDetail);
-            crawlRecommendations(driver, bookDetail);
-            crawlBookInside(driver, bookDetail);
-            crawlPublisherReview(driver, bookDetail);
+            // 비동기 크롤링 작업 병렬 실행
+            CompletableFuture<Void> introFuture = CompletableFuture.runAsync(() -> crawlBookIntroduction(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("책 소개 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> categoryFuture = CompletableFuture.runAsync(() -> crawlBookCategory(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("책 분야 정보 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> authorFuture = CompletableFuture.runAsync(() -> crawlAuthorInfo(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("저자 정보 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> contentsFuture = CompletableFuture.runAsync(() -> crawlContents(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("목차 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> recommendationsFuture = CompletableFuture.runAsync(() -> crawlRecommendations(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("추천사 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> bookInsideFuture = CompletableFuture.runAsync(() -> crawlBookInside(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("책 속으로 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+            CompletableFuture<Void> publisherReviewFuture = CompletableFuture.runAsync(() -> crawlPublisherReview(driver, bookDetail), executor)
+                    .exceptionally(ex -> {
+                        System.out.println("출판사 서평 크롤링 중 오류 발생: " + ex.getMessage());
+                        return null;
+                    });
+
+            // 모든 작업이 완료될 때까지 기다림
+            CompletableFuture.allOf(introFuture, categoryFuture, authorFuture, contentsFuture, recommendationsFuture, bookInsideFuture, publisherReviewFuture).join();
 
             System.out.println("크롤링 완료: " + bookDetail.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // 드라이버 종료
             driver.quit();
+            // ExecutorService는 모든 작업이 완료된 후에만 종료
+            if (!executor.isShutdown()) {
+                executor.shutdown();
+            }
         }
 
         return bookDetail;
     }
-    // 책 소개 크롤링 메서드
+
     private void crawlBookIntroduction(WebDriver driver, BookDetailVO bookDetail) {
         try {
-            WebElement bookIntroElement = driver.findElement(By.cssSelector(".intro_bottom .info_text"));
-            String bookIntroduction = bookIntroElement.getText();
-            bookDetail.setIntroduction(bookIntroduction);
+            List<WebElement> elements = driver.findElements(By.cssSelector(".intro_bottom .info_text"));
+            if (!elements.isEmpty()) {
+                String bookIntroduction = elements.get(0).getAttribute("innerHTML");
+                bookDetail.setIntroduction(bookIntroduction);
+            } else {
+                System.out.println("책 소개를 찾을 수 없습니다.");
+            }
         } catch (Exception e) {
-            System.out.println("책 소개를 찾을 수 없습니다.");
+            System.out.println("책 소개 크롤링 중 오류 발생: " + e.getMessage());
         }
     }
 
-    // 책 분야 정보 크롤링 메서드
     private void crawlBookCategory(WebDriver driver, BookDetailVO bookDetail) {
         try {
-            WebElement bookCategoryElement = driver.findElement(By.cssSelector(".intro_category_list"));
-            List<WebElement> categories = bookCategoryElement.findElements(By.tagName("a"));
-            StringBuilder categoryBuilder = new StringBuilder("이 책이 속한 분야: ");
-            for (WebElement category : categories) {
-                categoryBuilder.append(category.getText()).append(" > ");
+            List<WebElement> elements = driver.findElements(By.cssSelector(".intro_category_list"));
+            if (!elements.isEmpty()) {
+                String bookCategory = elements.get(0).getText();
+                bookDetail.setCategory(bookCategory);
+            } else {
+                System.out.println("책 분야 정보를 찾을 수 없습니다.");
             }
-            bookDetail.setCategory(categoryBuilder.toString());
         } catch (Exception e) {
-            System.out.println("책 분야 정보를 찾을 수 없습니다.");
+            System.out.println("책 분야 정보 크롤링 중 오류 발생: " + e.getMessage());
         }
     }
 
-    // 저자 정보 크롤링 메서드
     private void crawlAuthorInfo(WebDriver driver, BookDetailVO bookDetail) {
         try {
-            WebElement authorNameElement = driver.findElement(By.cssSelector(".round_gray_box .title_heading .person_link .text"));
-            String authorName = authorNameElement.getText();
-            WebElement authorInfoElement = driver.findElement(By.cssSelector(".round_gray_box .info_text"));
-            String authorInfo = authorInfoElement.getText();
-            bookDetail.setAuthorInfo(authorName + ": " + authorInfo);
+            List<WebElement> nameElements = driver.findElements(By.cssSelector(".round_gray_box .title_heading .person_link .text"));
+            List<WebElement> infoElements = driver.findElements(By.cssSelector(".round_gray_box .info_text"));
+            if (!nameElements.isEmpty() && !infoElements.isEmpty()) {
+                String authorName = nameElements.get(0).getAttribute("innerHTML");
+                String authorInfo = infoElements.get(0).getAttribute("innerHTML");
+                bookDetail.setAuthorInfo(authorName + ": " + authorInfo);
+            } else {
+                System.out.println("저자 정보를 찾을 수 없습니다.");
+            }
         } catch (Exception e) {
-            System.out.println("저자 정보를 찾을 수 없습니다.");
+            System.out.println("저자 정보 크롤링 중 오류 발생: " + e.getMessage());
         }
     }
 
+    private void crawlContents(WebDriver driver, BookDetailVO bookDetail) {
+        try {
+            List<WebElement> elements = driver.findElements(By.cssSelector(".book_contents_list .book_contents_item"));
+            if (!elements.isEmpty()) {
+                String contents = elements.get(0).getAttribute("innerHTML");
+                bookDetail.setContents(contents);
+            } else {
+                System.out.println("목차를 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("목차 크롤링 중 오류 발생: " + e.getMessage());
+        }
+    }
 
+    private void crawlRecommendations(WebDriver driver, BookDetailVO bookDetail) {
+        try {
+            List<WebElement> elements = driver.findElements(By.cssSelector(".recommend_list"));
+            if (!elements.isEmpty()) {
+                String recommendations = elements.get(0).getAttribute("innerHTML");
+                bookDetail.setRecommendations(recommendations);
+            } else {
+                System.out.println("추천사를 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("추천사 크롤링 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    private void crawlBookInside(WebDriver driver, BookDetailVO bookDetail) {
+        try {
+            List<WebElement> elements = driver.findElements(By.cssSelector(".book_inside .info_text"));
+            if (!elements.isEmpty()) {
+                String bookInside = elements.get(0).getAttribute("innerHTML");
+                bookDetail.setBookInside(bookInside);
+            } else {
+                System.out.println("책 속으로를 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("책 속으로 크롤링 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    private void crawlPublisherReview(WebDriver driver, BookDetailVO bookDetail) {
+        try {
+            List<WebElement> elements = driver.findElements(By.cssSelector(".book_review .info_text"));
+            if (!elements.isEmpty()) {
+                String review = elements.get(0).getAttribute("innerHTML");
+                bookDetail.setPublisherReview(review);
+            } else {
+                System.out.println("출판사 서평을 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            System.out.println("출판사 서평 크롤링 중 오류 발생: " + e.getMessage());
+        }
+    }
 
     private String downloadDetailImage(WebDriver driver, String isbn) {
         try {
-            WebElement detailImage = driver.findElement(By.cssSelector(".product_detail_area.detail_img .inner img"));
-            String imgUrl = detailImage.getAttribute("src");
+            List<WebElement> elements = driver.findElements(By.cssSelector(".product_detail_area.detail_img .inner img"));
+            if (!elements.isEmpty()) {
+                String imgUrl = elements.get(0).getAttribute("src");
 
-            // 프로젝트의 static/mainimg 폴더 경로 설정
-            String staticPath = System.getProperty("user.dir") + File.separator
-                    + "src" + File.separator
-                    + "main" + File.separator
-                    + "resources" + File.separator
-                    + "static" + File.separator
-                    + "mainimg";
+                String staticPath = System.getProperty("user.dir") + File.separator
+                        + "src" + File.separator
+                        + "main" + File.separator
+                        + "resources" + File.separator
+                        + "static" + File.separator
+                        + "mainimg";
 
-            // 디렉토리 생성
-            File directory = new File(staticPath);
-            if (!directory.exists()) {
-                directory.mkdirs(); // 디렉토리가 없으면 생성
-            }
+                File directory = new File(staticPath);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
 
-            // ISBN을 파일 이름으로 사용, 파일 이름에 사용할 수 없는 문자는 대체
-            String sanitizedIsbn = isbn.replaceAll("[\\\\/:*?\"<>|]", "_"); // 파일명에 사용할 수 없는 문자 대체
-            String fileName = staticPath + File.separator + sanitizedIsbn + ".png";
+                String sanitizedIsbn = isbn.replaceAll("[\\\\/:*?\"<>|]", "_");
+                String fileName = staticPath + File.separator + sanitizedIsbn + ".JPEG";
 
-            // 이미지 다운로드
-            if (downloadImage(imgUrl, fileName)) {
-                System.out.println("상세 페이지 이미지 다운로드 완료: " + new File(fileName).getAbsolutePath());
-                // 브라우저에서 접근할 수 있도록 URL 형식으로 반환
-                return "/mainimg/" + sanitizedIsbn + ".png";
+                if (downloadImage(imgUrl, fileName)) {
+                    System.out.println("상세 페이지 이미지 다운로드 완료: " + new File(fileName).getAbsolutePath());
+                    return "/mainimg/" + sanitizedIsbn + ".JPEG";
+                } else {
+                    System.out.println("상세 페이지 이미지를 다운로드할 수 없습니다.");
+                }
             } else {
-                System.out.println("상세 페이지 이미지를 다운로드할 수 없습니다.");
+                System.out.println("다운로드할 이미지를 찾을 수 없습니다.");
             }
         } catch (Exception e) {
-            System.out.println("다운로드할 이미지를 찾을 수 없습니다.");
+            System.out.println("이미지 다운로드 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
     }
 
-
-
-    // 이미지 다운로드 메서드
     public boolean downloadImage(String urlStr, String fileName) {
         try (InputStream in = new URL(urlStr).openStream()) {
             BufferedImage image = ImageIO.read(in);
             if (image != null) {
-                ImageIO.write(image, "png", new File(fileName));
+                ImageIO.write(image, "JPEG", new File(fileName));
                 return true;
             } else {
                 System.out.println("이미지를 읽을 수 없습니다: " + urlStr);
             }
         } catch (Exception e) {
+            System.out.println("이미지 다운로드 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
-    }
-
-    // 목차 크롤링 메서드
-    private void crawlContents(WebDriver driver, BookDetailVO bookDetail) {
-        try {
-            WebElement contentsElement = driver.findElement(By.cssSelector(".book_contents_list .book_contents_item"));
-            String contents = contentsElement.getText();
-            bookDetail.setContents(contents);
-        } catch (Exception e) {
-            System.out.println("목차를 찾을 수 없습니다.");
-        }
-    }
-
-    // 추천사 크롤링 메서드
-    private void crawlRecommendations(WebDriver driver, BookDetailVO bookDetail) {
-        try {
-            WebElement recommendList = driver.findElement(By.cssSelector(".recommend_list"));
-            List<WebElement> recommendItems = recommendList.findElements(By.cssSelector(".recommend_item"));
-            StringBuilder recommendations = new StringBuilder("추천사:");
-            for (WebElement recommendItem : recommendItems) {
-                String recommender = recommendItem.findElement(By.cssSelector(".title_heading")).getText();
-                String recommendation = recommendItem.findElement(By.cssSelector(".info_text")).getText();
-                recommendations.append(recommender).append(": ").append(recommendation).append("\n");
-            }
-            bookDetail.setRecommendations(recommendations.toString());
-        } catch (Exception e) {
-            System.out.println("추천사를 찾을 수 없습니다.");
-        }
-    }
-
-    // 책 속으로 크롤링 메서드
-    private void crawlBookInside(WebDriver driver, BookDetailVO bookDetail) {
-        try {
-            WebElement bookInsideElement = driver.findElement(By.cssSelector(".book_inside .info_text"));
-            String bookInside = bookInsideElement.getText();
-            bookDetail.setBookInside(bookInside);
-        } catch (Exception e) {
-            System.out.println("책 속으로를 찾을 수 없습니다.");
-        }
-    }
-
-    // 출판사 서평 크롤링 메서드
-    private void crawlPublisherReview(WebDriver driver, BookDetailVO bookDetail) {
-        try {
-            WebElement reviewElement = driver.findElement(By.cssSelector(".book_review .info_text"));
-            String review = reviewElement.getText();
-            bookDetail.setPublisherReview(review);
-        } catch (Exception e) {
-            System.out.println("출판사 서평을 찾을 수 없습니다.");
-        }
     }
 }

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.SiteUserMapper">
+
+    <!-- 사용자 등록 -->
+    <insert id="insertUser" parameterType="com.bookgo.vo.SiteUserVO">
+        INSERT INTO site_user (id, nickname, username, password, email, address1, address2, joindate, birthdate, fullname, phonenumber, points, isbanned)
+        VALUES (#{id, jdbcType=NUMERIC}, #{nickname}, #{username}, #{password}, #{email}, #{address1}, #{address2}, #{joinDate}, #{birthDate}, #{fullName}, #{phoneNumber}, #{points}, #{isBanned})
+    </insert>
+
+    <!-- 비밀번호 조회 -->
+    <select id="getPasswordByUsername" parameterType="String" resultType="String">
+        SELECT password
+        FROM site_user
+        WHERE username = #{username}
+    </select>
+
+    <!-- 사용자 정보 매핑 설정 -->
+    <resultMap id="UserResultMap" type="com.bookgo.vo.SiteUserVO">
+        <result property="id" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="address1" column="address1"/>
+        <result property="address2" column="address2"/>
+        <result property="joinDate" column="joindate"/>
+        <result property="birthDate" column="birthdate"/>
+        <result property="fullName" column="fullname"/>
+        <result property="phoneNumber" column="phonenumber"/>
+        <result property="points" column="points"/>
+        <result property="isBanned" column="isbanned"/>
+    </resultMap>
+
+    <!-- 이메일로 사용자 조회 -->
+    <select id="getUserByEmail" parameterType="String" resultMap="UserResultMap">
+        SELECT *
+        FROM site_user
+        WHERE email = #{email}
+    </select>
+
+    <!-- 사용자명으로 사용자 조회 -->
+    <select id="getUserByUsername" parameterType="String" resultMap="UserResultMap">
+        SELECT *
+        FROM site_user
+        WHERE username = #{username}
+    </select>
+
+    <!-- 이메일로 아이디 조회 -->
+    <select id="getUsernameByEmail" parameterType="String" resultType="String">
+        SELECT username
+        FROM site_user
+        WHERE email = #{email}
+    </select>
+
+    <!-- 비밀번호 업데이트 -->
+    <update id="updatePassword" parameterType="map">
+        UPDATE site_user
+        SET password = #{password}
+        WHERE username = #{username}
+    </update>
+
+    <!-- 사용자 필드 업데이트 -->
+    <update id="updateUserField" parameterType="map">
+        UPDATE site_user
+        SET ${field} = #{value}
+        WHERE username = #{username}
+    </update>
+
+</mapper>

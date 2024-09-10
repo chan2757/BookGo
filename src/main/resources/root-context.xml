@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.naver.com"/>
+        <property name="port" value="465"/>
+        <property name="username" value="${naver.email.username}"/>
+        <property name="password" value="${naver.email.password}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.ssl.enable">true</prop>
+                <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> <!-- SSL 소켓 팩토리 클래스 추가 -->
+                <prop key="mail.smtp.socketFactory.port">465</prop> <!-- SSL 소켓 팩토리 포트 추가 -->
+                <prop key="mail.smtp.ssl.trust">smtp.naver.com</prop> <!-- 신뢰할 서버 설정 -->
+                <prop key="mail.debug">true</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

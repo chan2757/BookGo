@@ -3,11 +3,11 @@ package com.bookgo.service;
 import com.bookgo.vo.BookDetailVO;
 import com.bookgo.vo.BookDpVO; // DP VO 추가
 import com.bookgo.mapper.BookDetailMapper;
-import com.bookgo.service.KyoboBookCrawlerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -34,9 +34,10 @@ public class BookDetailService {
 
         System.out.println(dp.toString());
 
-        if(bookDetail != null) {
+        if (bookDetail != null) {
             System.out.println("db에 정보가 있습니다.");
         }
+
         // 데이터베이스에 정보가 없으면 DP와 크롤링 정보를 사용하여 데이터를 수집 및 저장
         if (bookDetail == null) {
             // DP 정보로 임시 BookDetailVO를 생성
@@ -64,13 +65,23 @@ public class BookDetailService {
         BookDetailVO bookDetail = new BookDetailVO();
         bookDetail.setIsbn13(dp.getIsbn13());
         bookDetail.setTitle(dp.getTitle());
-        bookDetail.setAuthor(dp.getAuthor());
+
+        // DP의 저자 리스트를 그대로 설정 - 이 부분에서 authors가 제대로 설정되었는지 확인 필요
+        if (dp.getAuthors() != null) {
+            bookDetail.setAuthors(dp.getAuthors());
+            System.out.println("Authors from DP: " + dp.getAuthors()); // 디버그용 로그 추가
+        } else {
+            System.out.println("Authors are null in DP");
+        }
+
         bookDetail.setPublisher(dp.getPublisher());
         bookDetail.setPriceStandard(dp.getPriceStandard());
         bookDetail.setCustomerReviewRank(dp.getCustomerReviewRank());
-        bookDetail.setCover(dp.getCover()); // DP의 cover를 BookDetailVO의 cover로 사용
+        bookDetail.setCover(dp.getCover());
         return bookDetail;
     }
+
+
 
     // 알라딘 API에서 책 정보를 가져오는 메서드 (사용하지 않는다면 주석처리 가능)
     private BookDetailVO fetchBookDetailFromAladin(String isbn13) {
@@ -91,7 +102,11 @@ public class BookDetailService {
         BookDetailVO bookDetailVO = new BookDetailVO();
         bookDetailVO.setIsbn13(isbn13);
         bookDetailVO.setTitle((String) item.get("title"));
-        bookDetailVO.setAuthor((String) item.get("author"));
+
+        // API에서 받은 저자 데이터를 리스트로 변환하여 설정
+        List<String> authors = Arrays.asList(((String) item.get("author")).split(",\\s*"));
+        bookDetailVO.setAuthors(authors);
+
         bookDetailVO.setPublisher((String) item.get("publisher"));
         bookDetailVO.setPubDate((String) item.get("pubDate"));
         bookDetailVO.setPriceStandard(Integer.parseInt(item.get("priceStandard").toString()));

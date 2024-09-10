@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .find-container {
+            width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .find-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5a67d8;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-group button:hover {
+            background-color: #434190;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .link-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .link-group a {
+            color: #5a67d8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .link-group a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="find-container">
+    <h2>아이디 찾기</h2>
+    <form id="findUsernameForm" onsubmit="return findUsername();">
+        <div class="form-group">
+            <label for="email">등록하신 이메일</label>
+            <input type="email" id="email" name="email" required>
+            <span id="emailError" class="error"></span>
+        </div>
+        <div class="form-group">
+            <button type="submit">아이디 찾기</button>
+        </div>
+        <div id="resultMessage" class="error"></div>
+        <div class="link-group" id="additionalLinks" style="display: none;">
+            <a href="/user/login">로그인하러 가기</a>
+            <a href="/user/findPassword">비밀번호 찾기</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function validateEmailForm() {
+        const email = document.getElementById('email').value;
+
+        if (email.trim() === '') {
+            document.getElementById('emailError').textContent = '이메일을 입력해주세요.';
+            return false;
+        } else {
+            document.getElementById('emailError').textContent = '';
+        }
+
+        return true;
+    }
+
+    function findUsername() {
+        if (!validateEmailForm()) {
+            return false;
+        }
+
+        const email = document.getElementById('email').value;
+
+        // Ajax 요청을 사용하여 서버에 이메일 전송
+        fetch('/user/findUsername', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                const resultMessage = document.getElementById('resultMessage');
+                const additionalLinks = document.getElementById('additionalLinks');
+
+                if (data.success) {
+                    resultMessage.textContent = `아이디: ${data.username}`;
+                    additionalLinks.style.display = 'flex';
+                } else {
+                    resultMessage.textContent = data.error || '등록되지 않은 이메일입니다.';
+                    additionalLinks.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('resultMessage').textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+            });
+
+        return false; // 폼 제출 방지
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 정보 확인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .info-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .info-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            flex: 1;
+        }
+        .info-group span, .info-group input {
+            flex: 2;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+        }
+        .info-group button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #5a67d8;
+            color: white;
+            cursor: pointer;
+        }
+        .info-group button:hover {
+            background-color: #434190;
+        }
+        .message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>내 정보 확인</h2>
+    <div class="info-group">
+        <label for="username">아이디</label>
+        <span id="username"></span>
+        <!-- <button class="edit-btn" onclick="enableEdit('username')">수정</button> -->
+
+    </div>
+    <div class="info-group">
+        <label for="nickname">닉네임</label>
+        <span id="nickname"></span>
+
+        <!-- <button class="edit-btn" onclick="enableEdit('nickname')">수정</button> -->
+
+    </div>
+    <div class="info-group">
+        <label for="email">이메일</label>
+        <span id="email"></span>
+
+        <!-- <button class="edit-btn" onclick="enableEdit('email')">수정</button> -->
+
+    </div>
+    <div class="info-group">
+        <label for="fullname">이름</label>
+        <span id="fullname"></span>
+        <button class="edit-btn" onclick="enableEdit('fullname')">수정</button>
+    </div>
+    <div class="info-group">
+        <label for="phonenumber">연락처</label>
+        <span id="phonenumber"></span>
+        <button class="edit-btn" onclick="enableEdit('phonenumber')">수정</button>
+    </div>
+    <div class="info-group">
+        <label for="points">포인트</label>
+        <span id="points"></span>
+
+        <!-- <button class="edit-btn" onclick="enableEdit('points')">수정</button> -->
+    </div>
+    <div class="info-group">
+        <label for="address1">주소</label>
+        <span id="address1"></span>
+        <button class="edit-btn" onclick="enableEdit('address1')">수정</button>
+    </div>
+    <div class="info-group">
+        <label for="address2">상세 주소</label>
+        <span id="address2"></span>
+        <button class="edit-btn" onclick="enableEdit('address2')">수정</button>
+    </div>
+    <div id="userMessage" class="message"></div>
+</div>
+
+<script>
+    // 페이지 로드 시 사용자 정보 가져오기
+    document.addEventListener('DOMContentLoaded', loadUserInfo);
+
+    // 사용자 정보 로드 함수
+    function loadUserInfo() {
+        fetch('/user/info')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('nickname').textContent = data.nickname;
+                document.getElementById('email').textContent = data.email;
+                document.getElementById('fullname').textContent = data.fullName;
+                document.getElementById('phonenumber').textContent = data.phoneNumber;
+                document.getElementById('points').textContent = data.points + ' 점';
+                document.getElementById('address1').textContent = data.address1;
+                document.getElementById('address2').textContent = data.address2;
+            })
+            .catch(error => {
+                document.getElementById('userMessage').textContent = '정보를 불러오는 중 오류가 발생했습니다.';
+                console.error('Error loading user info:', error);
+            });
+    }
+
+    // 수정 버튼 클릭 시 필드 수정 가능하게 전환
+    function enableEdit(field) {
+        const span = document.getElementById(field);
+        const value = span.textContent;
+        const input = document.createElement('input');
+        input.value = value;
+        input.id = field + '-input';
+        span.replaceWith(input);
+
+        const button = event.target;
+        button.textContent = '수정 완료';
+        button.onclick = function() { confirmEdit(field, input.value) };
+    }
+
+    // 수정 완료 시 비밀번호 검증 및 데이터 저장
+    function confirmEdit(field, newValue) {
+        const password = prompt('수정을 완료하려면 비밀번호를 입력하세요:');
+        if (password) {
+            // 비밀번호 검증 후 데이터 업데이트 API 호출 (서버로 보내기)
+            fetch('/user/verifyPassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // 성공 시 데이터 업데이트
+                        updateField(field, newValue);
+                    } else {
+                        alert('비밀번호가 올바르지 않습니다.');
+                    }
+                })
+                .catch(error => {
+                    alert('비밀번호 검증 중 오류가 발생했습니다.');
+                    console.error('Error verifying password:', error);
+                });
+        }
+    }
+
+    // 필드 업데이트 함수
+    function updateField(field, newValue) {
+        fetch(`/user/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ field, value: newValue }) // 필드와 값만 전달
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // 성공 시 span을 다시 생성하고 버튼을 "수정"으로 변경
+                    document.getElementById(field + '-input').replaceWith(createSpan(field, newValue));
+                    document.querySelector(`button[onclick="enableEdit('${field}')"]`).replaceWith(createButton(field));
+                    alert('수정이 완료되었습니다.');
+                } else {
+                    alert('수정 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                alert('수정 중 오류가 발생했습니다.');
+                console.error('Error updating field:', error);
+            });
+    }
+
+    // 새로운 span 생성
+    function createSpan(field, value) {
+        const span = document.createElement('span');
+        span.id = field;
+        span.textContent = value;
+        return span;
+    }
+
+    // 새로운 버튼 생성
+    function createButton(field) {
+        const button = document.createElement('button');
+        button.className = 'edit-btn';
+        button.textContent = '수정';
+        button.onclick = function() { enableEdit(field) };
+        return button;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이 페이지</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .menu-item {
+      display: block;
+      padding: 15px;
+      margin: 10px 0;
+      background-color: #5a67d8;
+      color: #ffffff;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .menu-item:hover {
+      background-color: #434190;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>마이 페이지</h2>
+  <a href="/user/infoDetail" class="menu-item">내 정보 확인 및 수정</a>
+  <a href="/cart/details" class="menu-item">장바구니 보기</a>
+</div>
+</body>
+</html>

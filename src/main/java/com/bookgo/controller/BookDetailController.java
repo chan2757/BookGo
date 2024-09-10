@@ -33,6 +33,9 @@ public class BookDetailController {
         BookDetailVO bookDetail = bookDetailService.getBookDetail(dp.getIsbn13(), dp);
 
         model.addAttribute("bookDetail", bookDetail);
+
+        System.out.println(bookDetail.toString());
+
         return "bookgo/bookDetail"; // bookDetail.html 페이지로 이동
     }
 }

@@ -198,8 +198,19 @@
                     </thead>
                     <tbody class="align-middle">
                         <tr>
-                            <td class="align-middle"><img src="img/product-1.jpg" alt="" style="width: 50px;"> Colorful Stylish Shirt</td>
-                            <td class="align-middle">$150</td>
+                            <td class="option-area" th:value="${ cartItem.optionNo }">
+                                <a th:href="@{/product/details/(no=${cartItem.product.prodNo})}">[[${ cartItem.product.prodName }]]</a>
+                                <p>
+                                    <span>[[${ cartItem.option.pointSize }]]mm</span>
+                                    <th:block th:if="${ cartItem.option.bodyColor != '(해당없음)' }">
+                                        <span th:text="|/ ${#strings.replace(cartItem.option.bodyColor, '$', ',')}|"></span>
+                                    </th:block>
+                                    <th:block th:if="${ cartItem.option.inkColor != '(해당없음)' }">
+                                        <span th:text="|/ ${#strings.replace(cartItem.option.inkColor, '$', ',')}|"></span>
+                                    </th:block>
+                                </p>
+                            </td>
+                            <td class="align-middle">$</td>
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
@@ -224,13 +235,13 @@
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-primary btn-minus" >
+                                        <button class="btn btn-sm btn-primary btn-minus" id=".downBtn">
                                         <i class="fa fa-minus"></i>
                                         </button>
                                     </div>
                                     <input type="text" class="form-control form-control-sm bg-secondary text-center" value="1">
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-primary btn-plus">
+                                        <button class="btn btn-sm btn-primary btn-plus" id=".upBtn">
                                             <i class="fa fa-plus"></i>
                                         </button>
                                     </div>
@@ -331,7 +342,7 @@
                     <div class="card-footer border-secondary bg-transparent">
                         <div class="d-flex justify-content-between mt-2">
                             <h5 class="font-weight-bold">Total</h5>
-                            <h5 class="font-weight-bold">$160</h5>
+                            <h5 class="font-weight-bold"><b class="total-price">0</b>원</h5>
                         </div>
                         <button onclick="checkout.html" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</button>
                     </div>
@@ -425,9 +436,11 @@
     <!-- Contact Javascript File -->
     <script src="mail/jqBootstrapValidation.min.js"></script>
     <script src="mail/contact.js"></script>
-
+vc
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    
+    <script src="js/order.js"></script>
 </body>
 
 </html>
