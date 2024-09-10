@@ -6,65 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 정보 확인</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-        }
-        .container {
-            width: 400px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .info-group {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        .info-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            flex: 1;
-        }
-        .info-group span, .info-group input {
-            flex: 2;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f8f8;
-        }
-        .info-group button {
-            margin-left: 10px;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            background-color: #5a67d8;
-            color: white;
-            cursor: pointer;
-        }
-        .info-group button:hover {
-            background-color: #434190;
-        }
-        .message {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
+
     </style>
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 <div class="container">
     <h2>내 정보 확인</h2>
     <div class="info-group">
@@ -222,4 +183,5 @@
     }
 </script>
 </body>
+<div th:replace="includes/footer :: footerFragment"></div>
 </html>

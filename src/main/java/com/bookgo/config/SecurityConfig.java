@@ -46,6 +46,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()  // Static 리소스 허용
                         .requestMatchers("/user/login", "/user/signup", "/bookgo/index").permitAll()
                         .requestMatchers("/user/infoDetail", "/user/mypage").authenticated()
                         .anyRequest().permitAll()
