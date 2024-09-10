@@ -112,10 +112,10 @@ public class BookCartController {
             int userId = siteUserService.getUserIdByUsername(username);
             logger.info("Retrieved userId: {}", userId);
 
-            // cartId와 quantity를 안전하게 String으로 받고 Integer로 변환
-            int cartId = Integer.parseInt((String) request.get("cartId"));
+            // JSON에서 전달된 값이 String으로 되어 있다면 parse를 통해 int로 변환
+            int cartId = Integer.parseInt(request.get("cartId").toString());
             String isbn13 = (String) request.get("isbn13");
-            int quantity = Integer.parseInt((String) request.get("quantity"));
+            int quantity = Integer.parseInt(request.get("quantity").toString());
 
             logger.info("Updating cart item - Cart ID: {}, ISBN13: {}, Quantity: {}", cartId, isbn13, quantity);
 
@@ -131,5 +131,4 @@ public class BookCartController {
 
         return response;
     }
-
 }

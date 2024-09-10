@@ -21,6 +21,8 @@ public class SiteUserVO {
     private String address2;
     private LocalDate joinDate = LocalDate.now();  // 기본값 설정
     private LocalDate birthDate;
+    private String role = "USER";
+    // 기본값 설정
     @JsonProperty("fullName") // 명시적 매핑 추가
     private String fullName;
 

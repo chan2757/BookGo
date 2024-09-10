@@ -22,11 +22,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + username);
         }
-        // SiteUserVO를 UserDetails로 변환하여 반환 (필요한 변환 코드 추가)
+        String role = user.getRole(); // 데이터베이스에서 "USER" 또는 "ADMIN" 등의 역할을 가져온다고 가정
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles("USER") // 사용자 역할 설정 (예: USER, ADMIN)
+                .roles(role.toUpperCase()) // 가져온 역할을 대문자로 설정
                 .build();
     }
+
 }

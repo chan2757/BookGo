@@ -7,75 +7,112 @@
     <title>로그인</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
         }
+
+        header, footer {
+            display: block;
+            width: 100%;
+        }
+
         .login-container {
-            width: 400px;
-            padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            margin: 50px auto; /* 수직 중앙 정렬을 위한 마진 설정 */
+            box-sizing: border-box;
         }
+
         .login-container h2 {
             margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
             text-align: center;
         }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
         }
+
         .form-group input {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
-            font-size: 14px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 16px;
+            color: #333;
         }
+
         .form-group button {
             width: 100%;
             padding: 10px;
-            background-color: #5a67d8;
-            color: #ffffff;
             border: none;
             border-radius: 4px;
-            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         .form-group button:hover {
-            background-color: #434190;
+            background-color: #0056b3;
         }
+
         .error {
-            color: red;
-            font-size: 0.9em;
+            color: #dc3545;
+            font-size: 14px;
+            display: block;
             margin-top: 5px;
         }
+
         .link-group {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            text-align: center;
+            margin-top: 20px;
         }
+
         .link-group a {
-            color: #5a67d8;
+            color: #007bff;
             text-decoration: none;
             font-size: 14px;
         }
+
         .link-group a:hover {
             text-decoration: underline;
-        }
+
     </style>
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 <div class="login-container">
     <h2>로그인</h2>
     <form id="loginForm" action="/user/loginProcess" method="post" onsubmit="return validateLoginForm()">
@@ -124,5 +161,17 @@
         return true;
     }
 </script>
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

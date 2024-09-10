@@ -78,7 +78,7 @@ public class SiteUserController {
                     new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>())
             );
             System.out.println("로그인 성공: 아이디 - " + username);
-            return "redirect:/bookgo/index";
+            return "/index";
         } else {
             System.out.println("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.");
             model.addAttribute("loginErrorMessage", "아이디 또는 비밀번호가 잘못되었습니다.");

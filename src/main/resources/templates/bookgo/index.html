@@ -1,42 +1,220 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookGo 메인 페이지</title>
+    <meta charset="utf-8">
+    <title>BookGo - 도서 구매 및 도서관 검색 사이트</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+    <link th:href="@{/lib/owlcarousel/assets/owl.theme.default.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+
+
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
+        /* 섹션 높이 조정 */
+        .container-fluid.py-5 {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+            min-height: 500px; /* 섹션의 최소 높이 증가 */
         }
-        .container {
-            text-align: center;
+
+        /* 슬라이더 아이템 크기 조정 */
+        .book-item {
+            max-height: 350px; /* 아이템의 최대 높이 증가 */
+            overflow: hidden;
+            padding: 1rem; /* 아이템의 내부 패딩 */
         }
-        .button {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #5a67d8;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+
+        /* 이미지 크기 조정 */
+        .book-item img {
+            max-height: 180px; /* 이미지 높이 조정 */
+            width: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            display: block;
         }
-        .button:hover {
-            background-color: #434190;
+
+        /* 텍스트 폰트 크기 조정 */
+        .book-title {
+            font-size: 1rem; /* 제목 폰트 크기 */
+        }
+
+        .book-author,
+        .book-publisher,
+        .book-price {
+            font-size: 0.9rem; /* 저자, 출판사, 가격 폰트 크기 */
+            margin-bottom: 0.4rem; /* 텍스트 간 간격 조정 */
+        }
+
+        /* 슬라이더 이동 화살표 스타일 */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>BookGo 메인 페이지</h1>
-    <button class="button" onclick="location.href='/user/mypage'">마이페이지로 이동</button>
-    <button class="button" onclick="location.href='/bookgo/book/list'">리스트로 이동</button>
+<div th:replace="~{includes/header :: headerFragment}"></div>
+
+<!-- 도서 리스트 섹션 -->
+<div class="container-fluid py-5">
+    <h2 class="text-center mb-4">도서 리스트</h2>
+    <div class="button-container text-center mb-4">
+        <button onclick="loadBooks('Bestseller')" class="btn btn-primary mx-1">베스트셀러</button>
+        <button onclick="loadBooks('ItemNewSpecial')" class="btn btn-primary mx-1">주목할 만한 신간</button>
+        <button onclick="loadBooks('ItemNewAll')" class="btn btn-primary mx-1">신간 전체 리스트</button>
+    </div>
+
+    <div id="book-list" class="owl-carousel owl-theme">
+        <!-- 초기 데이터를 서버에서 렌더링 -->
+        <div th:each="book : ${books}" class="item">
+            <div class="book-item border p-3">
+                <img th:src="${book.cover}" alt="도서 이미지" class="img-fluid">
+                <h5 class="book-title mt-3" th:text="${book.title}">도서 제목</h5>
+                <div class="book-rating">
+                    <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).floor(book.customerReviewRank / 2.0))}" class="star">★</span>
+                    <span th:if="${(book.customerReviewRank / 2.0) % 1.0 >= 0.5}" class="star">⯪</span>
+                    <span th:each="i : ${#numbers.sequence(1, 5 - T(java.lang.Math).floor(book.customerReviewRank / 2.0) - ((book.customerReviewRank / 2.0) % 1.0 >= 0.5 ? 1 : 0))}" class="star" style="color: lightgray;">☆</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 좌우 버튼 추가
+    <a class="carousel-control-prev" href="#book-list" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon mb-n2" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#book-list" role="button" data-slide="next">
+        <span class="carousel-control-next-icon mb-n2" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>-->
 </div>
+
+<div th:replace="~{includes/footer :: footerFragment}"></div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
+
+<!-- AJAX Script -->
+<script>
+    // 제목을 25자 이상일 때 잘라내는 함수
+    function truncateTitle(element) {
+        const originalText = element.textContent || element.innerText; // 원래 텍스트 가져오기
+        if (originalText.length > 25) {
+            // 제목을 25자로 자르고 그 뒤의 특수문자 전까지 추출
+            const truncated = originalText.substring(0, 25);
+            const specialCharIndex = originalText.substring(25).search(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9\s]/); // 특수문자 위치 찾기
+            if (specialCharIndex !== -1) {
+                element.textContent = truncated + originalText.substring(25, 25 + specialCharIndex);
+            } else {
+                element.textContent = truncated; // 특수문자가 없으면 25자까지만 출력
+            }
+        }
+    }
+
+    function loadBooks(queryType) {
+        $.ajax({
+            url: `/bookgo/books/index/books?queryType=${queryType}`,
+            type: 'GET',
+            success: function (data) {
+                // 받은 HTML 프래그먼트를 book-list 영역에 넣기
+                document.getElementById('book-list').innerHTML = data;
+                // Owl Carousel 재초기화
+                $(".owl-carousel").owlCarousel({
+                    loop: true,
+                    margin: 10,
+                    nav: true,
+                    navText: [
+                        '<span class="carousel-control-prev-icon mb-n2" aria-hidden="true"></span>',
+                        '<span class="carousel-control-next-icon mb-n2" aria-hidden="true"></span>'
+                    ],
+                    dots: true,
+                    autoplay: true, // 자동 재생 설정
+                    autoplayTimeout: 3000, // 3초마다 슬라이드 전환
+                    autoplaySpeed: 800, // 부드러운 전환을 위한 속도 설정
+                    responsive: {
+                        0: {
+                            items: 1
+                        },
+                        600: {
+                            items: 2
+                        },
+                        1000: {
+                            items: 4
+                        }
+                    }
+                });
+                // 새로운 제목이 로드된 후 truncateTitle 적용
+                document.querySelectorAll('.book-title').forEach(truncateTitle);
+            },
+            error: function () {
+                alert('도서 데이터를 가져오는데 실패했습니다.');
+            }
+        });
+    }
+
+    // 페이지 로드 시 Owl Carousel 초기화 및 기본 도서 리스트 로드
+    $(document).ready(function () {
+        // Owl Carousel 초기화
+        $(".owl-carousel").owlCarousel({
+            loop: true,
+            margin: 10,
+            nav: true,
+            navText: [
+                '<span class="carousel-control-prev-icon mb-n2" aria-hidden="true"></span>',
+                '<span class="carousel-control-next-icon mb-n2" aria-hidden="true"></span>'
+            ],
+            dots: true,
+            autoplay: true, // 자동 재생 설정
+            autoplayTimeout: 3000, // 3초마다 슬라이드 전환
+            autoplaySpeed: 800, // 부드러운 전환을 위한 속도 설정
+            responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 2
+                },
+                1000: {
+                    items: 4
+                }
+            }
+        });
+
+        // 기본 도서 리스트 로드 (예: 'Bestseller'를 기본값으로 로드)
+        loadBooks('Bestseller');
+    });
+</script>
+
 </body>
 </html>
