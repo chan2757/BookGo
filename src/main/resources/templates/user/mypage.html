@@ -6,45 +6,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>마이 페이지</title>
   <style>
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f4f4f9;
     }
+
+    header, footer {
+      display: block;
+      width: 100%;
+    }
+
     .container {
-      max-width: 600px;
-      margin: 20px;
+      max-width: 800px;
+      margin: 50px auto;
       padding: 20px;
       background-color: #ffffff;
       border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
+
     .menu-item {
       display: block;
-      padding: 15px;
       margin: 10px 0;
-      background-color: #5a67d8;
-      color: #ffffff;
-      text-align: center;
+      padding: 10px 20px;
       text-decoration: none;
+      color: #007bff;
+      border: 1px solid #007bff;
       border-radius: 4px;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
+
     .menu-item:hover {
-      background-color: #434190;
+      background-color: #007bff;
+      color: #ffffff;
     }
+
   </style>
+  <!-- Favicon -->
+  <link th:href="@{/img/favicon.ico}" rel="icon">
+
+  <!-- Google Web Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Libraries Stylesheet -->
+  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+  <!-- Customized Bootstrap Stylesheet -->
+  <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
 <div class="container">
   <h2>마이 페이지</h2>
   <a href="/user/infoDetail" class="menu-item">내 정보 확인 및 수정</a>
   <a href="/cart/detail" class="menu-item">장바구니 보기</a>
 </div>
+<div th:replace="includes/footer :: footerFragment"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
 </body>
+
 </html>

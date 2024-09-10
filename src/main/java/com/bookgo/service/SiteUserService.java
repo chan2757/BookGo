@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -178,6 +179,12 @@ public class SiteUserService {
     public int getUserIdByUsername(String username) {
         // userMapper를 사용하여 username으로 id를 조회
         return userMapper.getUserIdByUsername(username);
+    }
+
+    @PostMapping("/loginProcess")
+    public String loginProcess() {
+        // 이 메서드는 필요하지 않으며, Spring Security에서 처리하게 설정
+        return "redirect:/index"; // 성공 시 리다이렉트 경로를 설정할 수 있음
     }
 
 

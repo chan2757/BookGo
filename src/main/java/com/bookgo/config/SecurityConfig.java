@@ -46,7 +46,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/user/signup", "/bookgo/index").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()  // Static 리소스 허용
+                        .requestMatchers("/index", "/user/login", "/user/signup", "/bookgo/**").permitAll()
                         .requestMatchers("/user/infoDetail", "/user/mypage").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -54,7 +55,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/user/login")
                         .loginProcessingUrl("/user/loginProcess")
-                        .defaultSuccessUrl("/bookgo/index", true)
+                        .defaultSuccessUrl("/index", true) // 수정된 부분
                         .failureUrl("/user/login?error=true")
                         .failureHandler((request, response, exception) -> {
                             System.out.println("로그인 실패: " + exception.getMessage());
@@ -64,7 +65,9 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/user/logout")
-                        .logoutSuccessUrl("/bookgo/index")
+                        .logoutSuccessUrl("/index") // 수정된 부분
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .deleteCookies("JSESSIONID") // 쿠키 삭제
                         .permitAll()
                 );
 

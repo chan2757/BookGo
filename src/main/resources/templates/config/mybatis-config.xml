@@ -35,5 +35,6 @@
         <mapper resource="templates/mapper/LibraryInfoMapper.xml"/>
         <mapper resource="templates/mapper/BookDetailMapper.xml"/>
         <mapper resource="templates/mapper/BookCartMapper.xml"/>
+        <mapper resource="templates/mapper/FAQMapper.xml"/>
     </mappers>
 </configuration>

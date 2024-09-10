@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <title>도서 리스트</title>
     <style>
+
+        .main-container {
+            margin-left: 400px; /* 왼쪽 여백을 100px로 설정 */
+            padding: 20px; /* 필요에 따라 다른 여백이나 패딩을 추가할 수 있습니다 */
+        }
+
         .book-list {
             display: flex;
             flex-direction: column;
@@ -103,8 +109,26 @@
             color: white;
         }
     </style>
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+
 </head>
 <body>
+<div th:replace="includes/header :: headerFragment"></div>
+<div class="main-container">
 <h1>도서 리스트</h1>
 <div class="button-container">
     <button onclick="location.href='/bookgo/books/list?queryType=Bestseller'">베스트셀러</button>
@@ -155,6 +179,24 @@
     </th:block>
     <button th:if="${currentPage < totalPages}" th:onclick="|location.href='?query=${query}&page=${currentPage + 1}'|">다음</button>
 </div>
+</div>
+
+<div th:replace="~{includes/footer :: footerFragment}"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<!-- Contact Javascript File -->
+<script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
+<script th:src="@{/mail/contact.js}"></script>
+
+<!-- Template Javascript -->
+<script th:src="@{/js/main.js}"></script>
+
+
+
+<script src="/js/map.js"></script>
 
 </body>
 </html>

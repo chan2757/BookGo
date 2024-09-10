@@ -15,8 +15,8 @@ var currentDestinationMarker = null; // 현재 목적지 마커
 function displaySummary(summary) {
     const summaryElement = document.getElementById('route-summary');
     summaryElement.innerHTML = `
-        <p><strong>출발지:</strong> ${summary.startLat}, ${summary.startLng}</p>
-        <p><strong>목적지:</strong> ${summary.goalLat}, ${summary.goalLng}</p>
+        <h3>경로 요약</h3>   
+        <br/>
         <p><strong>총거리:</strong> ${Math.round(summary.distance / 1000)} 키로미터</p>
         <p><strong>예상 시간:</strong> ${Math.round(summary.duration / 60000)} 분</p>
         <p><strong>통행료:</strong> ${summary.tollFare} 원</p>
