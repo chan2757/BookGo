@@ -56,7 +56,7 @@
         </div>
         <div class="form-group">
             <label for="requestPrice">결제 금액</label>
-            <input type="number" class="form-control" id="requestPrice" value="189000" required>
+            <input type="number" class="form-control" id="requestPrice" th:value="${totalPrice}" readonly>
         </div>
         <div class="text-right">
             <button type="button" class="btn btn-primary" onclick="requestPayment()">결제하기</button>

@@ -23,7 +23,7 @@
     <!-- Insert PaymentRequestVO -->
     <insert id="insertPaymentRequest" parameterType="com.bookgo.vo.PaymentRequestVO">
         INSERT INTO PAYMENT_REQUEST (REQUEST_ID, ORDER_ID, USERNAME, FULL_NAME, EMAIL, PHONE, ADDRESS, TOTAL_AMOUNT, TID, CREATED_AT)
-        VALUES (PAYMENT_REQUEST_SEQ.NEXTVAL, #{orderId}, #{username}, #{fullName}, #{email}, #{phone}, #{address}, #{totalAmount}, #{tid}, CURRENT_TIMESTAMP)
+        VALUES (PAYMENT_REQUEST_SEQ.NEXTVAL, #{orderId}, #{username}, #{fullName}, #{email}, #{phone}, #{address}, #{totalAmount}, #{tid, jdbcType=VARCHAR}, CURRENT_TIMESTAMP)
     </insert>
 
     <!-- PaymentDetailVO ResultMap -->
@@ -58,10 +58,9 @@
     </delete>
 
     <!-- REQUEST_ID로 결제 금액 수정 -->
-    <update id="updateTotalAmountByRequestId" parameterType="map">
+    <update id="updateTotalAmountByRequestId">
         UPDATE PAYMENT_REQUEST
-        SET TOTAL_AMOUNT = #{totalAmount}, UPDATED_AT = CURRENT_TIMESTAMP
+        SET TOTAL_AMOUNT = #{updatedAmount}, UPDATED_AT = CURRENT_TIMESTAMP
         WHERE REQUEST_ID = #{requestId}
     </update>
-
 </mapper>

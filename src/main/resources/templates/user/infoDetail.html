@@ -251,23 +251,19 @@
         const confirmPassword = prompt('비밀번호를 다시 입력하세요:');
 
         if (newPassword && confirmPassword && newPassword === confirmPassword) {
+            console.log(newPassword)
             fetch('/user/changePassword', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ newPassword })
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ newPassword: newPassword }) // 올바르게 입력된 비밀번호를 전달
             })
                 .then(response => response.json())
                 .then(result => {
-                    if (result.success) {
+
                         alert('비밀번호가 성공적으로 변경되었습니다.');
-                    } else {
-                        alert('비밀번호 변경에 실패했습니다.');
-                    }
+
                 })
-                .catch(error => {
-                    alert('비밀번호 변경 중 오류가 발생했습니다.');
-                    console.error('Error changing password:', error);
-                });
+
         } else {
             alert('비밀번호가 일치하지 않거나 입력이 잘못되었습니다.');
         }

@@ -50,8 +50,8 @@
             <table id="paymentTable" class="display" style="width:100%">
                 <thead>
                 <tr>
-                    <th>결제 요청 ID</th>
-                    <th>총 금액</th>
+                    <th>ID</th>
+                    <th>금액</th>
                     <th>결제 일자</th>
                     <th>이름</th>
                     <th>이메일</th>
@@ -72,7 +72,7 @@
                     <td th:text="${payment.address}"></td>
                     <td>
                         <ul>
-                            <li th:each="product : ${payment.products}">
+                            <li th:if="${payment.products != null}" th:each="product : ${payment.products}">
                                 <span th:text="${product.productName}"></span> -
                                 <span th:text="${product.quantity}"></span>개,
 
@@ -89,21 +89,20 @@
     </div>
 </div>
 
-<div class="footer">
-    <div class="container text-center">
-        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
-    </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 <script>
+
     $(document).ready(function () {
         $('#paymentTable').DataTable({
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Korean.json"
-            }
+            },
+            order: [[2, 'desc']],
+            "pageLength": 10,
+            "paging": true
         });
 
         // 환불 버튼 클릭 이벤트
@@ -134,7 +133,7 @@
             }
         });
     });
-</script>
 
+</script>
 </body>
 </html>

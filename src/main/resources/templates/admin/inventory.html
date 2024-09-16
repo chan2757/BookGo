@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>결제 관리</title>
+    <title>재고 관리</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
@@ -31,6 +31,10 @@
         .table-container {
             margin: 20px;
         }
+        .cover-preview {
+            width: 50px;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -44,40 +48,29 @@
     </div>
 
     <div class="main-content">
-        <h2>결제 관리</h2>
+        <h2>재고 관리</h2>
+
+
         <div class="table-container">
-            <table id="paymentTable" class="table table-striped" style="width:100%">
+            <table id="productTable" class="display" style="width:100%">
                 <thead>
                 <tr>
-                    <th>결제 요청 ID</th>
-                    <th>총 금액</th>
-                    <th>결제 일자</th>
-                    <th>이름</th>
-                    <th>이메일</th>
-                    <th>전화번호</th>
-                    <th>주소</th>
-                    <th>상품 목록</th>
+                    <th>ISBN13</th>
+                    <th>Title</th>
+                    <th>Authors</th>
+                    <th>Publisher</th>
+                    <th>Price</th>
+                    <th>Stock</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="payment : ${paymentRequests}">
-                    <td th:text="${payment.requestId}"></td>
-                    <td th:text="${payment.totalAmount}"></td>
-                    <td th:text="${#dates.format(payment.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${payment.fullName}"></td>
-                    <td th:text="${payment.email}"></td>
-                    <td th:text="${payment.phone}"></td>
-                    <td th:text="${payment.address}"></td>
-                    <td>
-                        <ul>
-                            <li th:each="product : ${payment.products}">
-                                <span th:text="${product.productName}"></span> -
-                                <span th:text="${product.quantity}"></span>개,
-                                단가: <span th:text="${product.itemPrice}"></span>원,
-                                총 가격: <span th:text="${product.totalPrice}"></span>원
-                            </li>
-                        </ul>
-                    </td>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.isbn13}"></td>
+                    <td th:text="${product.title}"></td>
+                    <td th:text="${product.authors}"></td>
+                    <td th:text="${product.publisher}"></td>
+                    <td th:text="${product.priceStandard}"></td>
+                    <td class="editable" th:data-isbn13="${product.isbn13}" th:data-stock="${product.stock}" th:text="${product.stock}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -93,12 +86,95 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-<script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<<script>
     $(document).ready(function () {
-        $('#paymentTable').DataTable({
+        $('#productTable').DataTable({
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Korean.json"
             }
+        });
+
+        // 수량 필드를 클릭할 때 발생하는 이벤트
+        $('.editable').click(function () {
+            const $cell = $(this);
+            const isbn13 = $cell.data('isbn13');
+            const currentValue = $cell.text();
+
+            const $input = $('<input>', {
+                type: 'number',
+                value: currentValue,
+                class: 'form-control',
+                blur: function () {
+                    saveChanges($cell, isbn13, $input.val());
+                },
+                keyup: function (e) {
+                    if (e.which === 13) $input.blur(); // Enter 키로 저장
+                }
+            });
+            $cell.html($input);
+            $input.focus();
+        });
+
+        function saveChanges($cell, isbn13, newValue) {
+            $.ajax({
+                url: '/admin/updateProductStock',
+                type: 'POST',
+                data: {
+                    isbn13: isbn13,
+                    stock: newValue
+                },
+                success: function (response) {
+                    $cell.text(newValue);
+                    alert('재고가 수정되었습니다.');
+                },
+                error: function () {
+                    alert('재고 수정에 실패했습니다.');
+                    $cell.text($cell.data('originalValue')); // 실패 시 원래 값 복원
+                }
+            });
+        }
+
+        // 엑셀 다운로드 버튼 클릭 이벤트
+        $('#exportExcel').click(function () {
+            // 테이블 데이터를 JSON 형식으로 변환
+            const productList = [];
+            $('#productTable tbody tr').each(function () {
+                const product = {
+                    isbn13: $(this).find('td').eq(0).text(),
+                    title: $(this).find('td').eq(1).text(),
+                    authors: $(this).find('td').eq(2).text(),
+                    publisher: $(this).find('td').eq(3).text(),
+                    priceStandard: $(this).find('td').eq(4).text(),
+                    stock: $(this).find('td').eq(5).text()
+                };
+                productList.push(product);
+                console.log(productList);
+            });
+
+            // JSON 데이터를 서버로 전송하여 엑셀로 출력 요청
+            $.ajax({
+                url: '/excel/exportVoList',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(productList),
+                xhrFields: {
+                    responseType: 'blob' // 파일 응답을 Blob 형태로 처리
+                },
+                success: function (response) {
+                    // 파일 다운로드 처리
+                    const url = window.URL.createObjectURL(new Blob([response]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', '재고_관리_데이터.xlsx'); // 다운로드할 파일 이름 설정
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                },
+                error: function () {
+                    alert('엑셀 파일을 다운로드하는 데 실패했습니다.');
+                }
+            });
         });
     });
 </script>

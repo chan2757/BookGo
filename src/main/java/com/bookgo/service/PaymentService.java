@@ -1,6 +1,9 @@
 package com.bookgo.service;
 
+import com.bookgo.controller.AdminController;
 import com.bookgo.mapper.PaymentMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,8 @@ import java.util.HashMap;
 
 @Service
 public class PaymentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     private final PaymentMapper paymentMapper;
 
@@ -56,7 +61,7 @@ public class PaymentService {
     /**
      * 카카오페이 환불 요청 처리 메서드
      *
-     * @param tid 결제 고유 번호
+     * @param tid          결제 고유 번호
      * @param refundAmount 환불 금액
      * @return 환불 성공 여부
      */
@@ -99,12 +104,20 @@ public class PaymentService {
     }
 
     // 결제 요청 삭제
+    @Transactional
     public void deletePaymentRequestByRequestId(Long requestId) {
         paymentMapper.deletePaymentRequestByRequestId(requestId);
     }
 
     // 결제 금액 업데이트
-    public void updateTotalAmountByRequestId(Long requestId, BigDecimal amounts) {
-        paymentMapper.updateTotalAmountByRequestId(requestId, amounts);
+    public boolean updateTotalAmountByRequestId(Long requestId, BigDecimal updatedAmount) {
+        try {
+            // Mapper에 requestId와 updatedAmount를 직접 전달
+            int rowsUpdated = paymentMapper.updateTotalAmountByRequestId(requestId, updatedAmount);
+            return rowsUpdated > 0;
+        } catch (Exception e) {
+            logger.error("DB 업데이트 중 오류가 발생했습니다: {}", e.getMessage(), e);
+            return false;
+        }
     }
 }

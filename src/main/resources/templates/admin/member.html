@@ -11,17 +11,20 @@
         .admin-container {
             display: flex;
             height: 100vh;
+            overflow: hidden; /* 스크롤이 생기지 않도록 설정 */
         }
 
         .sidebar {
-            width: 8.333%;
+            flex: 0 0 200px; /* 사이드바의 고정된 너비 설정 */
             background-color: #f8f9fa;
             padding: 15px;
+            overflow-y: auto; /* 내용이 많을 경우 스크롤 추가 */
         }
 
         .main-content {
-            width: 91.667%;
+            flex: 1; /* 나머지 공간을 차지하도록 설정 */
             padding: 20px;
+            overflow-y: auto; /* 내용이 많을 경우 스크롤 추가 */
             position: relative;
         }
 

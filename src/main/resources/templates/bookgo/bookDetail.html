@@ -196,5 +196,45 @@
 <script th:src="@{/lib/easing/easing.min.js}"></script>
 <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
 <script th:src="@{/js/main.js}"></script>
+<script>
+  document.getElementById('addToCartButton').addEventListener('click', function () {
+    // 히든 필드에서 ISBN13 값을 가져옵니다.
+    const isbn13 = document.getElementById('isbn13').value.trim();
+
+    // 수량을 입력 필드에서 가져옵니다.
+    const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+    // 수량이 유효한지 확인합니다.
+    if (isNaN(quantity) || quantity < 1) {
+      alert('유효한 수량을 입력하세요.');
+      return;
+    }
+
+    console.log('ISBN:', isbn13);
+    console.log('Quantity:', quantity);
+
+    // AJAX 요청을 통해 서버에 책을 추가합니다.
+    fetch('/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isbn13, quantity })
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert('책이 장바구니에 추가되었습니다.');
+              } else {
+                alert('장바구니에 추가하는데 실패했습니다.');
+              }
+            })
+            .catch(error => {
+              console.error('Error adding to cart:', error);
+              alert('장바구니에 추가하는 중 오류가 발생했습니다.');
+            });
+  });
+
+
+
+</script>
 </body>
 </html>

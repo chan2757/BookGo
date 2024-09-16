@@ -32,8 +32,6 @@ import java.util.Map;
 public class PaymentController {
 
 
-
-
     @Autowired
     private OrderService orderService;
 
@@ -46,7 +44,6 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
-
 
 
     @Autowired
@@ -171,23 +168,48 @@ public class PaymentController {
         Map<String, Object> reqPayData = (Map<String, Object>) session.getAttribute("reqPayData");
         String tid = (String) session.getAttribute("tid"); // 세션에서 tid 가져오기
 
+        // pg_token 가져오기
+        String pgToken = request.getParameter("pg_token");
+
         // JSON을 객체로 변환
         List<Map<String, Object>> itemList = null;
         if (itemListJson != null) {
-            itemList = new ObjectMapper().readValue(itemListJson, new TypeReference<List<Map<String, Object>>>() {});
+            itemList = new ObjectMapper().readValue(itemListJson, new TypeReference<List<Map<String, Object>>>() {
+            });
         }
 
         System.out.println("세션에서 불러온 itemList: " + itemList);
         System.out.println("세션에서 불러온 reqPayData: " + reqPayData);
         System.out.println("세션에서 불러온 tid: " + tid);
+        System.out.println("pg_token: " + pgToken); // 여기서 pg_token 출력
 
-        if (itemList != null && reqPayData != null && tid != null) {
+        if (itemList != null && reqPayData != null && tid != null && pgToken != null) {
             try {
-                // reqPayData에 tid 추가
-                reqPayData.put("tid", tid);
+                // 결제 승인 요청 파라미터 설정
+                Map<String, Object> approveParams = new HashMap<>();
+                approveParams.put("cid", "TC0ONETIME");
+                approveParams.put("tid", tid);
+                approveParams.put("partner_order_id", reqPayData.get("orderId"));
+                approveParams.put("partner_user_id", reqPayData.get("buyerName"));
+                approveParams.put("pg_token", pgToken);
 
-                // 결제 성공 시 데이터베이스에 저장
-                orderService.saveOrder(reqPayData, itemList);
+                // 결제 승인 요청 API 호출
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.set("Authorization", "SECRET_KEY DEVCD9F543E05482E85FC8F0AA2650A2734E3323");
+
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(approveParams, headers);
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<Map> response = restTemplate.postForEntity("https://open-api.kakaopay.com/online/v1/payment/approve", entity, Map.class);
+
+                // 결제 승인 결과 확인
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    model.addAttribute("message", "결제 승인에 실패했습니다.");
+                    return "pay/approval";
+                }
+
+                // 결제 승인 성공 시 데이터베이스에 주문 저장
+                orderService.saveOrder(reqPayData, itemList, tid);
 
                 String username = (String) reqPayData.get("buyerName"); // reqPayData에서 username 추출
                 int userId = userService.getUserIdByUsername(username); // username을 통해 userId 조회
@@ -250,7 +272,7 @@ public class PaymentController {
             // 2. 카카오페이 결제 취소 요청
             String apiUrl = "https://open-api.kakaopay.com/online/v1/payment/cancel";
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "DEV_SECRET_KEY DEVCD9F543E05482E85FC8F0AA2650A2734E3323");
+            headers.set("Authorization", "SECRET_KEY DEVCD9F543E05482E85FC8F0AA2650A2734E3323");
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             Map<String, Object> params = new HashMap<>();
@@ -261,7 +283,7 @@ public class PaymentController {
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, requestEntity, String.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(apiUrl, requestEntity, Map.class);
 
             // 요청 성공 여부 확인
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -270,11 +292,20 @@ public class PaymentController {
 
             // 3. 환불 성공 시 DB 처리
             BigDecimal refundAmountDecimal = BigDecimal.valueOf(refundAmount);
+
+            System.out.println("환불금액"+ refundAmountDecimal);
+
             if (refundAmountDecimal.compareTo(totalAmount) == 0) {
                 paymentService.deletePaymentRequestByRequestId(requestId);
+
             } else if (refundAmountDecimal.compareTo(totalAmount) < 0) {
                 BigDecimal updatedAmount = totalAmount.subtract(refundAmountDecimal);
-                paymentService.updateTotalAmountByRequestId(requestId, updatedAmount);
+                System.out.println("업데이트금액"+updatedAmount);
+                System.out.println("아이디"+requestId);
+                boolean updateSuccess = paymentService.updateTotalAmountByRequestId(requestId, updatedAmount);
+                if (!updateSuccess) {
+                    throw new Exception("DB 업데이트 중 오류가 발생했습니다.");
+                }
             } else {
                 throw new Exception("환불 금액이 총 결제 금액보다 큽니다.");
             }
@@ -283,7 +314,5 @@ public class PaymentController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("환불 처리에 실패했습니다: " + e.getMessage());
         }
-
-
     }
 }

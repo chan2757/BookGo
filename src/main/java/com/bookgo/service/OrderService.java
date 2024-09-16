@@ -16,7 +16,7 @@ public class OrderService {
     private PaymentMapper paymentMapper;
 
     // 결제 요청과 상세 항목을 저장하는 메서드
-    public void saveOrder(Map<String, Object> reqPayData, List<Map<String, Object>> itemList) {
+    public void saveOrder(Map<String, Object> reqPayData, List<Map<String, Object>> itemList, String tid) {
         // PaymentRequestVO 생성 및 설정
         PaymentRequestVO paymentRequestVO = new PaymentRequestVO();
         paymentRequestVO.setOrderId((String) reqPayData.get("orderId"));
@@ -26,7 +26,7 @@ public class OrderService {
         paymentRequestVO.setPhone((String) reqPayData.get("buyerTel"));
         paymentRequestVO.setAddress((String) reqPayData.get("buyerAddr"));
         paymentRequestVO.setTotalAmount((Integer) reqPayData.get("requestPrice"));
-        paymentRequestVO.setTid((String) reqPayData.get("tid"));
+        paymentRequestVO.setTid(tid);
 
         // PaymentRequestVO 출력
         System.out.println("PaymentRequestVO: " + paymentRequestVO);

@@ -24,36 +24,94 @@
             display: flex;
             height: 100vh;
         }
-
         .sidebar {
-            width: 8.333%; /* 1/12의 너비로 설정 */
+            width: 8.333%;
             background-color: #f8f9fa;
             padding: 15px;
         }
-
         .main-content {
-            width: 91.667%; /* 나머지 11/12의 너비로 설정 */
+            width: 91.667%;
             padding: 20px;
-            position: relative;
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* 그래프가 왼쪽, 보드가 오른쪽 */
+            gap: 20px;
         }
-
-        .notice-message {
-            display: none;
-            font-size: 14px;
-            color: #dc3545; /* Red color for the alarm message */
-            font-weight: bold;
-
-            margin-bottom: 15px;
-            border: 1px solid #f5c6cb;
+        .charts {
+            display: flex;
+            margin-left: 80px;
+            flex-direction: column;
+            gap: 20px;
+            height: 50%;
+            width: 83%;
+            margin-top: 20px;
+        }
+        .chart-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            flex: 1; /* 상하로 균등하게 공간을 차지 */
+        }
+        .note-container {
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            width: 750px;
+            margin-right: 70px;
+        }
+        .note-card {
+            flex: 1;
+            background: #fefefe;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
+            overflow: auto;
+            width: 130%;
+        }
+        .note-card:hover {
+            background: #f7f7f7;
+        }
+        .note-card h5 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .note-card textarea {
+            width: 100%;
+            height: calc(100% - 30px); /* 제목과의 간격을 고려한 높이 */
+            resize: none;
             padding: 10px;
-            background-color: #f8d7da;
             border-radius: 5px;
-            text-align: center;
-            max-width: 300px;
-            margin: 0 auto;
-            cursor: pointer;
+            border: 1px solid #ccc;
+            font-size: 18px; /* 글씨 크기 4px 증가 */
+            font-family: 'Poppins', sans-serif;
+            background: #fefefe;
         }
-
+        .small-notice {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 12px;
+            color: #dc3545; /* 수정된 색상 */
+            background-color: #f8d7da;
+            padding: 5px 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            z-index: 10;
+            max-width: 200px;
+        }
         .footer {
             background-color: #6c757d;
             color: #fff;
@@ -65,33 +123,57 @@
 
 <body>
 
-<!-- 헤더 -->
 <div class="header">
     <div th:insert="adminIc/adminHeader :: adminHeaderFragment"></div>
 </div>
 
-<!-- 그리드 레이아웃 -->
-<div class="admin-container">
-    <!-- 사이드바 -->
-    <div class="sidebar">
+<div class="container-fluid admin-container">
+    <div class="col-1 p-0 sidebar">
         <div th:insert="adminIc/adminSidebar :: adminSidebarFragment"></div>
     </div>
 
-    <!-- 메인 콘텐츠 -->
-    <div class="main-content">
-        <!-- 자연스러운 위치에 알림 메시지 배치 -->
-        <span id="noticeMessage" class="notice-message"></span>
+    <div class="col-11 main-content">
+        <!-- 문의 사항 알림 메시지 -->
+        <span id="noticeMessage" class="small-notice">관리자님, 답변을 기다리는 문의가 있습니다.</span>
 
-        <div class="container py-4">
-            <h2>관리자 페이지</h2>
-            <div class="row">
-                <!-- 페이지 내용 -->
+        <!-- 차트 영역 -->
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="monthlyTotalsChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="monthlyUsersChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 메모장 컨테이너 -->
+        <div class="note-container">
+            <div class="note-card">
+                <h5>관리자 준수사항</h5>
+                <textarea id="adminRules" placeholder="관리자 준수사항을 작성하세요...">
+[관리자 준수사항]
+1. 회원 정보는 철저히 보호해야 합니다.
+2. 결제 및 거래 내역의 무결성을 유지하십시오.
+3. 사용자 문의에 빠르게 응답하고 문제를 해결하십시오.
+4. 정기적으로 시스템 점검 및 보안을 확인하세요.
+5. 비밀번호 및 접근 권한 관리를 철저히 하십시오.
+                </textarea>
+            </div>
+
+            <div class="note-card">
+                <h5>관리자 의견</h5>
+                <textarea id="adminOpinions" placeholder="관리자 의견을 작성하세요...">
+[관리자 의견]
+- 새로운 기능 추가에 대한 의견을 자유롭게 작성해 주세요.
+- 사용자 피드백을 바탕으로 개선할 점을 기록하세요.
+- 협업이 필요한 부분이나 요청 사항을 기록해 주십시오.
+                </textarea>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Footer -->
 <div class="footer">
     <div class="container text-center">
         <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
@@ -100,34 +182,117 @@
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-<script src="lib/easing/easing.min.js"></script>
-<script src="lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     $(document).ready(function () {
-        // 페이지 로딩 시 답변 대기 문의 확인
+        // 문의 사항 확인
         checkPendingInquiries();
 
-        // 알림 메시지 클릭 시 /admin/inquiry로 이동
-        $('#noticeMessage').click(function () {
-            window.location.href = '/admin/inquiry';
+        // 월별 결제 총액 데이터 바인딩 및 차트 생성
+        $.ajax({
+            url: '/admin/getMonthlyTotals',
+            type: 'GET',
+            success: function (data) {
+                console.log(data); // 데이터를 콘솔에 출력하여 확인
+                renderChart('monthlyTotalsChart', data, '월별 총 결제 금액', '총 금액 (원)', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
+            },
+            error: function (error) {
+                console.error('월별 결제 총액 데이터를 가져오는 데 실패했습니다:', error);
+            }
         });
+
+        // 월별 가입자 수 데이터 바인딩 및 차트 생성
+        $.ajax({
+            url: '/admin/getMonthlyUserCounts',
+            type: 'GET',
+            success: function (data) {
+                console.log(data); // 데이터를 콘솔에 출력하여 확인
+                renderChart('monthlyUsersChart', data, '월별 가입자 수', '가입자 수', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+            },
+            error: function (error) {
+                console.error('월별 가입자 수 데이터를 가져오는 데 실패했습니다:', error);
+            }
+        });
+
+        // 메모장 기능 로드
+        loadNotePads();
     });
 
     function checkPendingInquiries() {
-        // 서버에서 문의와 답변 수가 같은지 확인하는 서비스 호출
         $.ajax({
             url: '/admin/checkInquiries',
             type: 'GET',
             success: function (response) {
-                // response가 false이면 관리자에게 알림 메시지 표시
                 if (!response) {
-                    $('#noticeMessage').text('관리자님! 답변을 기다리는 문의가 있습니다.').show();
+                    $('#noticeMessage').show();
                 }
             },
             error: function () {
                 console.error('문의 상태를 확인하는 데 실패했습니다.');
             }
+        });
+    }
+
+    // 차트를 렌더링하는 함수
+    function renderChart(canvasId, data, label, yTitle, backgroundColor, borderColor) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: label,
+                    data: Object.values(data),
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: yTitle
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '월'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 두 개의 메모장 내용 로드 및 저장 기능
+    function loadNotePads() {
+        const adminRules = $('#adminRules');
+        const adminOpinions = $('#adminOpinions');
+
+        // 로컬 스토리지에서 메모장 내용 로드
+        const savedRules = localStorage.getItem('adminRules');
+        const savedOpinions = localStorage.getItem('adminOpinions');
+
+        if (savedRules) {
+            adminRules.val(savedRules);
+        }
+
+        if (savedOpinions) {
+            adminOpinions.val(savedOpinions);
+        }
+
+        // 메모장 내용 변경 시 로컬 스토리지에 저장
+        adminRules.on('input', function () {
+            localStorage.setItem('adminRules', $(this).val());
+        });
+
+        adminOpinions.on('input', function () {
+            localStorage.setItem('adminOpinions', $(this).val());
         });
     }
 </script>

@@ -79,6 +79,7 @@
 
     <select id="getAllUsers" resultType="com.bookgo.vo.SiteUserVO">
         SELECT * FROM site_user
+
     </select>
 
     <!-- 이메일 중복 확인 -->
