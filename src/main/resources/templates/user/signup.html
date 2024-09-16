@@ -109,7 +109,12 @@
         <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" id="email" name="email" required>
-            <button type="button" onclick="checkEmail()">중복 체크</button>
+
+                <button type="button" onclick="checkEmail()">중복 체크</button>
+                <button type="button" onclick="sendVerificationEmail()">인증번호 받기</button>
+
+
+
             <span id="emailVerificationMessage" class="error"></span>
         </div>
         <div class="form-group">
@@ -200,13 +205,13 @@
         }
 
         // 비밀번호 유효성 검사
-        const passwordPattern = /^[a-z0-9]{6,}$/;
-        if (!passwordPattern.test(password)) {
-            document.getElementById('passwordError').textContent = '비밀번호를 확인하세요. 6자 이상, 영문 소문자와 숫자로 구성되어야 합니다.';
-            isValid = false;
-        } else {
-            document.getElementById('passwordError').textContent = '';
-        }
+        //const passwordPattern = /^[a-z0-9]{6,}$/;
+        //if (!passwordPattern.test(password)) {
+         //   document.getElementById('passwordError').textContent = '비밀번호를 확인하세요. 6자 이상, 영문 소문자와 숫자로 구성되어야 합니다.';
+           // isValid = false;
+        //} else {
+          //  document.getElementById('passwordError').textContent = '';
+        //}
 
         // 닉네임 유효성 검사
         if (nickname.length > 15) {
