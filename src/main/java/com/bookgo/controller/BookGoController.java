@@ -1,7 +1,10 @@
 package com.bookgo.controller;
 
+import com.bookgo.service.BookDetailService;
 import com.bookgo.service.FileService;
 import com.bookgo.vo.BoardPostsVO;
+import com.bookgo.vo.BookDetailVO;
+import com.bookgo.vo.BookDpVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,14 +12,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.bookgo.service.SiteUserService;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import com.bookgo.service.BoardPostsService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/")
@@ -25,12 +27,17 @@ public class BookGoController {
 
 	private final SiteUserService userService;
 
+	 // BookService를 통해 책 목록을 조회
+
+	private final BookDetailService bookDetailService;
+
 	private final FileService fileService; // FileService 선언
 
-	public BookGoController(SiteUserService userService, BoardPostsService boardPostsService,  FileService fileService) {
+	public BookGoController(SiteUserService userService, BoardPostsService boardPostsService, FileService fileService, BookDetailService bookDetailService) {
 		this.userService = userService;
         this.boardPostsService = boardPostsService;
-		this.fileService = new FileService(); // FileService 객체 생성
+        this.bookDetailService = bookDetailService;
+        this.fileService = new FileService(); // FileService 객체 생성
     }
 
 	private final BoardPostsService boardPostsService;
@@ -81,41 +88,41 @@ public class BookGoController {
 	@GetMapping("/contact")
 	public String contact() {
 		logger.info("고객센터 페이지 진입");
-		return "voc/vocMain"; // templates/bookgo/index.html로 매핑
+		return "voc/vocMain";
 	}
 
 	// FAQ 게시판 페이지로 이동
 	@GetMapping("/voc/vocFAQ")
 	public String vocFAQ( ) {
-		// 필요한 경우, 페이지 로딩 시 필요한 데이터를 Model에 추가할 수 있습니다.
-		return "voc/vocFAQ"; // templates 폴더에 있는 vocFAQ.html로 연결
+
+		return "voc/vocFAQ";
 	}
 
 	// FAQ 게시판 페이지로 이동
 	@GetMapping("/voc/inquiry")
 	public String QnA( ) {
-		// 필요한 경우, 페이지 로딩 시 필요한 데이터를 Model에 추가할 수 있습니다.
-		return "qna/qindex"; // templates 폴더에 있는 vocFAQ.html로 연결
+
+		return "qna/qindex";
 	}
 
 	@GetMapping("/boardmain")
 	public String boardmain(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-		// 사용자 정보가 로그인 되어 있는지 확인
+
 		if (userDetails != null) {
 			String username = userDetails.getUsername();
 			model.addAttribute("username", username);
 
-			// 사용자 이름을 통해 사용자 ID를 가져옵니다.
+
 			Integer userId = userService.getUserIdByUsername(username);
 			model.addAttribute("userId", userId);
 		} else {
-			// 로그인하지 않은 경우
+
 			model.addAttribute("username", null);
 			model.addAttribute("userId", null);
 		}
 
-		// 필요한 경우, 페이지 로딩 시 필요한 데이터를 Model에 추가할 수 있습니다.
-		return "board/boardpost"; // templates/board/boardpost.html로 연결
+
+		return "board/boardpost";
 	}
 	@PostMapping("/board/write")
 	public String writePost(
@@ -134,14 +141,14 @@ public class BookGoController {
 			String username = userDetails.getUsername();
 			Long userId = (long) userService.getUserIdByUsername(username);
 			boolean isAdmin = userDetails.getAuthorities().stream()
-					.anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN")); // 사용자 권한 확인
+					.anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
 			logger.debug("로그인 사용자 - username: {}, userId: {}, isAdmin: {}", username, userId, isAdmin);
 
-			// 공지 카테고리 번호 (예시로 1번을 공지로 설정)
+
 			long noticeCategoryId = 1L;
 
-			// 공지 카테고리일 때 관리자만 작성 가능
+
 			if (categoryId == noticeCategoryId && !isAdmin) {
 				logger.warn("관리자 권한이 없는 사용자가 공지글을 작성하려고 시도함 - username: {}", username);
 				model.addAttribute("message", "공지글은 관리자만 작성할 수 있습니다.");
@@ -155,21 +162,21 @@ public class BookGoController {
 			boardPost.setTitle(title);
 			boardPost.setContent(content);
 
-			// 여러 파일 업로드 처리
+
 			try {
-				StringBuilder fileNames = new StringBuilder(); // 파일명들을 저장할 StringBuilder
+				StringBuilder fileNames = new StringBuilder();
 
 				for (MultipartFile file : files) {
 					if (!file.isEmpty()) {
-						String savedFilePath = fileService.saveFile(file); // 각 파일을 저장하고 경로를 반환
-						fileNames.append(savedFilePath).append(","); // 파일 경로를 추가하고 쉼표로 구분
+						String savedFilePath = fileService.saveFile(file);
+						fileNames.append(savedFilePath).append(",");
 						logger.debug("파일이 성공적으로 저장되었습니다: {}", savedFilePath);
 					}
 				}
 
-				// 모든 파일의 경로를 설정 (필요에 따라 쉼표 제거 후 설정)
+
 				if (fileNames.length() > 0) {
-					boardPost.setFilename(fileNames.toString().replaceAll(",$", "")); // 마지막 쉼표 제거
+					boardPost.setFilename(fileNames.toString().replaceAll(",$", ""));
 				}
 
 				boardPostsService.insertPost(boardPost);
@@ -186,6 +193,32 @@ public class BookGoController {
 		}
 
 		return "redirect:/boardmain";
+	}
+
+	@GetMapping("/bookcategory/{categoryId}")
+	public String getBooksByCategory(@PathVariable("categoryId") String categoryId,
+									 @RequestParam(defaultValue = "1") int page,
+									 Model model) {
+		List<BookDpVO> books = bookDetailService.getBookDetailByCategoryId(categoryId);
+
+		int maxResults = 40;
+		int totalResults = books.size();
+		int totalPages = (int) Math.ceil((double) totalResults / maxResults);
+
+
+		int start = (page - 1) * maxResults;
+
+		List<BookDpVO> paginatedBooks = books.subList(start, Math.min(start + maxResults, totalResults));
+
+		model.addAttribute("books", paginatedBooks);
+		model.addAttribute("from", "category");
+		model.addAttribute("query", "");
+		model.addAttribute("queryType", "");
+		model.addAttribute("currentPage", page);
+		model.addAttribute("totalPages", totalPages);
+		model.addAttribute("categoryId", categoryId);
+
+		return "bookgo/bookList";
 	}
 
 

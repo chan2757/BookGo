@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 관리</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 8.333%;
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+        .main-content {
+            width: 91.667%;
+            padding: 20px;
+            position: relative;
+        }
+        .footer {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 30px 0;
+            margin-top: auto;
+        }
+        .table-container {
+            margin: 20px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="header">
+    <div th:insert="~{adminIc/adminHeader :: adminHeaderFragment}"></div>
+</div>
+
+<div class="admin-container">
+    <div class="sidebar">
+        <div th:insert="~{adminIc/adminSidebar :: adminSidebarFragment}"></div>
+    </div>
+
+    <div class="main-content">
+        <h2>게시판 관리</h2>
+
+        <div class="table-container">
+            <table id="boardTable" class="display" style="width:100%">
+                <thead>
+                <tr>
+                    <th>게시글 번호</th>
+                    <th>카테고리</th>
+                    <th>제목</th>
+                    <th>작성자</th>
+                    <th>조회수</th>
+                    <th>추천수</th>
+                    <th>작성일</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="post : ${posts}">
+                    <td th:text="${post.postId}"></td>
+                    <td th:text="${post.categoryName}"></td>
+                    <td>
+                        <a th:href="@{/board/detail(postId=${post.postId})}" th:text="${post.title}"></a>
+
+                    </td>
+                    <td th:text="${post.username}"></td>
+                    <td th:text="${post.viewCount}"></td>
+                    <td th:text="${post.recommendCount}"></td>
+                    <td th:text="${post.createdDate}"></td>
+                    <td>
+                        <form th:action="@{/admin/delete/{postId}(postId=${post.postId})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container text-center">
+        <p class="mb-0">© 2024 BookGo. All Rights Reserved.</p>
+    </div>
+</div>
+
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#boardTable').DataTable({
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.13.5/i18n/ko.json"
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

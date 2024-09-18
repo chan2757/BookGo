@@ -25,6 +25,8 @@ public class BookDetailVO {
     private String isbn13;           // ISBN13 필드
     private String cover; // 표지 이미지 URL (추가)
 
+    private String categoryNumber;
+
     @Override
     public String toString() {
         return "BookDetailVO{" +

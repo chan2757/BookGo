@@ -1,134 +1,127 @@
-    <!DOCTYPE html>
-    <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>도서 리스트</title>
-        <style>
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>도서 리스트</title>
+    <style>
+        .main-container {
+            margin-left: 200px;
+            padding: 20px;
+        }
 
-            .main-container {
-                margin-left: 400px; /* 왼쪽 여백을 100px로 설정 */
-                padding: 20px; /* 필요에 따라 다른 여백이나 패딩을 추가할 수 있습니다 */
-            }
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-            .book-list {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }
+        .book-row {
+            display: flex;
+            gap: 10px;
+        }
 
-            .book-row {
-                display: flex;
-                gap: 10px;
-            }
+        .book-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            width: 200px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
 
-            .book-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                border: 1px solid #ddd;
-                padding: 10px;
-                width: 200px;
-                transition: transform 0.3s, box-shadow 0.3s;
-            }
+        .book-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-            .book-item:hover {
-                transform: scale(1.05);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
+        .book-item img {
+            width: 150px;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
 
-            .book-item img {
-                width: 150px;
-                height: 220px;
-                object-fit: cover;
-                transition: transform 0.3s;
-            }
+        .book-item img:hover {
+            transform: scale(1.05);
+        }
 
-            .book-item img:hover {
-                transform: scale(1.05);
-            }
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: color 0.3s;
+        }
 
-            .book-title {
-                font-size: 16px;
-                font-weight: bold;
-                margin: 10px 0;
-                transition: color 0.3s;
-            }
+        .book-title:hover {
+            color: #007bff;
+        }
 
-            .book-title:hover {
-                color: #007bff;
-            }
+        .book-author, .book-publisher {
+            font-size: 14px;
+            color: #555;
+        }
 
-            .book-author, .book-publisher {
-                font-size: 14px;
-                color: #555;
-            }
+        .book-price {
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+        }
 
-            .book-price {
-                font-size: 14px;
-                color: #333;
-                margin-top: 5px;
-            }
+        .book-rating {
+            display: flex;
+            gap: 2px;
+            margin-top: 5px;
+        }
 
-            .book-rating {
-                display: flex;
-                gap: 2px;
-                margin-top: 5px;
-            }
+        .star {
+            color: gold;
+            font-size: 16px;
+        }
 
-            .star {
-                color: gold;
-                font-size: 16px;
-            }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
 
-            .button-container {
-                display: flex;
-                justify-content: flex-end;
-                gap: 10px;
-            }
+        .search-bar {
+            margin-left: auto;
+        }
 
-            .search-bar {
-                margin-left: auto;
-            }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
 
-            .pagination {
-                display: flex;
-                justify-content: center;
-                margin-top: 20px;
-                gap: 5px;
-            }
+        .pagination button {
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            background-color: white;
+            cursor: pointer;
+        }
 
-            .pagination button {
-                border: 1px solid #ddd;
-                padding: 5px 10px;
-                background-color: white;
-                cursor: pointer;
-            }
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
 
-            .pagination button.active {
-                background-color: #007bff;
-                color: white;
-            }
-        </style>
-        <!-- Favicon -->
-        <link th:href="@{/img/favicon.ico}" rel="icon">
-
-        <!-- Google Web Fonts -->
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-        <!-- Font Awesome -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-
-        <!-- Libraries Stylesheet -->
-        <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-
-        <!-- Customized Bootstrap Stylesheet -->
-        <link th:href="@{/css/style.css}" rel="stylesheet">
-
-    </head>
-    <body>
-    <div th:replace="includes/header :: headerFragment"></div>
-    <div class="main-container">
+    <!-- Favicon -->
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <!-- Customized Bootstrap Stylesheet -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="includes/header :: headerFragment"></div>
+<div class="main-container">
     <h1>도서 리스트</h1>
     <div class="button-container">
         <button onclick="location.href='/bookgo/books/list?queryType=Bestseller'">베스트셀러</button>
@@ -139,32 +132,73 @@
             <button type="submit">검색</button>
         </form>
     </div>
+
+    <input type="hidden" name="from" th:value="${from}">
+    <input type="hidden" name="categoryId" th:value="${categoryId != null ? categoryId : ''}">
+
+
     <div class="book-list">
-        <th:block th:each="row : ${#numbers.sequence(0, books.size() / 4)}">
+        <!-- 5x4 행으로 도서 목록을 보여줌 -->
+        <th:block th:each="row : ${#numbers.sequence(0, books.size() / 8)}">
             <div class="book-row">
-                <th:block th:each="book : ${books.subList(row * 4, T(java.lang.Math).min((row + 1) * 4, books.size()))}">
+                <th:block th:each="book : ${books.subList(row * 8, T(java.lang.Math).min((row + 1) * 8, books.size()))}">
                     <div class="book-item">
                         <form action="/bookgo/book/detail/view" method="post">
-                            <input type="hidden" name="isbn13" th:value="${book.isbn13}">
-                            <input type="hidden" name="title" th:value="${book.title}">
-                            <input type="hidden" name="author" th:value="${book.author}">
-                            <input type="hidden" name="publisher" th:value="${book.publisher}">
-                            <input type="hidden" name="priceStandard" th:value="${book.priceStandard}">
-                            <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank}">
-                            <input type="hidden" name="cover" th:value="${book.cover}">
+                            <input type="hidden" name="isbn13" th:value="${book.isbn13 != null ? book.isbn13 : ''}">
+                            <input type="hidden" name="title" th:value="${book.title != null ? book.title : ''}">
+                            <input type="hidden" name="author" th:value="${book.authors != null ? T(java.lang.String).join(', ', book.authors) : ''}">
+                            <input type="hidden" name="publisher" th:value="${book.publisher != null ? book.publisher : ''}">
+                            <input type="hidden" name="priceStandard" th:value="${book.priceStandard != null ? book.priceStandard : 0}">
+                            <input type="hidden" name="customerReviewRank" th:value="${book.customerReviewRank != null ? book.customerReviewRank : 0}">
+                            <input type="hidden" name="cover" th:value="${book.cover != null ? book.cover : '/img/no_image_available.png'}">
                             <button type="submit" style="background: none; border: none; padding: 0;">
-                                <img th:src="${book.cover}" alt="도서 이미지">
-                                <div class="book-title" th:text="${book.title}">도서 제목</div>
+                                <img th:src="${book.cover != null ? book.cover : '/img/no_image_available.png'}" alt="도서 이미지">
+                                <div class="book-title" th:text="${book.title != null ? book.title : '제목 없음'}">도서 제목</div>
                             </button>
                         </form>
-                        <div class="book-author" th:text="'저자: ' + ${book.author}">저자</div>
-                        <div class="book-publisher" th:text="'출판사: ' + ${book.publisher}">출판사</div>
-                        <div class="book-price" th:text="'가격: ' + ${#numbers.formatDecimal(book.priceStandard, 0, 0) + ' 원'}">가격</div>
-                        <div class="book-rating">
-                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).floor(book.customerReviewRank.doubleValue() / 2.0))}" class="star">★</span>
-                            <span th:if="${(book.customerReviewRank.doubleValue() / 2.0) % 1.0 >= 0.5}" class="star">⯪</span>
-                            <span th:each="i : ${#numbers.sequence(1, 5 - T(java.lang.Math).floor(book.customerReviewRank.doubleValue() / 2.0) - ((book.customerReviewRank.doubleValue() / 2.0) % 1.0 >= 0.5 ? 1 : 0))}" class="star" style="color: lightgray;">☆</span>
+                        <div class="book-author" th:text="'저자: ' + (${book.authors != null ? T(java.lang.String).join(', ', book.authors) : '저자 정보 없음'})">
+                            저자
                         </div>
+                        <div class="book-publisher" th:text="'출판사: ' + (${book.publisher != null ? book.publisher : '정보 없음'})">출판사</div>
+                        <div class="book-price" th:text="'가격: ' + (${book.priceStandard != null ? #numbers.formatDecimal(book.priceStandard, 0, 0) + ' 원' : '정보 없음'})">가격</div>
+                        <div class="book-rating">
+                            <!-- customerReviewRank가 null일 경우 빈 별 5개 표시 -->
+                            <span th:if="${book.customerReviewRank == null}" style="color: lightgray;">☆☆☆☆☆</span>
+
+                            <!-- customerReviewRank * 10이 10 미만일 경우 빈 별 5개 표시 -->
+                            <span th:if="${book.customerReviewRank != null and book.customerReviewRank * 10 < 10}" style="color: lightgray;">☆☆☆☆☆</span>
+
+                            <!-- customerReviewRank * 10이 10 이상 30 미만일 경우 ★☆☆☆☆ 표시 -->
+                            <span th:if="${book.customerReviewRank * 10 >= 10 and book.customerReviewRank * 10 < 30}">
+        <span style="color: gold;">★</span><span style="color: lightgray;">☆☆☆☆</span>
+    </span>
+
+                            <!-- customerReviewRank * 10이 30 이상 50 미만일 경우 ★★☆☆☆ 표시 -->
+                            <span th:if="${book.customerReviewRank * 10 >= 30 and book.customerReviewRank * 10 < 50}">
+        <span style="color: gold;">★★</span><span style="color: lightgray;">☆☆☆</span>
+    </span>
+
+                            <!-- customerReviewRank * 10이 50 이상 70 미만일 경우 ★★★☆☆ 표시 -->
+                            <span th:if="${book.customerReviewRank * 10 >= 50 and book.customerReviewRank * 10 < 70}">
+        <span style="color: gold;">★★★</span><span style="color: lightgray;">☆☆</span>
+    </span>
+
+                            <!-- customerReviewRank * 10이 70 이상 90 미만일 경우 ★★★★☆ 표시 -->
+                            <span th:if="${book.customerReviewRank * 10 >= 70 and book.customerReviewRank * 10 < 90}">
+        <span style="color: gold;">★★★★</span><span style="color: lightgray;">☆</span>
+    </span>
+
+                            <!-- customerReviewRank * 10이 90 이상일 경우 ★★★★★ 표시 -->
+                            <span th:if="${book.customerReviewRank * 10 >= 90}">
+        <span style="color: gold;">★★★★★</span>
+    </span>
+                        </div>
+
+
+
+
+
+
                     </div>
                 </th:block>
             </div>
@@ -172,31 +206,44 @@
     </div>
 
     <div class="pagination">
-        <button th:if="${currentPage > 1}" th:onclick="|location.href='?query=${query}&page=${currentPage - 1}'|">이전</button>
-        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-            <button th:classappend="${i == currentPage} ? 'active'" th:onclick="|location.href='?query=${query}&page=${i}'|"
-                    th:text="${i}">1</button>
+        <button th:if="${currentPage > 1}" th:data-query="${query}" th:data-page="${currentPage - 1}" th:onclick="'navigatePage(this)'">이전</button>
+        <th:block th:each="i : ${#numbers.sequence(currentPage - 2, currentPage + 2)}">
+            <button th:if="${i > 0 && i <= totalPages}" th:data-query="${query}" th:data-page="${i}" th:onclick="'navigatePage(this)'" th:text="${i}">1</button>
         </th:block>
-        <button th:if="${currentPage < totalPages}" th:onclick="|location.href='?query=${query}&page=${currentPage + 1}'|">다음</button>
+        <button th:if="${currentPage < totalPages}" th:data-query="${query}" th:data-page="${currentPage + 1}" th:onclick="'navigatePage(this)'">다음</button>
+
     </div>
-    </div>
-
-    <div th:replace="~{includes/footer :: footerFragment}"></div>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/lib/easing/easing.min.js}"></script>
-    <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-
-    <!-- Contact Javascript File -->
-    <script th:src="@{/mail/jqBootstrapValidation.min.js}"></script>
-    <script th:src="@{/mail/contact.js}"></script>
-
-    <!-- Template Javascript -->
-    <script th:src="@{/js/main.js}"></script>
 
 
 
-    <script src="/js/map.js"></script>
+</div>
+<div th:replace="~{includes/footer :: footerFragment}"></div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
 
-    </body>
-    </html>
+<script>
+    function navigatePage(button) {
+        const query = button.getAttribute('data-query');
+        const page = button.getAttribute('data-page');
+        const from = document.querySelector('input[name="from"]').value;
+        const categoryId = document.querySelector('input[name="categoryId"]').value; // 히든 인풋에서 categoryId 가져오기
+
+        if (from === 'category') {
+            window.location.href = `/bookgo/bookcategory/${categoryId}?page=${page}`; // 카테고리 ID를 URL에 포함
+            console.log("카테고리에서 온 요청입니다.");
+        } else if (from === 'search') {
+            window.location.href = `/bookgo/books/search?query=${encodeURIComponent(query)}&page=${page}`;
+            console.log("검색에서 온 요청입니다.");
+        } else {
+            window.location.href = `/bookgo/books/list?query=${encodeURIComponent(query)}&page=${page}`;
+            console.log("기본 요청입니다.");
+        }
+    }
+
+</script>
+
+</body>
+</html>

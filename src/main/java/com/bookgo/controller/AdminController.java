@@ -1,14 +1,7 @@
 package com.bookgo.controller;
 
-import com.bookgo.service.BookProductService;
-import com.bookgo.service.ExcelExportService;
-import com.bookgo.service.InquiryService;
-import com.bookgo.service.PaymentViewService; // 결제 데이터를 가져오는 서비스 추가
-import com.bookgo.service.SiteUserService;
-import com.bookgo.vo.BookProductVO;
-import com.bookgo.vo.InquiryVO;
-import com.bookgo.vo.PaymentViewVO; // 결제 요청 VO 추가
-import com.bookgo.vo.SiteUserVO;
+import com.bookgo.service.*;
+import com.bookgo.vo.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +36,10 @@ public class AdminController {
     private ExcelExportService excelExportService;
 
     @Autowired
-    private PaymentViewService paymentViewService; // 결제 데이터 서비스 추가
+    private PaymentViewService paymentViewService;
+
+    @Autowired
+    private BoardPostsService boardPostsService;
 
     // 관리자 메인 페이지
     @GetMapping("/main")
@@ -172,6 +164,36 @@ public class AdminController {
             return ResponseEntity.ok("Stock updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to update stock");
+        }
+    }
+
+    @GetMapping("/posts")
+    public String postManagement(Model model) {
+        logger.info("Accessing post management page.");
+        List<BoardPostsVO> posts = boardPostsService.getAllPosts();
+        logger.debug("Fetched posts: {}", posts);
+
+        if (posts == null || posts.isEmpty()) {
+            logger.warn("No posts found.");
+        } else {
+            logger.info("Number of posts fetched: {}", posts.size());
+        }
+
+        model.addAttribute("posts", posts);
+        return "admin/adminPost"; // adminPost.html로 이동
+    }
+
+    @PostMapping("/delete/{postId}")
+    public String deletePost(@PathVariable("postId") int postId) {
+        logger.debug("Deleting post with ID: {}", postId);
+        boolean isDeleted = boardPostsService.deletePost(postId);
+
+        if (isDeleted) {
+            logger.debug("Post deleted successfully.");
+            return "redirect:/admin/posts"; // 삭제 후 게시판 관리 페이지로 이동
+        } else {
+            logger.warn("Failed to delete post with ID: {}", postId);
+            return "error/404";
         }
     }
 }

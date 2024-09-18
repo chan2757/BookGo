@@ -6,12 +6,107 @@
     <link rel="stylesheet" href="/css/map.css">
     <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=5t0okt77tk"></script>
     <style>
-        #directions { margin-top: 20px; }
-        #route-guides { display: none; } /* 초기에는 숨김 */
-        #toggleButton { cursor: pointer; color: blue; text-decoration: underline; }
-        #resetButton { position: absolute; top: 10px; right: 10px; cursor: pointer; }
-    </style>
+        /* 지도와 경로 안내 스타일 */
+        #map {
+            width: 70%;
+            height: 600px;
+            float: left;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
+        #directions {
+            margin-top: 20px;
+            float: right;
+            width: 28%;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 버튼들 간의 간격을 10px로 설정 */
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            padding: 8px;
+            width: 250px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        #searchButton, #locationButton, #resetButton {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #searchButton:hover, #locationButton:hover, #resetButton:hover {
+            background-color: #45a049;
+        }
+
+        #routeOptions {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 경로 옵션 사이 간격 */
+            margin-bottom: 20px;
+        }
+
+        /* 메뉴 버튼 스타일 */
+        #menu button {
+            margin: 10px;
+            padding: 12px 20px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #menu button:hover {
+            background-color: #007bb5;
+        }
+
+        /* 경로 안내 상세보기 토글 버튼 */
+        #toggleButton {
+            margin-top: 10px;
+            cursor: pointer;
+            color: #007bb5;
+            text-decoration: underline;
+        }
+
+        #route-guides {
+            display: none;
+        }
+
+        /* 자동 완성 목록 */
+        #autocompleteList {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 5px;
+            list-style: none;
+            padding: 0;
+        }
+
+        #autocompleteList li {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        #autocompleteList li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
 
     <!-- Favicon -->
     <link th:href="@{/img/favicon.ico}" rel="icon">
@@ -39,47 +134,35 @@
         <div class="col-lg-12">
             <h1>도서관 지도</h1>
             <div id="controls">
-                <button id="locationButton" onclick="getCurrentLocation()">현위치로 이동</button>
                 <input type="text" id="searchInput" placeholder="주소 또는 장소 검색" oninput="showAutocomplete(this.value)">
-                <ul id="autocompleteList"></ul>
                 <button id="searchButton" onclick="searchLocation()">검색</button>
+                <button id="locationButton" onclick="getCurrentLocation()">현위치로 이동</button>
+                <button id="resetButton" onclick="resetMap()">다른 도서관 보기</button>
+                <ul id="autocompleteList"></ul>
             </div>
+
+            <!-- 메뉴 버튼 -->
             <div id="menu">
                 <button id="allMenu" class="menu" onclick="changeMarker('all')">모두</button>
                 <button id="publicMenu" class="menu" onclick="changeMarker('public')">공공</button>
                 <button id="smallMenu" class="menu" onclick="changeMarker('small')">작은</button>
             </div>
+
             <ul id="searchResults"></ul>
-            <div id="map" style="width: 100%; height: 600px;"></div>
+            <div id="map"></div>
 
-            <!-- 추가된 경로 옵션 선택 UI -->
-            <div id="routeOptions">
-                <label for="transportModeSelect">이동 수단:</label>
-                <select id="transportModeSelect" onchange="updateRoute()">
-                    <option value="car">자동차</option>
-                </select>
-
-                <label for="routeTypeSelect">경로 유형:</label>
-                <select id="routeTypeSelect" onchange="updateRoute()">
-                    <option value="trafast">가장 빠른 경로</option>
-                    <option value="tracomfort">편한 경로</option>
-                    <option value="traoptimal">최적 경로</option>
-                </select>
-            </div>
-
-            <!-- 경로 안내 정보를 표시할 영역 추가 -->
+            <!-- 경로 안내 정보 -->
             <div id="directions">
                 <div id="route-summary"></div>
                 <div id="toggleButton" onclick="toggleRouteGuides()">상세 안내보기</div>
                 <div id="route-guides"></div>
             </div>
-
-            <!-- 지도 초기화를 위한 리셋 버튼 추가 -->
-            <button id="resetButton" onclick="resetMap()">다른 도서관 보기</button>
         </div>
     </div>
 </div>
+
 <div th:replace="includes/footer :: footerFragment"></div>
+
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/lib/easing/easing.min.js}"></script>
@@ -91,9 +174,6 @@
 
 <!-- Template Javascript -->
 <script th:src="@{/js/main.js}"></script>
-
-
-
 <script src="/js/map.js"></script>
 
 </body>
