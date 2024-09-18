@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping({"/bookgo/books", "/bookgo/book"})
@@ -34,7 +35,7 @@ public class BookController {
                               @RequestParam(defaultValue = "1") int page, Model model) {
         logger.info("도서 리스트 요청: {} 페이지: {}", queryType, page);
 
-        int maxResults = 20;
+        int maxResults = 35;  // 한 페이지에 보여줄 최대 결과 수
         int startIndex = (page - 1) * maxResults + 1;
 
         String apiUrl = BASE_URL + "ItemList.aspx?ttbkey=" + ALADIN_API_KEY +
@@ -44,13 +45,47 @@ public class BookController {
         RestTemplate restTemplate = new RestTemplate();
         Map<String, Object> response = restTemplate.getForObject(apiUrl, Map.class);
 
-        model.addAttribute("books", response != null ? response.get("item") : null);
+        if (response == null || response.get("item") == null) {
+            throw new NullPointerException("도서 목록이 없습니다.");
+        }
+
+        // item 목록을 List<Map<String, Object>>로 변환
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("item");
+
+        // 총 결과 수를 받아와 총 페이지 수 계산
+        int totalResults = (int) response.get("totalResults"); // 총 검색 결과 수
+        int totalPages = (int) Math.ceil((double) totalResults / maxResults); // 총 페이지 수 계산
+
+        // items 리스트를 BookDpVO 리스트로 변환
+        List<BookDpVO> books = items.stream().map(item -> {
+            BookDpVO book = new BookDpVO();
+            book.setTitle((String) item.get("title"));
+            book.setPublisher((String) item.get("publisher"));
+            book.setIsbn13((String) item.get("isbn13"));
+            book.setPriceStandard((int) item.get("priceStandard"));
+            book.setCustomerReviewRank(Double.parseDouble(item.get("customerReviewRank").toString()));
+            book.setCover((String) item.get("cover"));
+            String authors = (String) item.get("author");
+            if (authors != null && !authors.isEmpty()) {
+                // 저자 문자열을 쉼표로 분리한 후, 각 항목의 공백을 제거
+                List<String> authorList = Arrays.stream(authors.split(","))
+                        .map(String::trim)
+                        .collect(Collectors.toList());
+                book.setAuthors(authorList);  // setAuthors를 사용하여 리스트로 저장
+            } else {
+                book.setAuthors(Collections.emptyList());  // 저자가 없을 경우 빈 리스트 설정
+            }
+            return book;
+        }).collect(Collectors.toList());
+
+        model.addAttribute("books", books);
         model.addAttribute("queryType", queryType);
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", 10);
+        model.addAttribute("totalPages", totalPages); // 실제 계산한 총 페이지 수 추가
 
         return "bookgo/bookList";
     }
+
 
     @GetMapping("/search")
     public String searchBooks(@RequestParam String query,
@@ -58,9 +93,11 @@ public class BookController {
                               @RequestParam(defaultValue = "Keyword") String queryType, Model model) {
         logger.info("도서 검색 요청: {}, 페이지: {}", query, page);
 
-        int start = (page - 1) * 20 + 1;
+        int maxResults = 35;
+        int start = (page - 1) * maxResults + 1;
+
         String apiUrl = BASE_URL + "ItemSearch.aspx?ttbkey=" + ALADIN_API_KEY +
-                "&Query=" + query + "&QueryType=" + queryType + "&MaxResults=100&start=" + start +
+                "&Query=" + query + "&QueryType=" + queryType + "&MaxResults=" + maxResults + "&start=" + start +
                 "&SearchTarget=Book&output=js&Version=20131101";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -70,10 +107,42 @@ public class BookController {
             throw new NullPointerException("검색 결과가 없습니다.");
         }
 
-        model.addAttribute("books", response != null ? response.get("item") : null);
+        // item 목록을 List<Map<String, Object>>로 변환
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("item");
+
+        // 총 검색 결과 수를 받아와 전체 페이지 수 계산
+        int totalResults = (int) response.get("totalResults"); // 총 검색 결과 수
+        int totalPages = (int) Math.ceil((double) totalResults / maxResults); // 전체 페이지 수 계산
+
+        // items 리스트를 BookDpVO 리스트로 변환
+        List<BookDpVO> books = items.stream().map(item -> {
+            BookDpVO book = new BookDpVO();
+            book.setTitle((String) item.get("title"));
+            book.setPublisher((String) item.get("publisher"));
+            book.setIsbn13((String) item.get("isbn13"));
+            book.setPriceStandard((int) item.get("priceStandard"));
+            book.setCustomerReviewRank(Double.parseDouble(item.get("customerReviewRank").toString()));
+            book.setCover((String) item.get("cover"));
+            String authors = (String) item.get("author");
+            if (authors != null && !authors.isEmpty()) {
+                // 저자 문자열을 쉼표로 분리한 후, 각 항목의 공백을 제거
+                List<String> authorList = Arrays.stream(authors.split(","))
+                        .map(String::trim)
+                        .collect(Collectors.toList());
+                book.setAuthors(authorList);  // setAuthors를 사용하여 리스트로 저장
+            } else {
+                book.setAuthors(Collections.emptyList());  // 저자가 없을 경우 빈 리스트 설정
+            }
+            return book;
+        }).collect(Collectors.toList());
+
+        // books 리스트를 모델에 추가
+        model.addAttribute("books", books);
         model.addAttribute("query", query);
-        model.addAttribute("page", page);
         model.addAttribute("queryType", queryType);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);  // 실제 계산한 총 페이지 수 추가
+
         return "bookgo/bookList";
     }
 
@@ -92,47 +161,5 @@ public class BookController {
     public String searchByPublisher(@RequestParam String publisher, @RequestParam(defaultValue = "1") int page, Model model) {
         logger.info("출판사 검색 요청: {}, 페이지: {}", publisher, page);
         return searchBooks(publisher, page, "Publisher", model);
-    }
-
-
-
-
-    // JSON 데이터를 BookDpVO 리스트로 변환하는 메서드
-    private List<BookDpVO> parseBooks(Map<String, Object> response) {
-        List<BookDpVO> books = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // JSON의 "item" 필드를 가져와서 List로 변환
-        List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("item");
-
-        if (items != null) {
-            for (Map<String, Object> item : items) {
-                try {
-                    BookDpVO book = new BookDpVO();
-
-                    // 필드 매핑
-                    book.setTitle((String) item.get("title"));
-                    book.setPublisher((String) item.get("publisher"));
-                    book.setIsbn13((String) item.get("isbn13"));
-                    book.setPriceStandard((int) item.get("priceStandard"));
-                    book.setCover((String) item.get("cover"));
-                    book.setCustomerReviewRank(item.get("customerReviewRank") instanceof Integer
-                            ? (Integer) item.get("customerReviewRank")
-                            : Double.parseDouble(item.get("customerReviewRank").toString()));
-
-                    // 저자 문자열을 리스트로 변환
-                    String author = (String) item.get("author");
-                    if (author != null && !author.trim().isEmpty()) {
-                        book.setAuthors(Arrays.asList(author.split(",\\s*")));
-                    }
-
-                    books.add(book);
-                } catch (Exception e) {
-                    logger.error("도서 데이터 파싱 중 오류 발생: {}", e.getMessage());
-                }
-            }
-        }
-
-        return books;
     }
 }

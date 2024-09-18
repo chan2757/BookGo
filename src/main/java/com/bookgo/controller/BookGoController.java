@@ -1,7 +1,10 @@
 package com.bookgo.controller;
 
+import com.bookgo.service.BookDetailService;
 import com.bookgo.service.FileService;
 import com.bookgo.vo.BoardPostsVO;
+import com.bookgo.vo.BookDetailVO;
+import com.bookgo.vo.BookDpVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,14 +12,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.bookgo.service.SiteUserService;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import com.bookgo.service.BoardPostsService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/")
@@ -25,12 +27,17 @@ public class BookGoController {
 
 	private final SiteUserService userService;
 
+	 // BookService를 통해 책 목록을 조회
+
+	private final BookDetailService bookDetailService;
+
 	private final FileService fileService; // FileService 선언
 
-	public BookGoController(SiteUserService userService, BoardPostsService boardPostsService,  FileService fileService) {
+	public BookGoController(SiteUserService userService, BoardPostsService boardPostsService, FileService fileService, BookDetailService bookDetailService) {
 		this.userService = userService;
         this.boardPostsService = boardPostsService;
-		this.fileService = new FileService(); // FileService 객체 생성
+        this.bookDetailService = bookDetailService;
+        this.fileService = new FileService(); // FileService 객체 생성
     }
 
 	private final BoardPostsService boardPostsService;
@@ -186,6 +193,25 @@ public class BookGoController {
 		}
 
 		return "redirect:/boardmain";
+	}
+
+	@GetMapping("/bookcategory/{categoryId}")
+	public String getBooksByCategory(@PathVariable("categoryId") String categoryId, Model model) {
+		List<BookDpVO> books = bookDetailService.getBookDetailByCategoryId(categoryId);
+		model.addAttribute("books", books);
+
+		int totalPages = (int) Math.ceil((double) books.size() / 35);
+
+		// 검색어가 없으므로 기본적으로 빈 문자열 설정
+		model.addAttribute("query", "");
+		model.addAttribute("queryType", "");
+
+		// 페이지네이션 관련 기본 값 추가 (필요하다면)
+		model.addAttribute("currentPage", 1);
+		model.addAttribute("totalPages", totalPages);
+
+
+		return "bookgo/bookList";  // 카테고리별 책 목록 페이지
 	}
 
 

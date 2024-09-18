@@ -25,11 +25,15 @@ public class BookDetailService {
 
     private final BookDetailMapper bookDetailMapper;
     private final KyoboBookCrawlerService kyoboBookCrawlerService;
+    private final CategoryService categoryService;
+    ;
+
 
     // 생성자
-    public BookDetailService(BookDetailMapper bookDetailMapper, KyoboBookCrawlerService kyoboBookCrawlerService) {
+    public BookDetailService(BookDetailMapper bookDetailMapper, KyoboBookCrawlerService kyoboBookCrawlerService, CategoryService categoryService) {
         this.bookDetailMapper = bookDetailMapper;
         this.kyoboBookCrawlerService = kyoboBookCrawlerService;
+        this.categoryService = categoryService;
     }
 
     // @Transactional 애노테이션은 메서드에 적용
@@ -55,6 +59,12 @@ public class BookDetailService {
 
             // 크롤링을 통한 상세 정보 추가
             bookDetail = kyoboBookCrawlerService.crawlBookDetails(bookDetail);
+
+            String categoryNum = categoryService.getCategoryNumber(bookDetail.getCategory());
+
+
+            bookDetail.setCategoryNumber(categoryNum);
+
 
             try {
                 bookDetailMapper.insertBookDetail(bookDetail); // MyBatis를 통해 데이터베이스에 저장
@@ -184,4 +194,11 @@ public class BookDetailService {
 
         return bookDpVO;
     }
+
+
+    public List<BookDpVO> getBookDetailByCategoryId(String categoryId) {
+        return bookDetailMapper.selectBookDpByCategoryId(categoryId);
+    }
 }
+
+

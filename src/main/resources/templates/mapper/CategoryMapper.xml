@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bookgo.mapper.CategoryMapper">
+
+    <!-- 모든 카테고리 조회 -->
+    <select id="findAllCategories" resultType="com.bookgo.vo.BookCategoryVO">
+        SELECT CATEGORY_ID AS categoryId, CATEGORY_NAME AS categoryName
+        FROM CATEGORY
+    </select>
+
+
+
+</mapper>

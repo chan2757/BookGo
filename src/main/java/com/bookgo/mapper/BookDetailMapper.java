@@ -1,7 +1,10 @@
 package com.bookgo.mapper;
 
 import com.bookgo.vo.BookDetailVO;
+import com.bookgo.vo.BookDpVO;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface BookDetailMapper {
@@ -10,4 +13,6 @@ public interface BookDetailMapper {
     BookDetailVO selectBookDetailByIsbn13(String isbn13);
 
     void insertBookDetail(BookDetailVO bookDetailVO);
+
+    List<BookDpVO> selectBookDpByCategoryId(String categoryId);
 }

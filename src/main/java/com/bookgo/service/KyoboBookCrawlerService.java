@@ -28,10 +28,14 @@ import java.util.concurrent.Executors;
 public class KyoboBookCrawlerService {
 
     // ExecutorService를 사용하여 비동기 작업을 병렬로 실행
-    private final ExecutorService executor = Executors.newFixedThreadPool(8); // 8개의 스레드 풀을 사용
+    //private final ExecutorService executor = Executors.newFixedThreadPool(8); // 8개의 스레드 풀을 사용
 
     public BookDetailVO crawlBookDetails(BookDetailVO bookDetail) {
         System.setProperty("webdriver.chrome.driver", "C:\\Users\\Joshua yoo\\chromedriver-win64\\chromedriver.exe");
+
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+
 
         // 1단계: 검색 단계에서 이미지 및 기타 리소스를 로드하지 않도록 설정
         ChromeOptions searchOptions = new ChromeOptions();
@@ -92,14 +96,13 @@ public class KyoboBookCrawlerService {
             }, executor);
 
             // 비동기 크롤링 작업 병렬 실행
-            CompletableFuture<Void> introFuture = measureExecutionTime("Book Introduction", () -> crawlBookIntroduction(detailDriver, bookDetail));
-            CompletableFuture<Void> categoryFuture = measureExecutionTime("Book Category", () -> crawlBookCategory(detailDriver, bookDetail));
-            CompletableFuture<Void> authorFuture = measureExecutionTime("Author Info", () -> crawlAuthorInfo(detailDriver, bookDetail));
-            CompletableFuture<Void> contentsFuture = measureExecutionTime("Contents", () -> crawlContents(detailDriver, bookDetail));
-            CompletableFuture<Void> recommendationsFuture = measureExecutionTime("Recommendations", () -> crawlRecommendations(detailDriver, bookDetail));
-            CompletableFuture<Void> bookInsideFuture = measureExecutionTime("Book Inside", () -> crawlBookInside(detailDriver, bookDetail));
-            CompletableFuture<Void> publisherReviewFuture = measureExecutionTime("Publisher Review", () -> crawlPublisherReview(detailDriver, bookDetail));
-
+            CompletableFuture<Void> introFuture = measureExecutionTime("Book Introduction", () -> crawlBookIntroduction(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> categoryFuture = measureExecutionTime("Book Category", () -> crawlBookCategory(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> authorFuture = measureExecutionTime("Author Info", () -> crawlAuthorInfo(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> contentsFuture = measureExecutionTime("Contents", () -> crawlContents(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> recommendationsFuture = measureExecutionTime("Recommendations", () -> crawlRecommendations(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> bookInsideFuture = measureExecutionTime("Book Inside", () -> crawlBookInside(detailDriver, bookDetail), executor);
+            CompletableFuture<Void> publisherReviewFuture = measureExecutionTime("Publisher Review", () -> crawlPublisherReview(detailDriver, bookDetail), executor);
             // 모든 작업이 완료될 때까지 기다림
             CompletableFuture.allOf(imageDownloadFuture, introFuture, categoryFuture, authorFuture, contentsFuture, recommendationsFuture, bookInsideFuture, publisherReviewFuture)
                     .whenComplete((result, error) -> {
@@ -122,7 +125,7 @@ public class KyoboBookCrawlerService {
         return bookDetail;
     }
 
-    private CompletableFuture<Void> measureExecutionTime(String taskName, Runnable task) {
+    private CompletableFuture<Void> measureExecutionTime(String taskName, Runnable task, ExecutorService executor) {
         return CompletableFuture.runAsync(() -> {
             long start = System.currentTimeMillis();
             task.run();

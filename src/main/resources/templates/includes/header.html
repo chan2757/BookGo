@@ -1,6 +1,6 @@
 <!-- Topbar Start -->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<header th:fragment="headerFragment">
+    <header th:fragment="headerFragment">
     <style>
         /* 기존 CSS */
         .search-form {
@@ -151,17 +151,14 @@
             </a>
             <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" id="navbar-vertical">
                 <div class="navbar-nav w-100 overflow-hidden" style="height: 410px">
-                    <div class="nav-item dropdown">
 
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">철학</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">종교</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">사회과학</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">자연과학</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">기술과학</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">예술</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">언어</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">문학</a>
-                        <a href="#" class="nav-item nav-link" onclick="showAlert()">역사</a>
+                    <div class="nav-item dropdown" th:if="${bookcategories != null}">
+                        <a th:each="category : ${bookcategories}"
+                           th:if="${category.categoryId != '000'}"
+                           th:href="@{'/bookcategory/' + ${category.categoryId}}"
+                           class="nav-item nav-link"
+                           th:text="${category.categoryName}">카테고리 이름</a>
+
                     </div>
                 </div>
             </nav>
